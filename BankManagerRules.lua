@@ -38,7 +38,7 @@ local ACTION_NOTSET = 1
 local BMR_ITEMLINK = 1
 local BMR_BAG_AND_SLOT = 2
 local ruleName
-local LR = LibStub("libResearch-2")
+local LR = libResearch
 
 local BMR_RULEWRITER_VALUE_OPTIONAL_KEYWORD = 1
 local BMR_RULEWRITER_VALUE_WITH_OPERATOR = 2
