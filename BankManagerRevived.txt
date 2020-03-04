@@ -11,19 +11,6 @@
 ## Description: Manage your Banks with automated push/pull
 ## SavedVariables: BMVars
 
-Libs\LibStub\LibStub.lua
-Libs\libResearch\libResearch.lua
-Libs\LibAddonMenu-2.0\LibAddonMenu-2.0.lua
-Libs\LibAddonMenu-2.0\controls\panel.lua
-Libs\LibAddonMenu-2.0\controls\submenu.lua
-Libs\LibAddonMenu-2.0\controls\checkbox.lua
-Libs\LibAddonMenu-2.0\controls\dropdown.lua
-Libs\LibAddonMenu-2.0\controls\editbox.lua
-Libs\LibAddonMenu-2.0\controls\header.lua
-Libs\LibAddonMenu-2.0\controls\slider.lua
-Libs\LibAddonMenu-2.0\controls\texture.lua
-Libs\LibAddonMenu-2.0\controls\button.lua
-
 languages\en.lua
 languages\$(language).lua
 
