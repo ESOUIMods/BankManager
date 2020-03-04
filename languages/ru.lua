@@ -73,9 +73,10 @@ SafeAddString(BMR_CURRENCY_KEEP_IN_BANK_TOOLTIP			, "Оставлять зада
 SafeAddString(BMR_TRADESKILL_ALCHEMY						, "Алхимия", 1)
 SafeAddString(BMR_TRADESKILL_CLOTHIER						, "Портняжное дело", 1)
 SafeAddString(BMR_TRADESKILL_PROVISIONING					, "Снабжение", 1)
-SafeAddString(BMR_TRADESKILL_ENCHANTING					, "Зачарование", 1)
-SafeAddString(BMR_TRADESKILL_BLACKSMITHING				, "Кузнечное дело", 1)
+SafeAddString(BMR_TRADESKILL_ENCHANTING						, "Зачарование", 1)
+SafeAddString(BMR_TRADESKILL_BLACKSMITHING					, "Кузнечное дело", 1)
 SafeAddString(BMR_TRADESKILL_WOODWORKING					, "Столярное дело", 1)
+SafeAddString(BMR_TRADESKILL_JEWELRYCRAFTING				, "Ювелирное дело", 1)
 
 -- Trophies are hardcoded because there is nothing to label them
 SafeAddString(BMR_TROPHY_TREASURE_MAP						, "Карты сокровищ", 1)

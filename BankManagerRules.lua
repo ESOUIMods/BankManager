@@ -99,6 +99,13 @@ BankManagerRules.static.refinedMaterial = {
 		[9] = "|H0:item:46142:30:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h",
 		[10] = "|H0:item:64502:30:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h",
 	},	
+	[CRAFTING_TYPE_JEWELRYCRAFTING] = {
+		[1] = "|H1:item:135146:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h",
+		[2] = "|H1:item:135144:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h",
+		[3] = "|H1:item:135142:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h",
+		[4] = "|H1:item:135140:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h",
+		[5] = "|H1:item:135138:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h",
+	},
 }
 
 -- Thanks guild
@@ -150,6 +157,13 @@ BankManagerRules.static.rawMaterial = {
 		[8] = "|H0:item:23137:30:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h",
 		[9] = "|H0:item:23138:30:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h",
 		[10] = "|H0:item:71199:30:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h",
+	},
+	[CRAFTING_TYPE_JEWELRYCRAFTING] = {
+		[1] = "|H1:item:135137:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h",
+		[2] = "|H1:item:135139:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h",
+		[3] = "|H1:item:135141:30:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h",
+		[4] = "|H1:item:135143:30:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h",
+		[5] = "|H1:item:135145:30:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h",
 	},
 }
 
@@ -233,6 +247,8 @@ BankManagerRules.static.rawStyles = {
 	[ITEMSTYLE_ORG_ABAHS_WATCH] = "|H0:item:76915:30:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h",
 	[ITEMSTYLE_ORG_DARK_BROTHERHOOD] = "|H0:item:79306:30:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h",
 	[ITEMSTYLE_ORG_ORDINATOR] = "|H1:item:81997:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h",
+	[ITEMSTYLE_ENEMY_MINOTAUR] = "|H1:item:81995:30:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h",
+	[ITEMSTYLE_ORG_BUOYANT_ARMIGER] = "|H1:item:121521:30:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h",
 }
 
 -- To display names nicely (even if level 1 got 2 solvents, only 1 is displayed here, but filter works, because not based on this array) itemLink here is not used by filter so it can be a little bit false
@@ -245,6 +261,17 @@ BankManagerRules.static.alchemySolventArray = {
 	[6] = "|H1:item:23268:129:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h",
 	[7] = "|H1:item:64500:134:50:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h",
 	[8] = "|H1:item:64501:308:50:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h",
+}
+
+BankManagerRules.static.jewelrycraftingRawTraits = {
+	[1] = "|H1:item:135159:30:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h",
+	[2] = "|H1:item:135158:30:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h",
+	[3] = "|H1:item:135160:30:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h",
+	[4] = "|H1:item:139417:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h",
+	[5] = "|H1:item:139415:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h",
+	[6] = "|H1:item:139419:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h",
+	[7] = "|H1:item:139418:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h",
+	[8] = "|H1:item:139416:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h",
 }
 
 -- List is built at each bank interaction
@@ -395,12 +422,13 @@ function BankManagerRules.addFiltersTaggedAll()
 				values = {
 					ITEMTYPE_ARMOR_TRAIT,    -- if multiple args, it will be a logical "or"
 					ITEMTYPE_WEAPON_TRAIT,
+					ITEMTYPE_JEWELRY_TRAIT,
 				},
 			},
 		},
 		position = 1, -- rules with the position flag are executed after, then first 1, then 2, then 3.
 		name = GetString(SI_ITEMFILTERTYPE0), -- used by LAM, name of the dropdown
-		tooltip = zo_strformat("<<1>> & <<2>>", GetString("SI_ITEMTYPE", ITEMTYPE_ARMOR_TRAIT), GetString("SI_ITEMTYPE", ITEMTYPE_WEAPON_TRAIT)), -- used by LAM, tooltip of the dropdown
+		tooltip = zo_strformat("<<1>> & <<2>> & <<3>>", GetString("SI_ITEMTYPE", ITEMTYPE_ARMOR_TRAIT), GetString("SI_ITEMTYPE", ITEMTYPE_WEAPON_TRAIT), GetString("SI_ITEMTYPE", ITEMTYPE_JEWELRY_TRAIT)), -- used by LAM, tooltip of the dropdown
 	}
 	
 	-- Styles All
@@ -447,6 +475,17 @@ function BankManagerRules.addFiltersTaggedAll()
 		position = 2,
 		name = GetString(SI_ITEMFILTERTYPE0),
 		tooltip = zo_strformat("<<1>> & <<2>>", GetString("SI_ITEMTYPE", ITEMTYPE_WOODWORKING_MATERIAL), GetString("SI_ITEMTYPE", ITEMTYPE_WOODWORKING_RAW_MATERIAL)),
+	}
+	
+	-- Material All Jewelcrafting
+	ruleName = "MaterialAll" .. CRAFTING_TYPE_JEWELRYCRAFTING
+	BankManagerRules.data[ruleName] = {
+		params = {
+			{func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = {ITEMTYPE_JEWELRYCRAFTING_MATERIAL, ITEMTYPE_JEWELRYCRAFTING_RAW_MATERIAL}},
+		},
+		position = 2,
+		name = GetString(SI_ITEMFILTERTYPE0),
+		tooltip = zo_strformat("<<1>> & <<2>>", GetString("SI_ITEMTYPE", ITEMTYPE_JEWELRYCRAFTING_MATERIAL), GetString("SI_ITEMTYPE", ITEMTYPE_JEWELRYCRAFTING_RAW_MATERIAL)),
 	}
 	
 	-- Refined All Blacksmithing
@@ -504,6 +543,17 @@ function BankManagerRules.addFiltersTaggedAll()
 		tooltip = zo_strformat("<<1>>", GetString("SI_ITEMTYPE", ITEMTYPE_WOODWORKING_MATERIAL)),
 	}
 	
+	-- Refined All Jewelcrafting
+	ruleName = "refinedMaterialAll" .. CRAFTING_TYPE_JEWELRYCRAFTING
+	BankManagerRules.data[ruleName] = {
+		params = {
+			{func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = {ITEMTYPE_JEWELRYCRAFTING_MATERIAL}},
+		},
+		position = 1,
+		name = zo_strformat("<<1>>", GetString("SI_ITEMTYPE", ITEMTYPE_JEWELRYCRAFTING_MATERIAL)),
+		tooltip = zo_strformat("<<1>>", GetString("SI_ITEMTYPE", ITEMTYPE_JEWELRYCRAFTING_MATERIAL)),
+	}
+	
 	-- Raw All Woodworking
 	ruleName = "rawMaterialAll" .. CRAFTING_TYPE_WOODWORKING
 	BankManagerRules.data[ruleName] = {
@@ -513,6 +563,17 @@ function BankManagerRules.addFiltersTaggedAll()
 		position = 1,
 		name = zo_strformat("<<1>>", GetString("SI_ITEMTYPE", ITEMTYPE_WOODWORKING_RAW_MATERIAL)),
 		tooltip = zo_strformat("<<1>>", GetString("SI_ITEMTYPE", ITEMTYPE_WOODWORKING_RAW_MATERIAL)),
+	}
+	
+	-- Raw All Jewelcrafting
+	ruleName = "rawMaterialAll" .. CRAFTING_TYPE_JEWELRYCRAFTING
+	BankManagerRules.data[ruleName] = {
+		params = {
+			{func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = {ITEMTYPE_JEWELRYCRAFTING_RAW_MATERIAL}},
+		},
+		position = 1,
+		name = zo_strformat("<<1>>", GetString("SI_ITEMTYPE", ITEMTYPE_JEWELRYCRAFTING_RAW_MATERIAL)),
+		tooltip = zo_strformat("<<1>>", GetString("SI_ITEMTYPE", ITEMTYPE_JEWELRYCRAFTING_RAW_MATERIAL)),
 	}
 	
 	-- Enchanting All
@@ -604,6 +665,48 @@ function BankManagerRules.addFiltersTaggedAll()
 	BankManagerRules.defaults[ruleName] = {}
 	BankManagerRules.defaults[ruleName].associatedGuild = GetString(BMR_ACTION_NOTSET)
 	
+	-- CRAFTING_TYPE_JEWELRYCRAFTING Improvement All
+	ruleName = "improvementAll" .. CRAFTING_TYPE_JEWELRYCRAFTING
+	BankManagerRules.data[ruleName] = {true}
+	
+	BankManagerRules.defaults[ruleName] = {}
+	BankManagerRules.defaults[ruleName].onlyIfNotFullStack = true
+	
+	-- improvementStacks CRAFTING_TYPE_JEWELRYCRAFTING
+	ruleName = "improvementStacks" .. CRAFTING_TYPE_JEWELRYCRAFTING
+	BankManagerRules.data[ruleName] = {true}
+	
+	BankManagerRules.defaults[ruleName] = {}
+	BankManagerRules.defaults[ruleName].onlyStacks = 1
+	
+	-- improvementStacks CRAFTING_TYPE_JEWELRYCRAFTING GBank
+	ruleName = "improvementGBank" .. CRAFTING_TYPE_JEWELRYCRAFTING
+	BankManagerRules.data[ruleName] = {true}
+	
+	BankManagerRules.defaults[ruleName] = {}
+	BankManagerRules.defaults[ruleName].associatedGuild = GetString(BMR_ACTION_NOTSET)
+	
+	-- (CRAFTING_TYPE_JEWELRYCRAFTING * 100) Improvement All
+	ruleName = "improvementAll" .. (CRAFTING_TYPE_JEWELRYCRAFTING * 100)
+	BankManagerRules.data[ruleName] = {true}
+	
+	BankManagerRules.defaults[ruleName] = {}
+	BankManagerRules.defaults[ruleName].onlyIfNotFullStack = true
+	
+	-- improvementStacks (CRAFTING_TYPE_JEWELRYCRAFTING * 100)
+	ruleName = "improvementStacks" .. (CRAFTING_TYPE_JEWELRYCRAFTING * 100)
+	BankManagerRules.data[ruleName] = {true}
+	
+	BankManagerRules.defaults[ruleName] = {}
+	BankManagerRules.defaults[ruleName].onlyStacks = 1
+	
+	-- improvementStacks (CRAFTING_TYPE_JEWELRYCRAFTING * 100) GBank
+	ruleName = "improvementGBank" .. (CRAFTING_TYPE_JEWELRYCRAFTING * 100)
+	BankManagerRules.data[ruleName] = {true}
+	
+	BankManagerRules.defaults[ruleName] = {}
+	BankManagerRules.defaults[ruleName].associatedGuild = GetString(BMR_ACTION_NOTSET)
+	
 	-- CRAFTING_TYPE_BLACKSMITHING Material Stacks
 	ruleName = "MaterialStacks" .. CRAFTING_TYPE_BLACKSMITHING
 	BankManagerRules.data[ruleName] = {true}
@@ -641,6 +744,20 @@ function BankManagerRules.addFiltersTaggedAll()
 	
 	-- CRAFTING_TYPE_WOODWORKING Material GBank
 	ruleName = "MaterialGBank" .. CRAFTING_TYPE_WOODWORKING
+	BankManagerRules.data[ruleName] = {true}
+	
+	BankManagerRules.defaults[ruleName] = {}
+	BankManagerRules.defaults[ruleName].associatedGuild = GetString(BMR_ACTION_NOTSET)
+	
+	-- CRAFTING_TYPE_JEWELRYCRAFTING Material Stacks
+	ruleName = "MaterialStacks" .. CRAFTING_TYPE_JEWELRYCRAFTING
+	BankManagerRules.data[ruleName] = {true}
+	
+	BankManagerRules.defaults[ruleName] = {}
+	BankManagerRules.defaults[ruleName].onlyStacks = 1
+	
+	-- CRAFTING_TYPE_JEWELRYCRAFTING Material GBank
+	ruleName = "MaterialGBank" .. CRAFTING_TYPE_JEWELRYCRAFTING
 	BankManagerRules.data[ruleName] = {true}
 	
 	BankManagerRules.defaults[ruleName] = {}
@@ -931,13 +1048,13 @@ function BankManagerRules.addFilters()
       local traitType, itemName = GetSmithingTraitItemInfo(traitItemIndex)
       local itemLink = GetSmithingTraitItemLink(traitItemIndex, LINK_STYLE_DEFAULT)
       local itemType = GetItemLinkItemType(itemLink)
-		
+	  
       if itemType ~= ITEMTYPE_NONE and traitType ~= ITEM_TRAIT_TYPE_NONE then 
 			
 			ruleName = "trait" .. traitType
 			BankManagerRules.data[ruleName] = {
 				params = {
-					{func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = {ITEMTYPE_ARMOR_TRAIT, ITEMTYPE_WEAPON_TRAIT}},
+					{func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = {ITEMTYPE_ARMOR_TRAIT, ITEMTYPE_WEAPON_TRAIT, ITEMTYPE_JEWELRY_TRAIT}},
 					{func = GetItemLinkTraitInfo, funcArgs = BMR_ITEMLINK, values = {traitType}},
 				},
 				name = zo_strformat(SI_TOOLTIP_ITEM_NAME, itemLink),
@@ -961,6 +1078,21 @@ function BankManagerRules.addFilters()
 			},
 			name = zo_strformat("<<1>> (<<2>>)", GetItemStyleName(styleItemIndex), GetItemLinkName(data)),
 			tooltip = zo_strformat("<<1>> (<<2>>)", GetItemStyleName(styleItemIndex), GetItemLinkName(data)),
+		}
+	
+	end
+	-- Raw Traits
+	
+	for rawItemIndex, data in pairs(BankManagerRules.static.jewelrycraftingRawTraits) do
+	
+		ruleName = "jewelTraitRaw" .. rawItemIndex
+		BankManagerRules.data[ruleName] = {
+			params = {
+				{func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = {ITEMTYPE_JEWELRY_RAW_TRAIT}},
+				{func = GetItemLinkItemId, funcArgs = BMR_ITEMLINK, values = {GetItemLinkItemId(data)}},
+			},
+			name = zo_strformat("<<1>>", GetItemLinkName(data)),
+			tooltip = zo_strformat("<<1>>", GetItemLinkName(data)),
 		}
 	
 	end
@@ -989,12 +1121,14 @@ function BankManagerRules.addFilters()
 	end
 	
 	-- Booster Items
-	local function addBoosters(craftId, craftBooster)
+	local function addBoosters(craftId, craftBooster, sub, prefix)
 	
 		for improvementItemIndex = 1, GetNumSmithingImprovementItems() do
 		
 			local itemName, _, _, _, _, _, _, quality = GetSmithingImprovementItemInfo(craftId, improvementItemIndex)
-			ruleName = "improvement" .. craftId .. improvementItemIndex
+			sub = sub or 1
+			prefix = prefix or ''
+			ruleName = "improvement" .. (craftId * sub) .. improvementItemIndex
 			local color = GetItemQualityColor(quality)
 			
 			BankManagerRules.data[ruleName] = {
@@ -1002,8 +1136,8 @@ function BankManagerRules.addFilters()
 					{func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = {craftBooster}},
 					{func = GetItemLinkQuality, funcArgs = BMR_ITEMLINK, values = {quality}},
 				},
-				name = zo_strformat("<<1>>", color:Colorize(zo_strformat(SI_TOOLTIP_ITEM_NAME, itemName))),
-				tooltip = zo_strformat("<<2>> (<<1>>)", GetString("SI_ITEMTYPE", craftBooster), zo_strformat(SI_TOOLTIP_ITEM_NAME, itemName)),
+				name = zo_strformat("<<1>>", color:Colorize(zo_strformat(SI_TOOLTIP_ITEM_NAME, prefix .. itemName))),
+				tooltip = zo_strformat("<<2>> (<<1>>)", GetString("SI_ITEMTYPE", craftBooster), zo_strformat(SI_TOOLTIP_ITEM_NAME, prefix .. itemName)),
 			}
 				
 		end
@@ -1012,6 +1146,8 @@ function BankManagerRules.addFilters()
 	addBoosters(CRAFTING_TYPE_BLACKSMITHING, ITEMTYPE_BLACKSMITHING_BOOSTER)
 	addBoosters(CRAFTING_TYPE_CLOTHIER, ITEMTYPE_CLOTHIER_BOOSTER)
 	addBoosters(CRAFTING_TYPE_WOODWORKING, ITEMTYPE_WOODWORKING_BOOSTER)
+	addBoosters(CRAFTING_TYPE_JEWELRYCRAFTING, ITEMTYPE_JEWELRYCRAFTING_BOOSTER)
+	addBoosters(CRAFTING_TYPE_JEWELRYCRAFTING, ITEMTYPE_JEWELRYCRAFTING_RAW_BOOSTER, 100, 'Raw ')
 	
 	-- Raw material - Impossible without interacting with a crafting station.
 	-- Refined material - Impossible without interacting with a crafting station.
@@ -1053,6 +1189,8 @@ function BankManagerRules.addFilters()
 	addMaterial(CRAFTING_TYPE_CLOTHIER, ITEMTYPE_CLOTHIER_MATERIAL, ITEMTYPE_CLOTHIER_RAW_MATERIAL, BankManagerRules.static.refinedMaterial[CRAFTING_TYPE_CLOTHIER], BankManagerRules.static.rawMaterial[CRAFTING_TYPE_CLOTHIER])
 	addMaterial(CRAFTING_TYPE_CLOTHIER * 100, ITEMTYPE_CLOTHIER_MATERIAL, ITEMTYPE_CLOTHIER_RAW_MATERIAL, BankManagerRules.static.refinedMaterial[CRAFTING_TYPE_CLOTHIER * 100], BankManagerRules.static.rawMaterial[CRAFTING_TYPE_CLOTHIER * 100])
 	addMaterial(CRAFTING_TYPE_WOODWORKING, ITEMTYPE_WOODWORKING_MATERIAL, ITEMTYPE_WOODWORKING_RAW_MATERIAL, BankManagerRules.static.refinedMaterial[CRAFTING_TYPE_WOODWORKING], BankManagerRules.static.rawMaterial[CRAFTING_TYPE_WOODWORKING])
+	-- jewelcraft
+	addMaterial(CRAFTING_TYPE_JEWELRYCRAFTING, ITEMTYPE_JEWELRYCRAFTING_MATERIAL, ITEMTYPE_JEWELRYCRAFTING_RAW_MATERIAL, BankManagerRules.static.refinedMaterial[CRAFTING_TYPE_JEWELRYCRAFTING], BankManagerRules.static.rawMaterial[CRAFTING_TYPE_JEWELRYCRAFTING])
 	
 	-- Heavy Armors
 	ruleName = "armorTypeWeight" .. ARMORTYPE_HEAVY

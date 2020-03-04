@@ -68,9 +68,10 @@ SafeAddString(BMR_CURRENCY_KEEP_IN_BANK_TOOLTIP			, "Garder la quantité défini
 SafeAddString(BMR_TRADESKILL_ALCHEMY						, "Alchimie", 1)
 SafeAddString(BMR_TRADESKILL_CLOTHIER						, "Couture", 1)
 SafeAddString(BMR_TRADESKILL_PROVISIONING					, "Cuisine", 1)
-SafeAddString(BMR_TRADESKILL_ENCHANTING					, "Enchantement", 1)
-SafeAddString(BMR_TRADESKILL_BLACKSMITHING				, "Forge", 1)
+SafeAddString(BMR_TRADESKILL_ENCHANTING						, "Enchantement", 1)
+SafeAddString(BMR_TRADESKILL_BLACKSMITHING					, "Forge", 1)
 SafeAddString(BMR_TRADESKILL_WOODWORKING					, "Travail du bois", 1)
+SafeAddString(BMR_TRADESKILL_JEWELRYCRAFTING				, "Joaillerie", 1)
 
 -- Trophies are hardcoded because there is nothing to label them
 SafeAddString(BMR_TROPHY_TREASURE_MAP						, "Cartes au trésor", 1)

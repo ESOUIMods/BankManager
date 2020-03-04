@@ -71,10 +71,11 @@ local lang = {
 	-- GetSkillLineInfo cannot be used. If you start game in FR Blacksmithing will be 5, even if you do a SetCVar, If you start game in EN, Blacksmithing will be 2. even if in the both languages they're at the 2nd position.
 	BMR_TRADESKILL_ALCHEMY						= "Alchemy",
 	BMR_TRADESKILL_CLOTHIER						= "Clothing",
-	BMR_TRADESKILL_PROVISIONING				= "Provisioning",
+	BMR_TRADESKILL_PROVISIONING					= "Provisioning",
 	BMR_TRADESKILL_ENCHANTING					= "Enchanting",
 	BMR_TRADESKILL_BLACKSMITHING				= "Blacksmithing",
 	BMR_TRADESKILL_WOODWORKING					= "Woodworking",
+	BMR_TRADESKILL_JEWELRYCRAFTING				= "Jewelry Crafting",
 	
 	-- Trophies are hardcoded because there is nothing to label them
 	BMR_TROPHY_TREASURE_MAP						= "Treasure Maps",

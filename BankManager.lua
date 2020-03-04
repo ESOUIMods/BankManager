@@ -28,9 +28,9 @@ http://creativecommons.org/licenses/by-nc-sa/4.0/legalcode
 
 local db
 local ADDON_NAME					= "BankManagerRevived"
-local displayName					= "|c3366FFBank|r Manager |c990000Revived|r"
-local ADDON_AUTHOR				= "Ayantir & SnowmanDK"
-local ADDON_VERSION				= "10.5"
+local displayName					= "|c3366FFBank|r Manager |c990000Revived|r |cF4EE42(Jewelry Crafting fix)|r"
+local ADDON_AUTHOR				= "Ayantir & SnowmanDK & Lexynide"
+local ADDON_VERSION				= "12"
 local ADDON_WEBSITE				= "http://www.esoui.com/downloads/info753-BankManagerRevived.html"
 local isBanking					= false
 local actualProfile				= 1
@@ -1399,8 +1399,8 @@ local function panelCurrencyNothing(ruleName, currencyType)
 
 	local optionPanel = {
 		type = "checkbox",
-		name = zo_strformat(BMR_CURRENCY_NOTHING, GetString("SI_CURRENCYTYPE", currencyType)),
-		tooltip = zo_strformat(BMR_CURRENCY_NOTHING_TOOLTIP, GetString("SI_CURRENCYTYPE", currencyType)),
+		name = zo_strformat(BMR_CURRENCY_NOTHING, GetCurrencyName(currencyType, false, false)),
+		tooltip = zo_strformat(BMR_CURRENCY_NOTHING_TOOLTIP, GetCurrencyName(currencyType, false, false)),
 		getFunc = function() return db.profiles[actualProfile].rules[ruleName].keepNothing end,
 		setFunc = function(newValue) db.profiles[actualProfile].rules[ruleName].keepNothing = newValue end,
 		default = false,
@@ -1762,7 +1762,7 @@ local function CheckAndAddRule(ruleString, fromLAM)
 		
 end
 
--- Build the ule Writer engine. it permit to the user to write its own rules
+-- Build the Rule Writer engine. it permit to the user to write its own rules
 local function RuleWriterPanel()
 
 	local optionPanel = {
@@ -1822,28 +1822,28 @@ local function LAMSubmenu(subMenu)
 	
 	if subMenu == "currencies" then
 		
-		table.insert(submenuControls, {type = "description", text = zo_strformat("<<1>> :", GetString("SI_CURRENCYTYPE", CURT_MONEY))})
+		table.insert(submenuControls, {type = "description", text = zo_strformat("<<1>> :", GetCurrencyName(CURT_MONEY, false, false))})
 		table.insert(submenuControls, panelCurrencyPush("currency" .. CURT_MONEY))
 		table.insert(submenuControls, panelCurrencyPull("currency" .. CURT_MONEY))
 		table.insert(submenuControls, panelCurrencyNothing("currency" .. CURT_MONEY, CURT_MONEY))
 		table.insert(submenuControls, panelCurrencyKeepInBankInstead("currency" .. CURT_MONEY, CURT_MONEY))
 		table.insert(submenuControls, {type = "texture", image="EsoUI/Art/Miscellaneous/horizontalDivider.dds", imageWidth=510, imageHeight=4})
 		
-		table.insert(submenuControls, {type = "description", text = zo_strformat("<<1>> :", GetString("SI_CURRENCYTYPE", CURT_TELVAR_STONES))})
+		table.insert(submenuControls, {type = "description", text = zo_strformat("<<1>> :", GetCurrencyName(CURT_TELVAR_STONES, false, false))})
 		table.insert(submenuControls, panelCurrencyPush("currency" .. CURT_TELVAR_STONES))
 		table.insert(submenuControls, panelCurrencyPull("currency" .. CURT_TELVAR_STONES))
 		table.insert(submenuControls, panelCurrencyNothing("currency" .. CURT_TELVAR_STONES, CURT_TELVAR_STONES))
 		table.insert(submenuControls, panelCurrencyKeepInBankInstead("currency" .. CURT_TELVAR_STONES, CURT_TELVAR_STONES))
 		table.insert(submenuControls, {type = "texture", image="EsoUI/Art/Miscellaneous/horizontalDivider.dds", imageWidth=510, imageHeight=4})
 		
-		table.insert(submenuControls, {type = "description", text = zo_strformat("<<1>> :", GetString("SI_CURRENCYTYPE", CURT_ALLIANCE_POINTS))})
+		table.insert(submenuControls, {type = "description", text = zo_strformat("<<1>> :", GetCurrencyName(CURT_ALLIANCE_POINTS, false, false))})
 		table.insert(submenuControls, panelCurrencyPush("currency" .. CURT_ALLIANCE_POINTS))
 		table.insert(submenuControls, panelCurrencyPull("currency" .. CURT_ALLIANCE_POINTS))
 		table.insert(submenuControls, panelCurrencyNothing("currency" .. CURT_ALLIANCE_POINTS, CURT_ALLIANCE_POINTS))
 		table.insert(submenuControls, panelCurrencyKeepInBankInstead("currency" .. CURT_ALLIANCE_POINTS, CURT_ALLIANCE_POINTS))
 		table.insert(submenuControls, {type = "texture", image="EsoUI/Art/Miscellaneous/horizontalDivider.dds", imageWidth=510, imageHeight=4})
 		
-		table.insert(submenuControls, {type = "description", text = zo_strformat("<<1>> :", GetString("SI_CURRENCYTYPE", CURT_WRIT_VOUCHERS))})
+		table.insert(submenuControls, {type = "description", text = zo_strformat("<<1>> :", GetCurrencyName(CURT_WRIT_VOUCHERS, false, false))})
 		table.insert(submenuControls, panelCurrencyPush("currency" .. CURT_WRIT_VOUCHERS))
 		table.insert(submenuControls, panelCurrencyPull("currency" .. CURT_WRIT_VOUCHERS))
 		table.insert(submenuControls, panelCurrencyNothing("currency" .. CURT_WRIT_VOUCHERS, CURT_WRIT_VOUCHERS))
@@ -1870,6 +1870,11 @@ local function LAMSubmenu(subMenu)
 			if itemType ~= ITEMTYPE_NONE and traitType ~= ITEM_TRAIT_TYPE_NONE then
 				table.insert(submenuControls, panelRule("trait" .. traitType))
 			end
+		end
+		
+		table.insert(submenuControls, {type = "texture", image="EsoUI/Art/Miscellaneous/horizontalDivider.dds", imageWidth=510, imageHeight=4})
+		for traitId, data in pairs(BankManagerRules.static.jewelrycraftingRawTraits) do
+			table.insert(submenuControls, panelRule("jewelTraitRaw" .. traitId))
 		end
 	
 	-- Styles
@@ -2009,6 +2014,41 @@ local function LAMSubmenu(subMenu)
 			end
 			if BankManagerRules.static.rawMaterial[CRAFTING_TYPE_WOODWORKING][materialIndex] ~= "" then
 				table.insert(submenuControls, panelRule("rawMaterial" .. CRAFTING_TYPE_WOODWORKING .. materialIndex))
+			end
+		end
+	
+	-- Jewelrycrafting
+	elseif subMenu == "jewelrycrafting" then
+	
+		table.insert(submenuControls, panelOnlyIfNotFullStack("improvement" .. CRAFTING_TYPE_JEWELRYCRAFTING, "improvementAll" .. CRAFTING_TYPE_JEWELRYCRAFTING))
+		table.insert(submenuControls, panelGuildBank("improvement" .. CRAFTING_TYPE_JEWELRYCRAFTING, "improvementGBank" .. CRAFTING_TYPE_JEWELRYCRAFTING))
+		table.insert(submenuControls, panelMaxStacks("improvement" .. CRAFTING_TYPE_JEWELRYCRAFTING, "improvementAll" .. CRAFTING_TYPE_JEWELRYCRAFTING, "improvementStacks" .. CRAFTING_TYPE_JEWELRYCRAFTING))
+		for improvementItemIndex = 1, GetNumSmithingImprovementItems() do
+			table.insert(submenuControls, panelRule("improvement" .. CRAFTING_TYPE_JEWELRYCRAFTING .. improvementItemIndex))
+		end
+	
+		table.insert(submenuControls, panelOnlyIfNotFullStack("improvement" .. (CRAFTING_TYPE_JEWELRYCRAFTING * 100), "improvementAll" .. (CRAFTING_TYPE_JEWELRYCRAFTING * 100)))
+		table.insert(submenuControls, panelGuildBank("improvement" .. (CRAFTING_TYPE_JEWELRYCRAFTING * 100), "improvementGBank" .. (CRAFTING_TYPE_JEWELRYCRAFTING * 100)))
+		table.insert(submenuControls, panelMaxStacks("improvement" .. (CRAFTING_TYPE_JEWELRYCRAFTING * 100), "improvementAll" .. (CRAFTING_TYPE_JEWELRYCRAFTING * 100), "improvementStacks" .. (CRAFTING_TYPE_JEWELRYCRAFTING * 100)))
+		for improvementItemIndex = 1, GetNumSmithingImprovementItems() do
+			table.insert(submenuControls, panelRule("improvement" .. (CRAFTING_TYPE_JEWELRYCRAFTING * 100) .. improvementItemIndex))
+		end
+		
+		table.insert(submenuControls, {type = "texture", image="EsoUI/Art/Miscellaneous/horizontalDivider.dds", imageWidth=510, imageHeight=4})
+		
+		table.insert(submenuControls, panelOnlyIfNotFullStack("Material[A]?[l]?[l]?" .. CRAFTING_TYPE_JEWELRYCRAFTING, "MaterialAll" .. CRAFTING_TYPE_JEWELRYCRAFTING))
+		table.insert(submenuControls, panelGuildBank("Material[A]?[l]?[l]?" .. CRAFTING_TYPE_JEWELRYCRAFTING, "MaterialGBank" .. CRAFTING_TYPE_JEWELRYCRAFTING))
+		table.insert(submenuControls, panelMaxStacks("Material[A]?[l]?[l]?" .. CRAFTING_TYPE_JEWELRYCRAFTING, "MaterialAll" .. CRAFTING_TYPE_JEWELRYCRAFTING, "MaterialStacks" .. CRAFTING_TYPE_JEWELRYCRAFTING))
+		table.insert(submenuControls, panelRule("MaterialAll" .. CRAFTING_TYPE_JEWELRYCRAFTING))
+		table.insert(submenuControls, panelRule("refinedMaterialAll" .. CRAFTING_TYPE_JEWELRYCRAFTING))
+		table.insert(submenuControls, panelRule("rawMaterialAll" .. CRAFTING_TYPE_JEWELRYCRAFTING))
+		
+		for materialIndex = 1, #BankManagerRules.static.refinedMaterial[CRAFTING_TYPE_JEWELRYCRAFTING] do
+			if BankManagerRules.static.refinedMaterial[CRAFTING_TYPE_JEWELRYCRAFTING][materialIndex] ~= "" then
+				table.insert(submenuControls, panelRule("refinedMaterial" .. CRAFTING_TYPE_JEWELRYCRAFTING .. materialIndex))
+			end
+			if BankManagerRules.static.rawMaterial[CRAFTING_TYPE_JEWELRYCRAFTING][materialIndex] ~= "" then
+				table.insert(submenuControls, panelRule("rawMaterial" .. CRAFTING_TYPE_JEWELRYCRAFTING .. materialIndex))
 			end
 		end
 	
@@ -2196,6 +2236,7 @@ local function buildLAMPanel()
 	local blacksmithingSubmenuControls = LAMSubmenu("blacksmithing")
 	local clothierSubmenuControls = LAMSubmenu("clothier")
 	local woodworkingSubmenuControls = LAMSubmenu("woodworking")
+	local jewelrycraftingSubmenuControls = LAMSubmenu("jewelrycrafting")
 	local cookingSubmenuControls = LAMSubmenu("cooking")
 	local enchantmentSubmenuControls = LAMSubmenu("enchanting")
 	local alchemySubmenuControls = LAMSubmenu("alchemy")
@@ -2357,7 +2398,7 @@ local function buildLAMPanel()
 		},
 		{
 			type = "submenu",
-			name = zo_strformat("<<1>> & <<2>>", GetString("SI_ITEMTYPE", ITEMTYPE_ARMOR_TRAIT), GetString("SI_ITEMTYPE", ITEMTYPE_WEAPON_TRAIT)),
+			name = zo_strformat("<<1>> & <<2>> & <<3>>", GetString("SI_ITEMTYPE", ITEMTYPE_ARMOR_TRAIT), GetString("SI_ITEMTYPE", ITEMTYPE_WEAPON_TRAIT), GetString("SI_ITEMTYPE", ITEMTYPE_JEWELRY_TRAIT)),
 			controls = traitSubmenuControls,
 		},
 		{
@@ -2379,6 +2420,11 @@ local function buildLAMPanel()
 			type = "submenu",
 			name = zo_strformat("<<1>>", GetString(BMR_TRADESKILL_WOODWORKING)),
 			controls = woodworkingSubmenuControls,
+		},
+		{
+			type = "submenu",
+			name = zo_strformat("<<1>>", GetString(BMR_TRADESKILL_JEWELRYCRAFTING)),
+			controls = jewelrycraftingSubmenuControls,
 		},
 		{
 			type = "submenu",
