@@ -25,12 +25,13 @@ http://creativecommons.org/licenses/by-nc-sa/4.0/legalcode
 ]]
  
 -- Global Vars
+local LAM2 = LibAddonMenu2
 
 local db
 local ADDON_NAME					= "BankManagerRevived"
 local displayName					= "|c3366FFBank|r Manager |c990000Revived|r |cF4EE42(Jewelry Crafting fix)|r"
 local ADDON_AUTHOR				= "Ayantir & SnowmanDK & Lexynide"
-local ADDON_VERSION				= "12"
+local ADDON_VERSION				= "13"
 local ADDON_WEBSITE				= "http://www.esoui.com/downloads/info753-BankManagerRevived.html"
 local isBanking					= false
 local actualProfile				= 1
@@ -2204,8 +2205,6 @@ local function buildLAMPanel()
 			end
 		end
 	end
-	
-	local LAM2 = LibStub:GetLibrary("LibAddonMenu-2.0")
 	
 	local panelData = {
 		type = "panel",

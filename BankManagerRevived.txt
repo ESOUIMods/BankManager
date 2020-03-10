@@ -5,11 +5,13 @@
 ; You can read the full terms at https://account.elderscrollsonline.com/add-on-terms
 
 ## Title: BankManagerRevived |cF4EE42(Jewelry Crafting fix)|r
-## APIVersion: 100025
-## Version: 12
 ## Author: Ayantir & |c990000Snowman|r|cFFFFFFDK|r & |c2DFFF7@Lexynide|r
 ## Description: Manage your Banks with automated push/pull
+## APIVersion: 100029
+## AddOnVersion: 13
+## Version: 13
 ## SavedVariables: BMVars
+## DependsOn: LibResearch>=042 LibAddonMenu-2.0>=28
 
 languages\en.lua
 languages\$(language).lua
