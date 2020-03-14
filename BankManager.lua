@@ -1000,6 +1000,7 @@ local function moveCurrency(ruleName, currencyType)
 	local currencyAmountMoved
 	local actionDone
 	
+	-- Keep In Bank set to ON
 	if inverted then
 		-- Do I need to pull or push? If Inverted, addon push to inventory and pull from inventory
 		local pushCurrency = currentCurrencyInBank > db.profiles[actualProfile].rules[ruleName].qtyToPush and (db.profiles[actualProfile].rules[ruleName].qtyToPush > 0 or (db.profiles[actualProfile].rules[ruleName].keepNothing and db.profiles[actualProfile].rules[ruleName].qtyToPush == 0))
@@ -1026,6 +1027,7 @@ local function moveCurrency(ruleName, currencyType)
 				actionDone = ACTION_PULL
 			end
 		end
+	-- Keep In Bank set to OFF
 	else
 		-- Do I need to pull or push?
 		local pushCurrency = currentCurrencyInInventory > db.profiles[actualProfile].rules[ruleName].qtyToPush and (db.profiles[actualProfile].rules[ruleName].qtyToPush > 0 or (db.profiles[actualProfile].rules[ruleName].keepNothing and db.profiles[actualProfile].rules[ruleName].qtyToPush == 0))

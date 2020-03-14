@@ -55,10 +55,11 @@ local lang = {
 	
 	BMR_PROFILE										= "Profile <<1>>",
 	
-	-- Currencies
+	-- Currencies qtyToPush
 	BMR_CURRENCY_PUSH								= "Keep currency",
 	BMR_CURRENCY_PUSH_TOOLTIP					= "Keep this amount in your inventory\n\nIf you set the value for 'Fill-up to' this one will be used as minimum value for the option here",
 	
+	-- Currencies qtyToPull
 	BMR_CURRENCY_PULL								= "Fill-up to",
 	BMR_CURRENCY_PULL_TOOLTIP					= "Fill-up from the bank to your inventory with this value. Leave 0 to disable the option",
 	
