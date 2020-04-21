@@ -16,37 +16,37 @@ SafeAddString(BMR_STACK_DETAILLED_TOOLTIP					, "Zeigt Informationen für jede V
 SafeAddString(BMR_DISPLAY_SUMMARY							, "Zusammenfassung Anzeigen", 1)
 SafeAddString(BMR_DISPLAY_SUMMARY_TOOLTIP					, "Zeigt eine Zusammenfassung der verlagerten Items & Währungen im Chat an.", 1)
 
-SafeAddString(BMR_STACK_DETAILLED_NOTMOVED				, "Display failed moves", 1)
-SafeAddString(BMR_STACK_DETAILLED_NOTMOVED_TOOLTIP		, "Display a message when BMR didn't succeeded to move an item due to free space missing in destination bag", 1)
+SafeAddString(BMR_STACK_DETAILLED_NOTMOVED				, "Zeige fehlgeschlagene Umlagerungen", 1)
+SafeAddString(BMR_STACK_DETAILLED_NOTMOVED_TOOLTIP		, "Zeigt eine Nachricht, wenn BMR die Umlagerung nicht ausführen konnte, wegen zu wenig Platz im Ziel-Inventar", 1)
 
 SafeAddString(BMR_DONT_MOVE_PROTECTED_ITEMS				, "Geschützte Items nicht verlagern", 1)
 SafeAddString(BMR_DONT_MOVE_PROTECTED_ITEMS_TOOLTIP	, "Items markiert von ESO, ItemSaver oder FCO Itemsaver nicht verlagern.", 1)
 
---SafeAddString(BMR_DONT_MOVE_MOVED_ITEMS					, "Don't move items moved by another source", 1)
---SafeAddString(BMR_DONT_MOVE_MOVED_ITEMS_TOOLTIP			, "Don't move items previously moved by another addon or by yourself while interacting at bank", 1)
+SafeAddString(BMR_DONT_MOVE_MOVED_ITEMS					, "Nichts umlagern, das schon umgelagert wurde", 1)
+SafeAddString(BMR_DONT_MOVE_MOVED_ITEMS_TOOLTIP			, "Deaktiviert das Umlagern von Gegenständen, die vorher von einem anderen Addon oder durch den Spieler selbst umgelagert wurden", 1)
 
---SafeAddString(BMR_WAIT_AT_STARTUP							,"Time before working when opening banks", 1)
---SafeAddString(BMR_WAIT_AT_STARTUP_TOOLTIP				,"Lower the value if you don't want to wait. A low value can bug BMR if your computer is a bit slow especially at Guild Bank", 1)
+SafeAddString(BMR_WAIT_AT_STARTUP							,"Zeit bis BMR umlagert nach öffnen der Bank", 1)
+SafeAddString(BMR_WAIT_AT_STARTUP_TOOLTIP				,"Verringere den Wert, wenn du nicht warten willst. Ein niedrigerer Wert kann zu Fehlern bei BMR führen, wenn dein Computer langsamer ist - besonders bei der Gildenbank", 1)
 	
---SafeAddString(BMR_NO_OVERFILL								, "Keep free slots in my bags", 1)
---SafeAddString(BMR_NO_OVERFILL_TOOLTIP					, "If set, BMR will try to keep this count of free slots in your bag and won't move additional items if the limit is reached", 1)
+SafeAddString(BMR_NO_OVERFILL								, "Platz freihalten im Ziel-Inventar", 1)
+SafeAddString(BMR_NO_OVERFILL_TOOLTIP					, "Wenn eingestellt, versucht BMR diese Zahl an Plätzen im Ziel-Inventar frei zu halten und keine weiteren Gegenstände bewegen wenn die Grenze erreicht ist", 1)
 
---SafeAddString(BMR_DELAY_BETWEEN_MOVES					, "Delay between moves", 1)
---SafeAddString(BMR_DELAY_BETWEEN_MOVES_TOOLTIP			, "Add a delay between each moves to avoid potential crashes and/or game kicks", 1)
+SafeAddString(BMR_DELAY_BETWEEN_MOVES					, "Verzögerungen zwischen Umlagerung", 1)
+SafeAddString(BMR_DELAY_BETWEEN_MOVES_TOOLTIP			, "Fügt eine Verzögerung zwischen allen Umlagerungen hinzu um das Risiko auf Abstürze und/oder Serverkicks zu reduzieren", 1)
 
 SafeAddString(BMR_ONLY_IF_NOT_FULL_STACK					, "Nur lagern wenn kein Stack existiert", 1)
 SafeAddString(BMR_ONLY_IF_NOT_FULL_STACK_TOOLTIP		, "Items nicht verlagern wenn im Ziel-Inventar schon ein voller Stack existiert.", 1)
 
-SafeAddString(BMR_MAX_STACK									, "Max Stacks", 1)
-SafeAddString(BMR_MAX_STACK_TOOLTIP							, "Anzahl der Items die maximal verschoben werden sollen.", 1)
+SafeAddString(BMR_MAX_STACK									, "Maximale Stacks/Stapel", 1)
+SafeAddString(BMR_MAX_STACK_TOOLTIP							, "Anzahl der Stapel an Gegenständen die maximal verschoben werden sollen bzw. im Ziel-Inventar sein können.", 1)
 
---SafeAddString(BMR_GUILD_LIST									, "Associated Guild Bank", 1)
---SafeAddString(BMR_GUILD_LIST_TOOLTIP						, "Name of the Guild Bank linked to the rules defined under. BMR will push items into this guild bank if conditions meet your personnal choices", 1)
+SafeAddString(BMR_GUILD_LIST									, "Zugewiesene Gildenbank", 1)
+SafeAddString(BMR_GUILD_LIST_TOOLTIP						, "Name der Gildenbank die mit den nachfolgenden Regeln verknüpft ist. BMR wird Gegenstände in diese Gildenbank umlagern, wenn deine persönlichen Einstellungen zutreffen", 1)
 
 -- Profiles
 SafeAddString(BMR_PROFILES										, "Profil", 1)
 SafeAddString(BMR_PROFILE_LIST								, "Ausgewähltes Profil", 1)
-SafeAddString(BMR_PROFILE_LIST_TOOLTIP						, "Für jeden Charakter gibt es 9 Profile die angepasst werden können.", 1)
+SafeAddString(BMR_PROFILE_LIST_TOOLTIP						, "Für jeden Charakter gibt es 9 Profile die angepasst werden können die du auch mit der letzten Einstellung übertragen kannst.", 1)
 SafeAddString(BMR_PROFILE_NAME								, "Profilname", 1)
 SafeAddString(BMR_PROFILE_NAME_TOOLTIP						, "Name des ausgewählten Profils", 1)
 SafeAddString(BMR_PROFILE_RESET								, "Profil zurücksetzen", 1)
@@ -76,16 +76,16 @@ SafeAddString(BMR_TRADESKILL_WOODWORKING					, "Schreinerei", 1)
 SafeAddString(BMR_TRADESKILL_JEWELRYCRAFTING				, "Schmuckhandwerk", 1)
 
 -- Trophies are hardcoded because there is nothing to label them
---SafeAddString(BMR_TROPHY_TREASURE_MAP						, "Treasure Maps", 1)
---SafeAddString(BMR_TROPHY_SURVEY_MAP							, "Survey Maps", 1)
---SafeAddString(BMR_TROPHY_MOTIF_FRAGMENT					, "Motif Fragments", 1)
---SafeAddString(BMR_TROPHY_RECIPE_FRAGMENT					, "Recipe Fragments", 1)
---SafeAddString(BMR_TROPHY_IMPERIALCITY_PVE					, "Imperial City Trophies", 1)
---SafeAddString(BMR_TROPHY_QUEST_REWARD						, "Quest Rewards Trophies", 1)
+SafeAddString(BMR_TROPHY_TREASURE_MAP						, "Schatzkarten", 1)
+SafeAddString(BMR_TROPHY_SURVEY_MAP							, "Fundberichte", 1)
+SafeAddString(BMR_TROPHY_MOTIF_FRAGMENT					, "Stilfragmente", 1)
+SafeAddString(BMR_TROPHY_RECIPE_FRAGMENT					, "Rezeptfragmente", 1)
+SafeAddString(BMR_TROPHY_IMPERIALCITY_PVE					, "Kaiserstadt Trophäen", 1)
+SafeAddString(BMR_TROPHY_QUEST_REWARD						, "Questbelohnungs Trophäen", 1)
 
 -- Writ quests
---SafeAddString(BMR_WRIT_QUESTS								, "Keep/pull materials for writs", 1)
---SafeAddString(BMR_WRIT_QUESTS_TOOLTIP						, "Keep or pull desired materials in bag for doing daily writs", 1)
+SafeAddString(BMR_WRIT_QUESTS								, "Behalte/entnehme Handwerksquestgegenstände", 1)
+SafeAddString(BMR_WRIT_QUESTS_TOOLTIP						, "Behalte/entnehme Gegenstände/Material die/das du für deine Handwerksquest benötigst", 1)
 
 -- Bindings
 SafeAddString(SI_BINDING_NAME_BMR_PROFILE1				, "Profil 1", 1)
@@ -102,8 +102,8 @@ SafeAddString(SI_BINDING_NAME_BMR_PROFILE9				, "Profil 9", 1)
 SafeAddString(BMR_ACTION_PUSH									, "In die Bank verlagern", 1)
 SafeAddString(BMR_ACTION_PULL									, "Ins Inventar verlagern", 1)
 SafeAddString(BMR_ACTION_NOTSET								, "-", 1)
---SafeAddString(BMR_ACTION_PUSH_GBANK							, "Push to Guild Bank", 1)
---SafeAddString(BMR_ACTION_PUSH_BOTH							, "Push to both Banks", 1)
+SafeAddString(BMR_ACTION_PUSH_GBANK							, "In Gildenbank verlagern", 1)
+SafeAddString(BMR_ACTION_PUSH_BOTH							, "In beide Banken verlagern", 1)
 
 -- Chat notifications
 SafeAddString(BMR_ACTION_ITEMS_MOVED					 	, "BMR hat <<3>>x |t16:16:<<2>>|t<<1>> <<4>> verlagert.", 1)
@@ -127,4 +127,4 @@ SafeAddString(BMR_IMPORT										, "BMR Einstellungen importieren von", 1)
 SafeAddString(BMR_IMPORT_DESC									, "Von welchem Charakter Einstellungen importiert werden sollen. Beachten Sie dass Einstellungen Charaktermäßig behandelt werden, d.h. diese Einstellungen gelten nur für den jetzigen Charakter.", 1)
 SafeAddString(BMR_IMPORTED										, "BMR Einstellungen wurden von <<1>> importiert.", 1)
 
-SafeAddString(BMR_ZOS_LIMITATIONS							, "Due to game restrictions, BMR processed only 98 items. Please wait 10 seconds, and interact again with npc.", 1)
+SafeAddString(BMR_ZOS_LIMITATIONS							, "Wegen Spiel-Einschränkungen, konnte BMR nur 98 Gegenstände bearbeiten. Bitte warte 10 Sekunden und interagiere erneut mit dem NPC.", 1)
