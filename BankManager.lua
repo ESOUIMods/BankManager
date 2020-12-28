@@ -368,10 +368,11 @@ local function IsItemProtected(bagId, slotId)
     return true
   end
 
-  --FCO ItemSaver support
-  if FCOIS and FCOIS.IsMarked then
-    return FCOIS.IsMarked(bagId, slotId, -1)
-  end
+	--FCO ItemSaver support
+	if FCOIS and FCOIS.IsItemLocked then
+		--return FCOIS.IsMarked(bagId, slotId, -1)
+		return FCOIS.IsItemLocked(bagId, slotId)
+	end
 
   --FilterIt support
   if FilterIt and FilterIt.AccountSavedVariables and FilterIt.AccountSavedVariables.FilteredItems then
