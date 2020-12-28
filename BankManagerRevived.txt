@@ -8,8 +8,8 @@
 ## Author: Sharlikran, |c2DFFF7@Lexynide|r, |c990000Snowman|r|cFFFFFFDK|r, Ayantir, Eldrni, Todo
 ## Description: Manage your Banks with automated push/pull
 ## APIVersion: 100033 100034
-## Version: 1.3.00
-## AddOnVersion: 1300
+## Version: 1.6.00
+## AddOnVersion: 1600
 ## SavedVariables: BMVars
 ## DependsOn: LibResearch>=042 LibAddonMenu-2.0>=32
 

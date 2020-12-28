@@ -31,7 +31,7 @@ local db = { }
 local ADDON_NAME = "BankManagerRevived"
 local displayName = "|c3366FFBank|r Manager |c990000Revived|r |cF4EE42(Jewelry Crafting fix)|r"
 local ADDON_AUTHOR = "Sharlikran, Lexynide, SnowmanDK, Ayantir, Eldrni, Todo"
-local ADDON_VERSION = "1.3.00"
+local ADDON_VERSION = "1.6.00"
 local ADDON_WEBSITE = "https://www.esoui.com/downloads/info2249-BankManagerRevivedJewelryCraftingfix.html"
 local isBanking = false
 local actualProfile = 1
@@ -2409,6 +2409,8 @@ local function buildLAMPanel()
     end
   end
 
+  --[[TODO Update panelData
+  ]]--
   local panelData = {
     type                = "panel",
     name                = ADDON_NAME,
