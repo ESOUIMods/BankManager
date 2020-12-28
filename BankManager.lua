@@ -20,14 +20,14 @@ Under the following terms:
     No additional restrictions — You may not apply legal terms or technological measures that legally restrict others from doing anything the license permits.
 
 
-Please read full licence at : 
+Please read full licence at :
 http://creativecommons.org/licenses/by-nc-sa/4.0/legalcode
 ]]
 
 -- Global Vars
 local LAM2 = LibAddonMenu2
 
-local db
+local db = { }
 local ADDON_NAME = "BankManagerRevived"
 local displayName = "|c3366FFBank|r Manager |c990000Revived|r |cF4EE42(Jewelry Crafting fix)|r"
 local ADDON_AUTHOR = "Ayantir & SnowmanDK & Lexynide"
@@ -62,13 +62,49 @@ local BMR_ITEMLINK = 1
 local BMR_BAG_AND_SLOT = 2
 --local startTimeInMs			= 0
 
+--[[
+BAG_BACKPACK 	1
+BAG_BANK 	2
+BAG_GUILDBANK 3
+BAG_SUBSCRIBER_BANK 	6
+BAG_HOUSE_BANK_ONE 	7
+BAG_HOUSE_BANK_TWO 	8
+BAG_HOUSE_BANK_THREE 	9
+BAG_HOUSE_BANK_FOUR 	10
+BAG_HOUSE_BANK_FIVE 	11
+BAG_HOUSE_BANK_SIX 	12
+BAG_HOUSE_BANK_SEVEN 	13
+BAG_HOUSE_BANK_EIGHT 	14
+BAG_HOUSE_BANK_NINE 	15
+BAG_HOUSE_BANK_TEN 	16
+
+* IsBankOpen()
+** _Returns:_ *bool* _isBankOpen_
+
+* GetBankingBag()
+** _Returns:_ *[Bag|#Bag]* _bankingBag_
+
+* IsGuildBankOpen()
+** _Returns:_ *bool* _isGuildBankOpen_
+]]--
 -- Array of queues for moving items to handle bag/bank capacity limits
 local pushQueue = {}
 local pullQueue = {}
 local movedItems = {
-  [BAG_BACKPACK]        = {},
-  [BAG_BANK]            = {},
-  [BAG_SUBSCRIBER_BANK] = {},
+  [BAG_BACKPACK]         = {},
+  [BAG_BANK]             = {},
+  [BAG_GUILDBANK]        = {},
+  [BAG_SUBSCRIBER_BANK]  = {},
+  [BAG_HOUSE_BANK_ONE]   = {},
+  [BAG_HOUSE_BANK_TWO]   = {},
+  [BAG_HOUSE_BANK_THREE] = {},
+  [BAG_HOUSE_BANK_FOUR]  = {},
+  [BAG_HOUSE_BANK_FIVE]  = {},
+  [BAG_HOUSE_BANK_SIX]   = {},
+  [BAG_HOUSE_BANK_SEVEN] = {},
+  [BAG_HOUSE_BANK_EIGHT] = {},
+  [BAG_HOUSE_BANK_NINE]  = {},
+  [BAG_HOUSE_BANK_TEN]   = {},
 }
 
 -- Defaults structure for SV
@@ -506,9 +542,20 @@ local function moveItems(atGBank, errorReasonAtGBank)
 
   -- Our bagcache, because game don't have it in realtime
   local tinyBagCache = {
-    [BAG_BACKPACK]        = {},
-    [BAG_BANK]            = {},
-    [BAG_SUBSCRIBER_BANK] = {},
+    [BAG_BACKPACK]         = {},
+    [BAG_BANK]             = {},
+    [BAG_GUILDBANK]        = {},
+    [BAG_SUBSCRIBER_BANK]  = {},
+    [BAG_HOUSE_BANK_ONE]   = {},
+    [BAG_HOUSE_BANK_TWO]   = {},
+    [BAG_HOUSE_BANK_THREE] = {},
+    [BAG_HOUSE_BANK_FOUR]  = {},
+    [BAG_HOUSE_BANK_FIVE]  = {},
+    [BAG_HOUSE_BANK_SIX]   = {},
+    [BAG_HOUSE_BANK_SEVEN] = {},
+    [BAG_HOUSE_BANK_EIGHT] = {},
+    [BAG_HOUSE_BANK_NINE]  = {},
+    [BAG_HOUSE_BANK_TEN]   = {},
   }
 
   -- Our bagcache for qty, because game don't have it in realtime
@@ -516,15 +563,37 @@ local function moveItems(atGBank, errorReasonAtGBank)
 
   -- Avoid checking first 230 slots if we already did it.
   local tinyBagCacheFirstSlot = {
-    [BAG_BACKPACK]        = 0,
-    [BAG_BANK]            = 0,
-    [BAG_SUBSCRIBER_BANK] = 0,
+    [BAG_BACKPACK]         = 0,
+    [BAG_BANK]             = 0,
+    [BAG_GUILDBANK]        = 0,
+    [BAG_SUBSCRIBER_BANK]  = 0,
+    [BAG_HOUSE_BANK_ONE]   = 0,
+    [BAG_HOUSE_BANK_TWO]   = 0,
+    [BAG_HOUSE_BANK_THREE] = 0,
+    [BAG_HOUSE_BANK_FOUR]  = 0,
+    [BAG_HOUSE_BANK_FIVE]  = 0,
+    [BAG_HOUSE_BANK_SIX]   = 0,
+    [BAG_HOUSE_BANK_SEVEN] = 0,
+    [BAG_HOUSE_BANK_EIGHT] = 0,
+    [BAG_HOUSE_BANK_NINE]  = 0,
+    [BAG_HOUSE_BANK_TEN]   = 0,
   }
 
   local freeSlots = {
-    [BAG_BACKPACK]        = 0,
-    [BAG_BANK]            = 0,
-    [BAG_SUBSCRIBER_BANK] = 0,
+    [BAG_BACKPACK]         = 0,
+    [BAG_BANK]             = 0,
+    [BAG_GUILDBANK]        = 0,
+    [BAG_SUBSCRIBER_BANK]  = 0,
+    [BAG_HOUSE_BANK_ONE]   = 0,
+    [BAG_HOUSE_BANK_TWO]   = 0,
+    [BAG_HOUSE_BANK_THREE] = 0,
+    [BAG_HOUSE_BANK_FOUR]  = 0,
+    [BAG_HOUSE_BANK_FIVE]  = 0,
+    [BAG_HOUSE_BANK_SIX]   = 0,
+    [BAG_HOUSE_BANK_SEVEN] = 0,
+    [BAG_HOUSE_BANK_EIGHT] = 0,
+    [BAG_HOUSE_BANK_NINE]  = 0,
+    [BAG_HOUSE_BANK_TEN]   = 0,
   }
 
   -- Items moved in psuh + pull actions
@@ -661,9 +730,20 @@ local function moveItems(atGBank, errorReasonAtGBank)
     pushQueue = {}
     pullQueue = {}
     movedItems = {
-      [BAG_BACKPACK]        = {},
-      [BAG_BANK]            = {},
-      [BAG_SUBSCRIBER_BANK] = {},
+      [BAG_BACKPACK]         = {},
+      [BAG_BANK]             = {},
+      [BAG_GUILDBANK]        = {},
+      [BAG_SUBSCRIBER_BANK]  = {},
+      [BAG_HOUSE_BANK_ONE]   = {},
+      [BAG_HOUSE_BANK_TWO]   = {},
+      [BAG_HOUSE_BANK_THREE] = {},
+      [BAG_HOUSE_BANK_FOUR]  = {},
+      [BAG_HOUSE_BANK_FIVE]  = {},
+      [BAG_HOUSE_BANK_SIX]   = {},
+      [BAG_HOUSE_BANK_SEVEN] = {},
+      [BAG_HOUSE_BANK_EIGHT] = {},
+      [BAG_HOUSE_BANK_NINE]  = {},
+      [BAG_HOUSE_BANK_TEN]   = {},
     }
 
     inProgress = false
@@ -1279,9 +1359,20 @@ local function onCloseBank()
   pushQueue = {}
   pullQueue = {}
   movedItems = {
-    [BAG_BACKPACK]        = {},
-    [BAG_BANK]            = {},
-    [BAG_SUBSCRIBER_BANK] = {},
+    [BAG_BACKPACK]         = {},
+    [BAG_BANK]             = {},
+    [BAG_GUILDBANK]        = {},
+    [BAG_SUBSCRIBER_BANK]  = {},
+    [BAG_HOUSE_BANK_ONE]   = {},
+    [BAG_HOUSE_BANK_TWO]   = {},
+    [BAG_HOUSE_BANK_THREE] = {},
+    [BAG_HOUSE_BANK_FOUR]  = {},
+    [BAG_HOUSE_BANK_FIVE]  = {},
+    [BAG_HOUSE_BANK_SIX]   = {},
+    [BAG_HOUSE_BANK_SEVEN] = {},
+    [BAG_HOUSE_BANK_EIGHT] = {},
+    [BAG_HOUSE_BANK_NINE]  = {},
+    [BAG_HOUSE_BANK_TEN]   = {},
   }
 
   inProgress = false

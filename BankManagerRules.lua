@@ -21,7 +21,7 @@ Under the following terms:
     No additional restrictions — You may not apply legal terms or technological measures that legally restrict others from doing anything the license permits.
 
 
-Please read full licence at : 
+Please read full licence at :
 http://creativecommons.org/licenses/by-nc-sa/4.0/legalcode
 ]]
 
@@ -294,15 +294,15 @@ BankManagerRules.keywordConditionTable = {
 
   QUALITY = { -- keyword
     [BMR_RULEWRITER_VALUE_WITH_OPERATOR] = {
-      GREY   = { func = GetItemLinkQuality, funcArgs = BMR_ITEMLINK, values = { ITEM_QUALITY_TRASH } },
-      WHITE  = { func = GetItemLinkQuality, funcArgs = BMR_ITEMLINK, values = { ITEM_QUALITY_NORMAL } },
-      GREEN  = { func = GetItemLinkQuality, funcArgs = BMR_ITEMLINK, values = { ITEM_QUALITY_MAGIC } },
-      BLUE   = { func = GetItemLinkQuality, funcArgs = BMR_ITEMLINK, values = { ITEM_QUALITY_ARCANE } },
-      PURPLE = { func = GetItemLinkQuality, funcArgs = BMR_ITEMLINK, values = { ITEM_QUALITY_ARTIFACT } },
-      YELLOW = { func = GetItemLinkQuality, funcArgs = BMR_ITEMLINK, values = { ITEM_QUALITY_LEGENDARY } },
+      GREY   = { func = GetItemLinkFunctionalQuality, funcArgs = BMR_ITEMLINK, values = { ITEM_FUNCTIONAL_QUALITY_TRASH } },
+      WHITE  = { func = GetItemLinkFunctionalQuality, funcArgs = BMR_ITEMLINK, values = { ITEM_FUNCTIONAL_QUALITY_NORMAL } },
+      GREEN  = { func = GetItemLinkFunctionalQuality, funcArgs = BMR_ITEMLINK, values = { ITEM_FUNCTIONAL_QUALITY_MAGIC } },
+      BLUE   = { func = GetItemLinkFunctionalQuality, funcArgs = BMR_ITEMLINK, values = { ITEM_FUNCTIONAL_QUALITY_ARCANE } },
+      PURPLE = { func = GetItemLinkFunctionalQuality, funcArgs = BMR_ITEMLINK, values = { ITEM_FUNCTIONAL_QUALITY_ARTIFACT } },
+      YELLOW = { func = GetItemLinkFunctionalQuality, funcArgs = BMR_ITEMLINK, values = { ITEM_FUNCTIONAL_QUALITY_LEGENDARY } },
     },
     data                                 = {
-      func = GetItemLinkQuality, funcArgs = BMR_ITEMLINK
+      func = GetItemLinkFunctionalQuality, funcArgs = BMR_ITEMLINK
     },
   },
 
@@ -947,7 +947,7 @@ function BankManagerRules.addFiltersTaggedAll()
   BankManagerRules.data[ruleName] = {
     params    = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_GLYPH_ARMOR } },
-      { func = GetItemLinkQuality, funcArgs = BMR_ITEMLINK, values = { ITEM_QUALITY_NORMAL } },
+      { func = GetItemLinkFunctionalQuality, funcArgs = BMR_ITEMLINK, values = { ITEM_FUNCTIONAL_QUALITY_NORMAL } },
       { func = IsItemLinkCrafted, funcArgs = BMR_ITEMLINK, values = { true } },
       { func = GetItemCreatorName, funcArgs = BMR_BAG_AND_SLOT, values = { GetUnitName("player") } },
       { func = IsWritItem, funcArgs = BMR_ITEMLINK, values = { true } },
@@ -1146,7 +1146,7 @@ function BankManagerRules.addFilters()
       BankManagerRules.data[ruleName] = {
         params  = {
           { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { craftBooster } },
-          { func = GetItemLinkQuality, funcArgs = BMR_ITEMLINK, values = { quality } },
+          { func = GetItemLinkFunctionalQuality, funcArgs = BMR_ITEMLINK, values = { quality } },
         },
         name    = zo_strformat("<<1>>", color:Colorize(zo_strformat(SI_TOOLTIP_ITEM_NAME, prefix .. itemName))),
         tooltip = zo_strformat("<<2>> (<<1>>)", GetString("SI_ITEMTYPE", craftBooster),
@@ -1264,6 +1264,8 @@ function BankManagerRules.addFilters()
       GetString("SI_ARMORTYPE", ARMORTYPE_LIGHT)),
   }
 
+  --[[TODO why does this rule type say Quality but ARMORTYPE_LIGHT
+  ]]--
   -- Light Armors
   ruleName = "armorQuality" .. ARMORTYPE_LIGHT
   BankManagerRules.data[ruleName] = {
@@ -1412,7 +1414,7 @@ function BankManagerRules.addFilters()
   BankManagerRules.data[ruleName] = {
     params  = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_ARMOR } },
-      { func = GetItemLinkArmorType, funcArgs = BMR_ITEMLINK, values = { ARMORTYPE_HEAVY } },
+      { func = GetItemLinkArmorType, funcArgs = BMR_ITEMLINK, values = { ARMORTYPE_MEDIUM } },
       { func = GetItemLinkSetInfo, funcArgs = BMR_ITEMLINK, values = { false } },
       { func = IsItemNeededForResearch, funcArgs = BMR_ITEMLINK, values = { true } },
       { func = IsItemJunk, funcArgs = BMR_BAG_AND_SLOT, values = { false } },
@@ -1506,7 +1508,7 @@ function BankManagerRules.addFilters()
   BankManagerRules.data[ruleName] = {
     params  = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_INGREDIENT } },
-      { func = GetItemLinkQuality, funcArgs = BMR_ITEMLINK, values = { ITEM_QUALITY_ARTIFACT, ITEM_QUALITY_LEGENDARY } },
+      { func = GetItemLinkFunctionalQuality, funcArgs = BMR_ITEMLINK, values = { ITEM_FUNCTIONAL_QUALITY_ARTIFACT, ITEM_FUNCTIONAL_QUALITY_LEGENDARY } },
     },
     name    = zo_strformat(GetString(BMR_RARE_INGREDIENTS),
       "|H0:item:26802:28:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h",
@@ -1523,7 +1525,7 @@ function BankManagerRules.addFilters()
   BankManagerRules.data[ruleName] = {
     params  = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_DRINK } },
-      { func = GetItemLinkQuality, funcArgs = BMR_ITEMLINK, values = { ITEM_QUALITY_LEGENDARY } },
+      { func = GetItemLinkFunctionalQuality, funcArgs = BMR_ITEMLINK, values = { ITEM_FUNCTIONAL_QUALITY_LEGENDARY } },
     },
     name    = "|H0:item:64221:124:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h & |H0:item:115027:124:1:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h",
     tooltip = "|H0:item:64221:124:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h & |H0:item:115027:124:1:0:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:0|h|h",
@@ -1583,7 +1585,7 @@ function BankManagerRules.addFilters()
   BankManagerRules.data[ruleName] = {
     params  = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_ENCHANTING_RUNE_ASPECT } },
-      { func = GetItemLinkQuality, funcArgs = BMR_ITEMLINK, values = { ITEM_QUALITY_NORMAL } },
+      { func = GetItemLinkFunctionalQuality, funcArgs = BMR_ITEMLINK, values = { ITEM_FUNCTIONAL_QUALITY_NORMAL } },
     },
     name    = "|H0:item:45850:20:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h", -- "Ta" item
     tooltip = "|H0:item:45850:20:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h",
@@ -1593,7 +1595,7 @@ function BankManagerRules.addFilters()
   BankManagerRules.data[ruleName] = {
     params  = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_ENCHANTING_RUNE_ASPECT } },
-      { func = GetItemLinkQuality, funcArgs = BMR_ITEMLINK, values = { ITEM_QUALITY_MAGIC, ITEM_QUALITY_ARCANE, ITEM_QUALITY_ARTIFACT, ITEM_QUALITY_LEGENDARY } },
+      { func = GetItemLinkFunctionalQuality, funcArgs = BMR_ITEMLINK, values = { ITEM_FUNCTIONAL_QUALITY_MAGIC, ITEM_FUNCTIONAL_QUALITY_ARCANE, ITEM_FUNCTIONAL_QUALITY_ARTIFACT, ITEM_FUNCTIONAL_QUALITY_LEGENDARY } },
     },
     name    = GetString("SI_ITEMTYPE", ITEMTYPE_ENCHANTING_RUNE_ASPECT),
     tooltip = GetString("SI_ITEMTYPE", ITEMTYPE_ENCHANTING_RUNE_ASPECT),
@@ -1622,13 +1624,22 @@ function BankManagerRules.addFilters()
     ruleName = "alchemySolvent" .. alchemySkill
     BankManagerRules.data[ruleName] = {
       params  = {
-        { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_POTION_BASE, ITEMTYPE_POISON_BASE } },
+        { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_POTION_BASE } },
         { func = GetItemLinkRequiredCraftingSkillRank, funcArgs = BMR_ITEMLINK, values = { alchemySkill } },
       },
       name    = GetString(SI_GROUP_LIST_PANEL_LEVEL_HEADER) .. alchemySkill .. " - " .. zo_strformat(SI_TOOLTIP_ITEM_NAME,
         GetItemLinkName(BankManagerRules.static.alchemySolventArray[alchemySkill])),
       tooltip = GetString(SI_GROUP_LIST_PANEL_LEVEL_HEADER) .. alchemySkill .. " - " .. zo_strformat(SI_TOOLTIP_ITEM_NAME,
         GetItemLinkName(BankManagerRules.static.alchemySolventArray[alchemySkill])),
+    }
+
+    ruleName = "alchemyPoisonSolvent"
+    BankManagerRules.data[ruleName] = {
+      params  = {
+        { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_POISON_BASE } },
+      },
+      name    = GetString("SI_ITEMTYPE", ITEMTYPE_POISON_BASE),
+      tooltip = GetString("SI_ITEMTYPE", ITEMTYPE_POISON_BASE),
     }
 
   end
@@ -1660,7 +1671,7 @@ function BankManagerRules.addFilters()
   BankManagerRules.data[ruleName] = {
     params  = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_TOOL } },
-      { func = GetItemLinkQuality, funcArgs = BMR_ITEMLINK, values = { ITEM_QUALITY_NORMAL } },
+      { func = GetItemLinkFunctionalQuality, funcArgs = BMR_ITEMLINK, values = { ITEM_FUNCTIONAL_QUALITY_NORMAL } },
     },
     name    = GetString("SI_ITEMTYPE", ITEMTYPE_LOCKPICK),
     tooltip = GetString("SI_ITEMTYPE", ITEMTYPE_LOCKPICK),
@@ -1684,6 +1695,16 @@ function BankManagerRules.addFilters()
     },
     name    = zo_strformat("<<1>>", GetString("SI_ITEMTYPE", ITEMTYPE_POTION)),
     tooltip = zo_strformat("<<1>>", GetString("SI_ITEMTYPE", ITEMTYPE_POTION)),
+  }
+
+  -- Poisons
+  ruleName = "MiscPoison"
+  BankManagerRules.data[ruleName] = {
+    params  = {
+      { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_POISON } },
+    },
+    name    = zo_strformat("<<1>>", GetString("SI_ITEMTYPE", ITEMTYPE_POISON)),
+    tooltip = zo_strformat("<<1>>", GetString("SI_ITEMTYPE", ITEMTYPE_POISON)),
   }
 
   -- Racial books
@@ -1711,7 +1732,7 @@ function BankManagerRules.addFilters()
   BankManagerRules.data[ruleName] = {
     params  = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_TOOL, ITEMTYPE_CROWN_REPAIR } },
-      { func = GetItemLinkQuality, funcArgs = BMR_ITEMLINK, values = { ITEM_QUALITY_ARCANE, ITEM_QUALITY_MAGIC } },
+      { func = GetItemLinkFunctionalQuality, funcArgs = BMR_ITEMLINK, values = { ITEM_FUNCTIONAL_QUALITY_ARCANE, ITEM_FUNCTIONAL_QUALITY_MAGIC } },
     },
     name    = zo_strformat("<<1>> & <<2>>", GetString(SI_REPAIR_KIT_CONFIRM),
       GetString("SI_ITEMTYPE", ITEMTYPE_CROWN_REPAIR)),
@@ -1724,7 +1745,7 @@ function BankManagerRules.addFilters()
   BankManagerRules.data[ruleName] = {
     params  = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_SOUL_GEM } },
-      { func = GetItemLinkQuality, funcArgs = BMR_ITEMLINK, values = { ITEM_QUALITY_NORMAL } },
+      { func = GetItemLinkFunctionalQuality, funcArgs = BMR_ITEMLINK, values = { ITEM_FUNCTIONAL_QUALITY_NORMAL } },
     },
     name    = zo_strformat("<<1>> - <<2>>", GetString("SI_ITEMTYPE", ITEMTYPE_SOUL_GEM),
       GetString(SI_GAME_CAMERA_ACTION_EMPTY)),
@@ -1737,12 +1758,12 @@ function BankManagerRules.addFilters()
   BankManagerRules.data[ruleName] = {
     params  = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_SOUL_GEM } },
-      { func = GetItemLinkQuality, funcArgs = BMR_ITEMLINK, values = { ITEM_QUALITY_MAGIC, ITEM_QUALITY_ARCANE } },
+      { func = GetItemLinkFunctionalQuality, funcArgs = BMR_ITEMLINK, values = { ITEM_FUNCTIONAL_QUALITY_MAGIC, ITEM_FUNCTIONAL_QUALITY_ARCANE } },
     },
     name    = zo_strformat("<<1>>",
-      GetItemQualityColor(ITEM_QUALITY_MAGIC):Colorize(GetString("SI_ITEMTYPE", ITEMTYPE_SOUL_GEM))),
+      GetItemQualityColor(ITEM_FUNCTIONAL_QUALITY_MAGIC):Colorize(GetString("SI_ITEMTYPE", ITEMTYPE_SOUL_GEM))),
     tooltip = zo_strformat("<<1>>",
-      GetItemQualityColor(ITEM_QUALITY_MAGIC):Colorize(GetString("SI_ITEMTYPE", ITEMTYPE_SOUL_GEM))),
+      GetItemQualityColor(ITEM_FUNCTIONAL_QUALITY_MAGIC):Colorize(GetString("SI_ITEMTYPE", ITEMTYPE_SOUL_GEM))),
   }
 
   -- Master Writs
@@ -1760,7 +1781,7 @@ function BankManagerRules.addFilters()
   BankManagerRules.data[ruleName] = {
     params  = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_TROPHY } },
-      { func = GetItemLinkQuality, funcArgs = BMR_ITEMLINK, values = { ITEM_QUALITY_ARCANE } },
+      { func = GetItemLinkFunctionalQuality, funcArgs = BMR_ITEMLINK, values = { ITEM_FUNCTIONAL_QUALITY_ARCANE } },
       { func = GetItemLinkBindType, funcArgs = BMR_ITEMLINK, values = { BIND_TYPE_NONE } },
       { func = IsItemLinkConsumable, funcArgs = BMR_ITEMLINK, values = { false } },
     },
