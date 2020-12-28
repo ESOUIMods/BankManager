@@ -252,15 +252,28 @@ BankManagerRules.static.rawStyles = {
 }
 
 -- To display names nicely (even if level 1 got 2 solvents, only 1 is displayed here, but filter works, because not based on this array) itemLink here is not used by filter so it can be a little bit false
-BankManagerRules.static.alchemySolventArray = {
-  [1] = "|H1:item:883:30:2:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h",
-  [2] = "|H1:item:4570:30:50:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h",
-  [3] = "|H1:item:23265:30:34:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h",
-  [4] = "|H1:item:23266:30:40:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h",
-  [5] = "|H1:item:23267:125:50:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h",
-  [6] = "|H1:item:23268:129:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h",
-  [7] = "|H1:item:64500:134:50:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h",
-  [8] = "|H1:item:64501:308:50:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h",
+BankManagerRules.static.alchemyPotionSolventArray = {
+	[1] = "|H1:item:883:30:3:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h", -- 3
+	[2] = "|H1:item:1187:30:10:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h", -- 10
+	[3] = "|H1:item:4570:30:20:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h", -- 20
+	[4] = "|H1:item:23265:30:30:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h", -- 30
+	[5] = "|H1:item:23266:30:40:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h", -- 40
+	[6] = "|H1:item:23267:125:50:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h", -- cp 10
+	[7] = "|H1:item:23268:129:50:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h", -- cp 50
+	[8] = "|H1:item:64500:134:50:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h", -- cp 100
+	[9] = "|H1:item:64501:308:50:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h", -- cp 150
+}
+
+BankManagerRules.static.alchemyPoisonSolventArray = {
+	[1] = "|H1:item:75357:30:3:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h", -- 3
+	[2] = "|H1:item:75358:30:10:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h", -- 10
+	[3] = "|H1:item:75359:30:20:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h", -- 20
+	[4] = "|H1:item:75360:30:30:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h", -- 30
+	[5] = "|H1:item:75361:30:40:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h", -- 40
+	[6] = "|H1:item:75362:125:50:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h", -- cp 10
+	[7] = "|H1:item:75363:129:50:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h", -- cp 50
+	[8] = "|H1:item:75364:134:50:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h", -- cp 100
+	[9] = "|H1:item:75365:308:50:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h", -- cp 150
 }
 
 BankManagerRules.static.jewelrycraftingRawTraits = {
@@ -1619,30 +1632,32 @@ function BankManagerRules.addFilters()
     tooltip = GetString("SI_ITEMTYPE", ITEMTYPE_REAGENT),
   }
 
-  local MAX_ALCHEMY_SKILL = 8 -- No UI function for that
-  for alchemySkill = 1, MAX_ALCHEMY_SKILL do
-    ruleName = "alchemySolvent" .. alchemySkill
-    BankManagerRules.data[ruleName] = {
-      params  = {
-        { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_POTION_BASE } },
-        { func = GetItemLinkRequiredCraftingSkillRank, funcArgs = BMR_ITEMLINK, values = { alchemySkill } },
-      },
-      name    = GetString(SI_GROUP_LIST_PANEL_LEVEL_HEADER) .. alchemySkill .. " - " .. zo_strformat(SI_TOOLTIP_ITEM_NAME,
-        GetItemLinkName(BankManagerRules.static.alchemySolventArray[alchemySkill])),
-      tooltip = GetString(SI_GROUP_LIST_PANEL_LEVEL_HEADER) .. alchemySkill .. " - " .. zo_strformat(SI_TOOLTIP_ITEM_NAME,
-        GetItemLinkName(BankManagerRules.static.alchemySolventArray[alchemySkill])),
-    }
+	local MAX_ALCHEMY_SKILL = 9 -- No UI function for that
+	for alchemySkill=1, MAX_ALCHEMY_SKILL do
+		ruleName = "alchemyPotionSolvent" .. alchemySkill
+		BankManagerRules.data[ruleName] = {
+			params = {
+				{func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = {ITEMTYPE_POTION_BASE}},
+				{func = GetItemLinkRequiredCraftingSkillRank, funcArgs = BMR_ITEMLINK, values = {alchemySkill}},
+			},
+			name = GetString(SI_GROUP_LIST_PANEL_LEVEL_HEADER) .. alchemySkill .. " - " .. zo_strformat(SI_TOOLTIP_ITEM_NAME, GetItemLinkName(BankManagerRules.static.alchemyPotionSolventArray[alchemySkill])),
+			tooltip = GetString(SI_GROUP_LIST_PANEL_LEVEL_HEADER) .. alchemySkill .. " - " .. zo_strformat(SI_TOOLTIP_ITEM_NAME, GetItemLinkName(BankManagerRules.static.alchemyPotionSolventArray[alchemySkill])),
+		}
 
-    ruleName = "alchemyPoisonSolvent"
-    BankManagerRules.data[ruleName] = {
-      params  = {
-        { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_POISON_BASE } },
-      },
-      name    = GetString("SI_ITEMTYPE", ITEMTYPE_POISON_BASE),
-      tooltip = GetString("SI_ITEMTYPE", ITEMTYPE_POISON_BASE),
-    }
+	end
 
-  end
+	for alchemySkill=1, MAX_ALCHEMY_SKILL do
+		ruleName = "alchemyPoisonSolvent" .. alchemySkill
+		BankManagerRules.data[ruleName] = {
+			params = {
+				{func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = {ITEMTYPE_POISON_BASE}},
+				{func = GetItemLinkRequiredCraftingSkillRank, funcArgs = BMR_ITEMLINK, values = {alchemySkill}},
+			},
+			name = GetString(SI_GROUP_LIST_PANEL_LEVEL_HEADER) .. alchemySkill .. " - " .. zo_strformat(SI_TOOLTIP_ITEM_NAME, GetItemLinkName(BankManagerRules.static.alchemyPoisonSolventArray[alchemySkill])),
+			tooltip = GetString(SI_GROUP_LIST_PANEL_LEVEL_HEADER) .. alchemySkill .. " - " .. zo_strformat(SI_TOOLTIP_ITEM_NAME, GetItemLinkName(BankManagerRules.static.alchemyPoisonSolventArray[alchemySkill])),
+		}
+
+	end
 
   -- Misc
 

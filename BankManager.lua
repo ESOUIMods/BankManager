@@ -2271,9 +2271,15 @@ local function LAMSubmenu(subMenu)
     table.insert(submenuControls, panelRule("alchemyReagent"))
     table.insert(submenuControls,
       { type = "texture", image = "EsoUI/Art/Miscellaneous/horizontalDivider.dds", imageWidth = 510, imageHeight = 4 })
-    local MAX_ALCHEMY_SKILL = 8
+    local MAX_ALCHEMY_SKILL = 9
+    -- alchemySolvent
     for alchemySkill = 1, MAX_ALCHEMY_SKILL do
-      table.insert(submenuControls, panelRule("alchemySolvent" .. alchemySkill))
+      table.insert(submenuControls, panelRule("alchemyPotionSolvent" .. alchemySkill))
+    end
+    table.insert(submenuControls,
+      { type = "texture", image = "EsoUI/Art/Miscellaneous/horizontalDivider.dds", imageWidth = 510, imageHeight = 4 })
+    for alchemySkill = 1, MAX_ALCHEMY_SKILL do
+      table.insert(submenuControls, panelRule("alchemyPoisonSolvent" .. alchemySkill))
     end
 
     -- Enchanting
