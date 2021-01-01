@@ -71,8 +71,7 @@
           <Anchor point="LEFT" relativePoint="RIGHT" offsetX="-55" relativeTo="$(parent)"/>
         </Button>
 
-        <Label name="$(parent)RuleName" text="BankManagerRevived" font="ZoFontTooltipTitle"
-               horizontalAlignment="CENTER">
+        <Label name="$(parent)RuleName" text="BankManagerRevived" font="ZoFontTooltipTitle" horizontalAlignment="CENTER">
           <Dimensions x="185"/>
           <Anchor offsetY="-10" point="BOTTOM" relativePoint="BOTTOM" relativeTo="$(parent)"/>
         </Label>

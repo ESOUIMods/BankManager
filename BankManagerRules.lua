@@ -30,27 +30,27 @@ http://creativecommons.org/licenses/by-nc-sa/4.0/legalcode
 
 -- addFiltersTaggedAll is intended to regroup multiple  filters, such as "all trait stones", "all armors", thoses rules are executed AFTER filters defined in addFilters() thanks to .position flag
 
-BankManagerRules = {}
-BankManagerRules.data = {}
-BankManagerRules.defaults = {}
+BankManagerRules                                  = {}
+BankManagerRules.data                             = {}
+BankManagerRules.defaults                         = {}
 
-local ACTION_NOTSET = 1
-local BMR_ITEMLINK = 1
-local BMR_BAG_AND_SLOT = 2
+local ACTION_NOTSET                               = 1
+local BMR_ITEMLINK                                = 1
+local BMR_BAG_AND_SLOT                            = 2
 local ruleName
-local LR = LibResearch
+local LR                                          = LibResearch
 
-local BMR_RULEWRITER_VALUE_OPTIONAL_KEYWORD = 1
-local BMR_RULEWRITER_VALUE_WITH_OPERATOR = 2
-local BMR_RULEWRITER_VALUE_WITHOUT_OPERATOR = 3
+local BMR_RULEWRITER_VALUE_OPTIONAL_KEYWORD       = 1
+local BMR_RULEWRITER_VALUE_WITH_OPERATOR          = 2
+local BMR_RULEWRITER_VALUE_WITHOUT_OPERATOR       = 3
 
 -- List of all things we cannot dynamically get
-BankManagerRules.static = {}
+BankManagerRules.static                           = {}
 
 -- Taken through the Crafts panels - it doesn't return correct values with itemLinkStyle, Quality and requiredLevel.
 -- itemLink cannot be used, because GetItemLink() returns a link with the name hardcoded inside the link, so use the itemId.
 -- /script d(GetItemLink(1, 19) .. " " .. BankManagerRules.static.refinedMaterial[1][10])
-BankManagerRules.static.refinedMaterial = {
+BankManagerRules.static.refinedMaterial           = {
   [CRAFTING_TYPE_BLACKSMITHING]   = {
     [1]  = "|H0:item:5413:30:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h",
     [2]  = "|H0:item:4487:30:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h",
@@ -109,7 +109,7 @@ BankManagerRules.static.refinedMaterial = {
 }
 
 -- Thanks guild
-BankManagerRules.static.rawMaterial = {
+BankManagerRules.static.rawMaterial               = {
   [CRAFTING_TYPE_BLACKSMITHING]   = {
     [1]  = "|H0:item:808:30:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h",
     [2]  = "|H0:item:5820:30:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h",
@@ -169,7 +169,7 @@ BankManagerRules.static.rawMaterial = {
 
 -- From Dustman. But maybe move to GetItemLinkFlavorText should be better if ZOS revamp cooking again
 -- 1 is food, 2 is drink, 3 is special
-BankManagerRules.static.rawIngredients = {
+BankManagerRules.static.rawIngredients            = {
   --meat (health)
   ["28609"] = 1, --Game
   ["33752"] = 1, --Red Meat
@@ -236,7 +236,7 @@ BankManagerRules.static.rawIngredients = {
 }
 
 -- raw items are maybe linked to ITEMTYPE_RAW_MATERIAL, but they are not linked to GetItemLinkItemStyle, so no function and nothing to enumerate.
-BankManagerRules.static.rawStyles = {
+BankManagerRules.static.rawStyles                 = {
   [ITEMSTYLE_AREA_DWEMER]          = "|H0:item:57665:30:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h",
   [ITEMSTYLE_GLASS]                = "|H0:item:64690:33:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h",
   [ITEMSTYLE_AREA_AKAVIRI]         = "|H0:item:64688:33:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h",
@@ -253,30 +253,30 @@ BankManagerRules.static.rawStyles = {
 
 -- To display names nicely (even if level 1 got 2 solvents, only 1 is displayed here, but filter works, because not based on this array) itemLink here is not used by filter so it can be a little bit false
 BankManagerRules.static.alchemyPotionSolventArray = {
-	[1] = "|H1:item:883:30:3:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h", -- 3
-	[2] = "|H1:item:1187:30:10:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h", -- 10
-	[3] = "|H1:item:4570:30:20:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h", -- 20
-	[4] = "|H1:item:23265:30:30:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h", -- 30
-	[5] = "|H1:item:23266:30:40:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h", -- 40
-	[6] = "|H1:item:23267:125:50:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h", -- cp 10
-	[7] = "|H1:item:23268:129:50:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h", -- cp 50
-	[8] = "|H1:item:64500:134:50:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h", -- cp 100
-	[9] = "|H1:item:64501:308:50:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h", -- cp 150
+  [1] = "|H1:item:883:30:3:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h", -- 3
+  [2] = "|H1:item:1187:30:10:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h", -- 10
+  [3] = "|H1:item:4570:30:20:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h", -- 20
+  [4] = "|H1:item:23265:30:30:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h", -- 30
+  [5] = "|H1:item:23266:30:40:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h", -- 40
+  [6] = "|H1:item:23267:125:50:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h", -- cp 10
+  [7] = "|H1:item:23268:129:50:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h", -- cp 50
+  [8] = "|H1:item:64500:134:50:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h", -- cp 100
+  [9] = "|H1:item:64501:308:50:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h", -- cp 150
 }
 
 BankManagerRules.static.alchemyPoisonSolventArray = {
-	[1] = "|H1:item:75357:30:3:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h", -- 3
-	[2] = "|H1:item:75358:30:10:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h", -- 10
-	[3] = "|H1:item:75359:30:20:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h", -- 20
-	[4] = "|H1:item:75360:30:30:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h", -- 30
-	[5] = "|H1:item:75361:30:40:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h", -- 40
-	[6] = "|H1:item:75362:125:50:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h", -- cp 10
-	[7] = "|H1:item:75363:129:50:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h", -- cp 50
-	[8] = "|H1:item:75364:134:50:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h", -- cp 100
-	[9] = "|H1:item:75365:308:50:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h", -- cp 150
+  [1] = "|H1:item:75357:30:3:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h", -- 3
+  [2] = "|H1:item:75358:30:10:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h", -- 10
+  [3] = "|H1:item:75359:30:20:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h", -- 20
+  [4] = "|H1:item:75360:30:30:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h", -- 30
+  [5] = "|H1:item:75361:30:40:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h", -- 40
+  [6] = "|H1:item:75362:125:50:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h", -- cp 10
+  [7] = "|H1:item:75363:129:50:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h", -- cp 50
+  [8] = "|H1:item:75364:134:50:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h", -- cp 100
+  [9] = "|H1:item:75365:308:50:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h", -- cp 150
 }
 
-BankManagerRules.static.jewelrycraftingRawTraits = {
+BankManagerRules.static.jewelrycraftingRawTraits  = {
   [1] = "|H1:item:135159:30:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h",
   [2] = "|H1:item:135158:30:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h",
   [3] = "|H1:item:135160:30:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h",
@@ -288,11 +288,11 @@ BankManagerRules.static.jewelrycraftingRawTraits = {
 }
 
 -- List is built at each bank interaction
-BankManagerRules.static.special = {}
-BankManagerRules.static.special.writsQuests = {}
+BankManagerRules.static.special                   = {}
+BankManagerRules.static.special.writsQuests       = {}
 
 -- RuleWriter Keywords
-BankManagerRules.keywordConditionTable = {
+BankManagerRules.keywordConditionTable            = {
 
   ARMOR   = { -- keyword
     [BMR_RULEWRITER_VALUE_OPTIONAL_KEYWORD] = {
@@ -381,9 +381,9 @@ local function IsWritItem(itemLink)
 
   for _, data in ipairs(BankManagerRules.static.special.writsQuests) do
     if string.find(data.text, Sanitize(itemName)) then
-      BankManagerRules.static.special.writsQuests[itemLink] = data.qtyToMove
+      BankManagerRules.static.special.writsQuests[itemLink]       = data.qtyToMove
       BankManagerRules.static.special.writsQuestsGlyphs[itemLink] = data.qtyToMove -- Bit dirty, see how to improve
-      BankManagerRules.static.special.writsQuestsPots[itemLink] = data.qtyToMove
+      BankManagerRules.static.special.writsQuestsPots[itemLink]   = data.qtyToMove
       return true
     end
   end
@@ -425,8 +425,8 @@ function BankManagerRules.addFiltersTaggedAll()
   -- "All" will be executed after standard rules to do not interfere
   -- If you want to write a OnlyIfNotFullStack option look at rulename improvementXX
 
-  ruleName = "traitAll"
-  BankManagerRules.data[ruleName] = {
+  ruleName                                               = "traitAll"
+  BankManagerRules.data[ruleName]                        = {
     -- params which will define if the item analized match the rule. if multiple params, it will be a logical "and"
     params   = {
       {
@@ -447,8 +447,8 @@ function BankManagerRules.addFiltersTaggedAll()
   }
 
   -- Styles All
-  ruleName = "styleAll"
-  BankManagerRules.data[ruleName] = {
+  ruleName                                               = "styleAll"
+  BankManagerRules.data[ruleName]                        = {
     params   = {
       {
         func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_STYLE_MATERIAL, ITEMTYPE_RAW_MATERIAL },
@@ -460,8 +460,8 @@ function BankManagerRules.addFiltersTaggedAll()
   }
 
   -- Material All Blacksmithing
-  ruleName = "MaterialAll" .. CRAFTING_TYPE_BLACKSMITHING
-  BankManagerRules.data[ruleName] = {
+  ruleName                                               = "MaterialAll" .. CRAFTING_TYPE_BLACKSMITHING
+  BankManagerRules.data[ruleName]                        = {
     params   = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_BLACKSMITHING_MATERIAL, ITEMTYPE_BLACKSMITHING_RAW_MATERIAL } },
     },
@@ -472,8 +472,8 @@ function BankManagerRules.addFiltersTaggedAll()
   }
 
   -- Material All Clothier
-  ruleName = "MaterialAll" .. CRAFTING_TYPE_CLOTHIER
-  BankManagerRules.data[ruleName] = {
+  ruleName                                               = "MaterialAll" .. CRAFTING_TYPE_CLOTHIER
+  BankManagerRules.data[ruleName]                        = {
     params   = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_CLOTHIER_MATERIAL, ITEMTYPE_CLOTHIER_RAW_MATERIAL } },
     },
@@ -484,8 +484,8 @@ function BankManagerRules.addFiltersTaggedAll()
   }
 
   -- Material All Woodworking
-  ruleName = "MaterialAll" .. CRAFTING_TYPE_WOODWORKING
-  BankManagerRules.data[ruleName] = {
+  ruleName                                               = "MaterialAll" .. CRAFTING_TYPE_WOODWORKING
+  BankManagerRules.data[ruleName]                        = {
     params   = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_WOODWORKING_MATERIAL, ITEMTYPE_WOODWORKING_RAW_MATERIAL } },
     },
@@ -496,8 +496,8 @@ function BankManagerRules.addFiltersTaggedAll()
   }
 
   -- Material All Jewelcrafting
-  ruleName = "MaterialAll" .. CRAFTING_TYPE_JEWELRYCRAFTING
-  BankManagerRules.data[ruleName] = {
+  ruleName                                               = "MaterialAll" .. CRAFTING_TYPE_JEWELRYCRAFTING
+  BankManagerRules.data[ruleName]                        = {
     params   = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_JEWELRYCRAFTING_MATERIAL, ITEMTYPE_JEWELRYCRAFTING_RAW_MATERIAL } },
     },
@@ -508,8 +508,8 @@ function BankManagerRules.addFiltersTaggedAll()
   }
 
   -- Refined All Blacksmithing
-  ruleName = "refinedMaterialAll" .. CRAFTING_TYPE_BLACKSMITHING
-  BankManagerRules.data[ruleName] = {
+  ruleName                                               = "refinedMaterialAll" .. CRAFTING_TYPE_BLACKSMITHING
+  BankManagerRules.data[ruleName]                        = {
     params   = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_BLACKSMITHING_MATERIAL } },
     },
@@ -519,8 +519,8 @@ function BankManagerRules.addFiltersTaggedAll()
   }
 
   -- Raw All Blacksmithing
-  ruleName = "rawMaterialAll" .. CRAFTING_TYPE_BLACKSMITHING
-  BankManagerRules.data[ruleName] = {
+  ruleName                                               = "rawMaterialAll" .. CRAFTING_TYPE_BLACKSMITHING
+  BankManagerRules.data[ruleName]                        = {
     params   = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_BLACKSMITHING_RAW_MATERIAL } },
     },
@@ -530,8 +530,8 @@ function BankManagerRules.addFiltersTaggedAll()
   }
 
   -- Refined All Clothier
-  ruleName = "refinedMaterialAll" .. CRAFTING_TYPE_CLOTHIER
-  BankManagerRules.data[ruleName] = {
+  ruleName                                               = "refinedMaterialAll" .. CRAFTING_TYPE_CLOTHIER
+  BankManagerRules.data[ruleName]                        = {
     params   = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_CLOTHIER_MATERIAL } },
     },
@@ -541,8 +541,8 @@ function BankManagerRules.addFiltersTaggedAll()
   }
 
   -- Raw All Clothier
-  ruleName = "rawMaterialAll" .. CRAFTING_TYPE_CLOTHIER
-  BankManagerRules.data[ruleName] = {
+  ruleName                                               = "rawMaterialAll" .. CRAFTING_TYPE_CLOTHIER
+  BankManagerRules.data[ruleName]                        = {
     params   = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_CLOTHIER_RAW_MATERIAL } },
     },
@@ -552,8 +552,8 @@ function BankManagerRules.addFiltersTaggedAll()
   }
 
   -- Refined All Woodworking
-  ruleName = "refinedMaterialAll" .. CRAFTING_TYPE_WOODWORKING
-  BankManagerRules.data[ruleName] = {
+  ruleName                                               = "refinedMaterialAll" .. CRAFTING_TYPE_WOODWORKING
+  BankManagerRules.data[ruleName]                        = {
     params   = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_WOODWORKING_MATERIAL } },
     },
@@ -563,8 +563,8 @@ function BankManagerRules.addFiltersTaggedAll()
   }
 
   -- Refined All Jewelcrafting
-  ruleName = "refinedMaterialAll" .. CRAFTING_TYPE_JEWELRYCRAFTING
-  BankManagerRules.data[ruleName] = {
+  ruleName                                               = "refinedMaterialAll" .. CRAFTING_TYPE_JEWELRYCRAFTING
+  BankManagerRules.data[ruleName]                        = {
     params   = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_JEWELRYCRAFTING_MATERIAL } },
     },
@@ -574,8 +574,8 @@ function BankManagerRules.addFiltersTaggedAll()
   }
 
   -- Raw All Woodworking
-  ruleName = "rawMaterialAll" .. CRAFTING_TYPE_WOODWORKING
-  BankManagerRules.data[ruleName] = {
+  ruleName                                               = "rawMaterialAll" .. CRAFTING_TYPE_WOODWORKING
+  BankManagerRules.data[ruleName]                        = {
     params   = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_WOODWORKING_RAW_MATERIAL } },
     },
@@ -585,8 +585,8 @@ function BankManagerRules.addFiltersTaggedAll()
   }
 
   -- Raw All Jewelcrafting
-  ruleName = "rawMaterialAll" .. CRAFTING_TYPE_JEWELRYCRAFTING
-  BankManagerRules.data[ruleName] = {
+  ruleName                                               = "rawMaterialAll" .. CRAFTING_TYPE_JEWELRYCRAFTING
+  BankManagerRules.data[ruleName]                        = {
     params   = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_JEWELRYCRAFTING_RAW_MATERIAL } },
     },
@@ -596,8 +596,8 @@ function BankManagerRules.addFiltersTaggedAll()
   }
 
   -- Enchanting All
-  ruleName = "enchantingAll"
-  BankManagerRules.data[ruleName] = {
+  ruleName                                               = "enchantingAll"
+  BankManagerRules.data[ruleName]                        = {
     params   = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_ENCHANTING_RUNE_ESSENCE, ITEMTYPE_ENCHANTING_RUNE_POTENCY, ITEMTYPE_ENCHANTING_RUNE_ASPECT } },
     },
@@ -609,8 +609,8 @@ function BankManagerRules.addFiltersTaggedAll()
   }
 
   -- Alchemy All
-  ruleName = "alchemyAll"
-  BankManagerRules.data[ruleName] = {
+  ruleName                                               = "alchemyAll"
+  BankManagerRules.data[ruleName]                        = {
     params   = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_POTION_BASE, ITEMTYPE_POISON_BASE, ITEMTYPE_REAGENT } },
     },
@@ -622,326 +622,326 @@ function BankManagerRules.addFiltersTaggedAll()
 
   -- This rule won't be executed, it's a placeholder for the OnlyIfNotFullStack
   -- CRAFTING_TYPE_BLACKSMITHING Improvement All
-  ruleName = "improvementAll" .. CRAFTING_TYPE_BLACKSMITHING
-  BankManagerRules.data[ruleName] = {
+  ruleName                                               = "improvementAll" .. CRAFTING_TYPE_BLACKSMITHING
+  BankManagerRules.data[ruleName]                        = {
     true, -- Don't write params section or rule will be executed. ruleName will be the Lua var to store the value
   }
 
   -- no .action here, it's unneeded, there is no rule behind this filter definition
-  BankManagerRules.defaults[ruleName] = {}
+  BankManagerRules.defaults[ruleName]                    = {}
   BankManagerRules.defaults[ruleName].onlyIfNotFullStack = true
 
   -- improvementStacks CRAFTING_TYPE_BLACKSMITHING
-  ruleName = "improvementStacks" .. CRAFTING_TYPE_BLACKSMITHING
-  BankManagerRules.data[ruleName] = { true }
+  ruleName                                               = "improvementStacks" .. CRAFTING_TYPE_BLACKSMITHING
+  BankManagerRules.data[ruleName]                        = { true }
 
-  BankManagerRules.defaults[ruleName] = {}
-  BankManagerRules.defaults[ruleName].onlyStacks = 1
+  BankManagerRules.defaults[ruleName]                    = {}
+  BankManagerRules.defaults[ruleName].onlyStacks         = 1
 
   -- improvementStacks CRAFTING_TYPE_BLACKSMITHING GBank
-  ruleName = "improvementGBank" .. CRAFTING_TYPE_BLACKSMITHING
-  BankManagerRules.data[ruleName] = { true }
+  ruleName                                               = "improvementGBank" .. CRAFTING_TYPE_BLACKSMITHING
+  BankManagerRules.data[ruleName]                        = { true }
 
-  BankManagerRules.defaults[ruleName] = {}
-  BankManagerRules.defaults[ruleName].associatedGuild = GetString(BMR_ACTION_NOTSET)
+  BankManagerRules.defaults[ruleName]                    = {}
+  BankManagerRules.defaults[ruleName].associatedGuild    = GetString(BMR_ACTION_NOTSET)
 
   -- CRAFTING_TYPE_CLOTHIER Improvement All
-  ruleName = "improvementAll" .. CRAFTING_TYPE_CLOTHIER
-  BankManagerRules.data[ruleName] = { true }
+  ruleName                                               = "improvementAll" .. CRAFTING_TYPE_CLOTHIER
+  BankManagerRules.data[ruleName]                        = { true }
 
-  BankManagerRules.defaults[ruleName] = {}
+  BankManagerRules.defaults[ruleName]                    = {}
   BankManagerRules.defaults[ruleName].onlyIfNotFullStack = true
 
   -- improvementStacks CRAFTING_TYPE_CLOTHIER
-  ruleName = "improvementStacks" .. CRAFTING_TYPE_CLOTHIER
-  BankManagerRules.data[ruleName] = { true }
+  ruleName                                               = "improvementStacks" .. CRAFTING_TYPE_CLOTHIER
+  BankManagerRules.data[ruleName]                        = { true }
 
-  BankManagerRules.defaults[ruleName] = {}
-  BankManagerRules.defaults[ruleName].onlyStacks = 1
+  BankManagerRules.defaults[ruleName]                    = {}
+  BankManagerRules.defaults[ruleName].onlyStacks         = 1
 
   -- improvementStacks CRAFTING_TYPE_CLOTHIER GBank
-  ruleName = "improvementGBank" .. CRAFTING_TYPE_CLOTHIER
-  BankManagerRules.data[ruleName] = { true }
+  ruleName                                               = "improvementGBank" .. CRAFTING_TYPE_CLOTHIER
+  BankManagerRules.data[ruleName]                        = { true }
 
-  BankManagerRules.defaults[ruleName] = {}
-  BankManagerRules.defaults[ruleName].associatedGuild = GetString(BMR_ACTION_NOTSET)
+  BankManagerRules.defaults[ruleName]                    = {}
+  BankManagerRules.defaults[ruleName].associatedGuild    = GetString(BMR_ACTION_NOTSET)
 
   -- CRAFTING_TYPE_WOODWORKING Improvement All
-  ruleName = "improvementAll" .. CRAFTING_TYPE_WOODWORKING
-  BankManagerRules.data[ruleName] = { true }
+  ruleName                                               = "improvementAll" .. CRAFTING_TYPE_WOODWORKING
+  BankManagerRules.data[ruleName]                        = { true }
 
-  BankManagerRules.defaults[ruleName] = {}
+  BankManagerRules.defaults[ruleName]                    = {}
   BankManagerRules.defaults[ruleName].onlyIfNotFullStack = true
 
   -- improvementStacks CRAFTING_TYPE_WOODWORKING
-  ruleName = "improvementStacks" .. CRAFTING_TYPE_WOODWORKING
-  BankManagerRules.data[ruleName] = { true }
+  ruleName                                               = "improvementStacks" .. CRAFTING_TYPE_WOODWORKING
+  BankManagerRules.data[ruleName]                        = { true }
 
-  BankManagerRules.defaults[ruleName] = {}
-  BankManagerRules.defaults[ruleName].onlyStacks = 1
+  BankManagerRules.defaults[ruleName]                    = {}
+  BankManagerRules.defaults[ruleName].onlyStacks         = 1
 
   -- improvementStacks CRAFTING_TYPE_WOODWORKING GBank
-  ruleName = "improvementGBank" .. CRAFTING_TYPE_WOODWORKING
-  BankManagerRules.data[ruleName] = { true }
+  ruleName                                               = "improvementGBank" .. CRAFTING_TYPE_WOODWORKING
+  BankManagerRules.data[ruleName]                        = { true }
 
-  BankManagerRules.defaults[ruleName] = {}
-  BankManagerRules.defaults[ruleName].associatedGuild = GetString(BMR_ACTION_NOTSET)
+  BankManagerRules.defaults[ruleName]                    = {}
+  BankManagerRules.defaults[ruleName].associatedGuild    = GetString(BMR_ACTION_NOTSET)
 
   -- CRAFTING_TYPE_JEWELRYCRAFTING Improvement All
-  ruleName = "improvementAll" .. CRAFTING_TYPE_JEWELRYCRAFTING
-  BankManagerRules.data[ruleName] = { true }
+  ruleName                                               = "improvementAll" .. CRAFTING_TYPE_JEWELRYCRAFTING
+  BankManagerRules.data[ruleName]                        = { true }
 
-  BankManagerRules.defaults[ruleName] = {}
+  BankManagerRules.defaults[ruleName]                    = {}
   BankManagerRules.defaults[ruleName].onlyIfNotFullStack = true
 
   -- improvementStacks CRAFTING_TYPE_JEWELRYCRAFTING
-  ruleName = "improvementStacks" .. CRAFTING_TYPE_JEWELRYCRAFTING
-  BankManagerRules.data[ruleName] = { true }
+  ruleName                                               = "improvementStacks" .. CRAFTING_TYPE_JEWELRYCRAFTING
+  BankManagerRules.data[ruleName]                        = { true }
 
-  BankManagerRules.defaults[ruleName] = {}
-  BankManagerRules.defaults[ruleName].onlyStacks = 1
+  BankManagerRules.defaults[ruleName]                    = {}
+  BankManagerRules.defaults[ruleName].onlyStacks         = 1
 
   -- improvementStacks CRAFTING_TYPE_JEWELRYCRAFTING GBank
-  ruleName = "improvementGBank" .. CRAFTING_TYPE_JEWELRYCRAFTING
-  BankManagerRules.data[ruleName] = { true }
+  ruleName                                               = "improvementGBank" .. CRAFTING_TYPE_JEWELRYCRAFTING
+  BankManagerRules.data[ruleName]                        = { true }
 
-  BankManagerRules.defaults[ruleName] = {}
-  BankManagerRules.defaults[ruleName].associatedGuild = GetString(BMR_ACTION_NOTSET)
+  BankManagerRules.defaults[ruleName]                    = {}
+  BankManagerRules.defaults[ruleName].associatedGuild    = GetString(BMR_ACTION_NOTSET)
 
   -- (CRAFTING_TYPE_JEWELRYCRAFTING * 100) Improvement All
-  ruleName = "improvementAll" .. (CRAFTING_TYPE_JEWELRYCRAFTING * 100)
-  BankManagerRules.data[ruleName] = { true }
+  ruleName                                               = "improvementAll" .. (CRAFTING_TYPE_JEWELRYCRAFTING * 100)
+  BankManagerRules.data[ruleName]                        = { true }
 
-  BankManagerRules.defaults[ruleName] = {}
+  BankManagerRules.defaults[ruleName]                    = {}
   BankManagerRules.defaults[ruleName].onlyIfNotFullStack = true
 
   -- improvementStacks (CRAFTING_TYPE_JEWELRYCRAFTING * 100)
-  ruleName = "improvementStacks" .. (CRAFTING_TYPE_JEWELRYCRAFTING * 100)
-  BankManagerRules.data[ruleName] = { true }
+  ruleName                                               = "improvementStacks" .. (CRAFTING_TYPE_JEWELRYCRAFTING * 100)
+  BankManagerRules.data[ruleName]                        = { true }
 
-  BankManagerRules.defaults[ruleName] = {}
-  BankManagerRules.defaults[ruleName].onlyStacks = 1
+  BankManagerRules.defaults[ruleName]                    = {}
+  BankManagerRules.defaults[ruleName].onlyStacks         = 1
 
   -- improvementStacks (CRAFTING_TYPE_JEWELRYCRAFTING * 100) GBank
-  ruleName = "improvementGBank" .. (CRAFTING_TYPE_JEWELRYCRAFTING * 100)
-  BankManagerRules.data[ruleName] = { true }
+  ruleName                                               = "improvementGBank" .. (CRAFTING_TYPE_JEWELRYCRAFTING * 100)
+  BankManagerRules.data[ruleName]                        = { true }
 
-  BankManagerRules.defaults[ruleName] = {}
-  BankManagerRules.defaults[ruleName].associatedGuild = GetString(BMR_ACTION_NOTSET)
+  BankManagerRules.defaults[ruleName]                    = {}
+  BankManagerRules.defaults[ruleName].associatedGuild    = GetString(BMR_ACTION_NOTSET)
 
   -- CRAFTING_TYPE_BLACKSMITHING Material Stacks
-  ruleName = "MaterialStacks" .. CRAFTING_TYPE_BLACKSMITHING
-  BankManagerRules.data[ruleName] = { true }
+  ruleName                                               = "MaterialStacks" .. CRAFTING_TYPE_BLACKSMITHING
+  BankManagerRules.data[ruleName]                        = { true }
 
-  BankManagerRules.defaults[ruleName] = {}
-  BankManagerRules.defaults[ruleName].onlyStacks = 1
+  BankManagerRules.defaults[ruleName]                    = {}
+  BankManagerRules.defaults[ruleName].onlyStacks         = 1
 
   -- CRAFTING_TYPE_BLACKSMITHING Material GBank
-  ruleName = "MaterialGBank" .. CRAFTING_TYPE_BLACKSMITHING
-  BankManagerRules.data[ruleName] = { true }
+  ruleName                                               = "MaterialGBank" .. CRAFTING_TYPE_BLACKSMITHING
+  BankManagerRules.data[ruleName]                        = { true }
 
-  BankManagerRules.defaults[ruleName] = {}
-  BankManagerRules.defaults[ruleName].associatedGuild = GetString(BMR_ACTION_NOTSET)
+  BankManagerRules.defaults[ruleName]                    = {}
+  BankManagerRules.defaults[ruleName].associatedGuild    = GetString(BMR_ACTION_NOTSET)
 
   -- CRAFTING_TYPE_CLOTHIER Material Stacks
-  ruleName = "MaterialStacks" .. CRAFTING_TYPE_CLOTHIER
-  BankManagerRules.data[ruleName] = { true }
+  ruleName                                               = "MaterialStacks" .. CRAFTING_TYPE_CLOTHIER
+  BankManagerRules.data[ruleName]                        = { true }
 
-  BankManagerRules.defaults[ruleName] = {}
-  BankManagerRules.defaults[ruleName].onlyStacks = 1
+  BankManagerRules.defaults[ruleName]                    = {}
+  BankManagerRules.defaults[ruleName].onlyStacks         = 1
 
   -- CRAFTING_TYPE_CLOTHIER Material GBank
-  ruleName = "MaterialGBank" .. CRAFTING_TYPE_CLOTHIER
-  BankManagerRules.data[ruleName] = { true }
+  ruleName                                               = "MaterialGBank" .. CRAFTING_TYPE_CLOTHIER
+  BankManagerRules.data[ruleName]                        = { true }
 
-  BankManagerRules.defaults[ruleName] = {}
-  BankManagerRules.defaults[ruleName].associatedGuild = GetString(BMR_ACTION_NOTSET)
+  BankManagerRules.defaults[ruleName]                    = {}
+  BankManagerRules.defaults[ruleName].associatedGuild    = GetString(BMR_ACTION_NOTSET)
 
   -- CRAFTING_TYPE_WOODWORKING Material Stacks
-  ruleName = "MaterialStacks" .. CRAFTING_TYPE_WOODWORKING
-  BankManagerRules.data[ruleName] = { true }
+  ruleName                                               = "MaterialStacks" .. CRAFTING_TYPE_WOODWORKING
+  BankManagerRules.data[ruleName]                        = { true }
 
-  BankManagerRules.defaults[ruleName] = {}
-  BankManagerRules.defaults[ruleName].onlyStacks = 1
+  BankManagerRules.defaults[ruleName]                    = {}
+  BankManagerRules.defaults[ruleName].onlyStacks         = 1
 
   -- CRAFTING_TYPE_WOODWORKING Material GBank
-  ruleName = "MaterialGBank" .. CRAFTING_TYPE_WOODWORKING
-  BankManagerRules.data[ruleName] = { true }
+  ruleName                                               = "MaterialGBank" .. CRAFTING_TYPE_WOODWORKING
+  BankManagerRules.data[ruleName]                        = { true }
 
-  BankManagerRules.defaults[ruleName] = {}
-  BankManagerRules.defaults[ruleName].associatedGuild = GetString(BMR_ACTION_NOTSET)
+  BankManagerRules.defaults[ruleName]                    = {}
+  BankManagerRules.defaults[ruleName].associatedGuild    = GetString(BMR_ACTION_NOTSET)
 
   -- CRAFTING_TYPE_JEWELRYCRAFTING Material Stacks
-  ruleName = "MaterialStacks" .. CRAFTING_TYPE_JEWELRYCRAFTING
-  BankManagerRules.data[ruleName] = { true }
+  ruleName                                               = "MaterialStacks" .. CRAFTING_TYPE_JEWELRYCRAFTING
+  BankManagerRules.data[ruleName]                        = { true }
 
-  BankManagerRules.defaults[ruleName] = {}
-  BankManagerRules.defaults[ruleName].onlyStacks = 1
+  BankManagerRules.defaults[ruleName]                    = {}
+  BankManagerRules.defaults[ruleName].onlyStacks         = 1
 
   -- CRAFTING_TYPE_JEWELRYCRAFTING Material GBank
-  ruleName = "MaterialGBank" .. CRAFTING_TYPE_JEWELRYCRAFTING
-  BankManagerRules.data[ruleName] = { true }
+  ruleName                                               = "MaterialGBank" .. CRAFTING_TYPE_JEWELRYCRAFTING
+  BankManagerRules.data[ruleName]                        = { true }
 
-  BankManagerRules.defaults[ruleName] = {}
-  BankManagerRules.defaults[ruleName].associatedGuild = GetString(BMR_ACTION_NOTSET)
+  BankManagerRules.defaults[ruleName]                    = {}
+  BankManagerRules.defaults[ruleName].associatedGuild    = GetString(BMR_ACTION_NOTSET)
 
   -- CookingIngredients All
-  ruleName = "cookingIngredientsAll"
-  BankManagerRules.data[ruleName] = { true }
+  ruleName                                               = "cookingIngredientsAll"
+  BankManagerRules.data[ruleName]                        = { true }
 
-  BankManagerRules.defaults[ruleName] = {}
+  BankManagerRules.defaults[ruleName]                    = {}
   BankManagerRules.defaults[ruleName].onlyIfNotFullStack = true
 
   -- CookingIngredients Stacks
-  ruleName = "cookingIngredientsStacks"
-  BankManagerRules.data[ruleName] = { true }
+  ruleName                                               = "cookingIngredientsStacks"
+  BankManagerRules.data[ruleName]                        = { true }
 
-  BankManagerRules.defaults[ruleName] = {}
-  BankManagerRules.defaults[ruleName].onlyStacks = 1
+  BankManagerRules.defaults[ruleName]                    = {}
+  BankManagerRules.defaults[ruleName].onlyStacks         = 1
 
   -- CookingIngredients GBank
-  ruleName = "cookingIngredientsGBank"
-  BankManagerRules.data[ruleName] = { true }
+  ruleName                                               = "cookingIngredientsGBank"
+  BankManagerRules.data[ruleName]                        = { true }
 
-  BankManagerRules.defaults[ruleName] = {}
-  BankManagerRules.defaults[ruleName].associatedGuild = GetString(BMR_ACTION_NOTSET)
+  BankManagerRules.defaults[ruleName]                    = {}
+  BankManagerRules.defaults[ruleName].associatedGuild    = GetString(BMR_ACTION_NOTSET)
 
   -- cookingRecipeGBank GBank
-  ruleName = "cookingRecipeGBank"
-  BankManagerRules.data[ruleName] = { true }
+  ruleName                                               = "cookingRecipeGBank"
+  BankManagerRules.data[ruleName]                        = { true }
 
-  BankManagerRules.defaults[ruleName] = {}
-  BankManagerRules.defaults[ruleName].associatedGuild = GetString(BMR_ACTION_NOTSET)
+  BankManagerRules.defaults[ruleName]                    = {}
+  BankManagerRules.defaults[ruleName].associatedGuild    = GetString(BMR_ACTION_NOTSET)
 
   -- enchantingStacks
-  ruleName = "enchantingStacks"
-  BankManagerRules.data[ruleName] = { true }
+  ruleName                                               = "enchantingStacks"
+  BankManagerRules.data[ruleName]                        = { true }
 
-  BankManagerRules.defaults[ruleName] = {}
-  BankManagerRules.defaults[ruleName].onlyStacks = 1
+  BankManagerRules.defaults[ruleName]                    = {}
+  BankManagerRules.defaults[ruleName].onlyStacks         = 1
 
   -- enchanting GBank
-  ruleName = "enchantingGBank"
-  BankManagerRules.data[ruleName] = { true }
+  ruleName                                               = "enchantingGBank"
+  BankManagerRules.data[ruleName]                        = { true }
 
-  BankManagerRules.defaults[ruleName] = {}
-  BankManagerRules.defaults[ruleName].associatedGuild = GetString(BMR_ACTION_NOTSET)
+  BankManagerRules.defaults[ruleName]                    = {}
+  BankManagerRules.defaults[ruleName].associatedGuild    = GetString(BMR_ACTION_NOTSET)
 
   -- enchantingGlyphs GBank
-  ruleName = "enchantingGlyphsGBank"
-  BankManagerRules.data[ruleName] = { true }
+  ruleName                                               = "enchantingGlyphsGBank"
+  BankManagerRules.data[ruleName]                        = { true }
 
-  BankManagerRules.defaults[ruleName] = {}
-  BankManagerRules.defaults[ruleName].associatedGuild = GetString(BMR_ACTION_NOTSET)
+  BankManagerRules.defaults[ruleName]                    = {}
+  BankManagerRules.defaults[ruleName].associatedGuild    = GetString(BMR_ACTION_NOTSET)
 
   -- alchemy Stacks
-  ruleName = "alchemyStacks"
-  BankManagerRules.data[ruleName] = { true }
+  ruleName                                               = "alchemyStacks"
+  BankManagerRules.data[ruleName]                        = { true }
 
-  BankManagerRules.defaults[ruleName] = {}
-  BankManagerRules.defaults[ruleName].onlyStacks = 1
+  BankManagerRules.defaults[ruleName]                    = {}
+  BankManagerRules.defaults[ruleName].onlyStacks         = 1
 
   -- alchemy GBank
-  ruleName = "alchemyGBank"
-  BankManagerRules.data[ruleName] = { true }
+  ruleName                                               = "alchemyGBank"
+  BankManagerRules.data[ruleName]                        = { true }
 
-  BankManagerRules.defaults[ruleName] = {}
-  BankManagerRules.defaults[ruleName].associatedGuild = GetString(BMR_ACTION_NOTSET)
+  BankManagerRules.defaults[ruleName]                    = {}
+  BankManagerRules.defaults[ruleName].associatedGuild    = GetString(BMR_ACTION_NOTSET)
 
   -- trait Stacks
-  ruleName = "traitStacks"
-  BankManagerRules.data[ruleName] = { true }
+  ruleName                                               = "traitStacks"
+  BankManagerRules.data[ruleName]                        = { true }
 
-  BankManagerRules.defaults[ruleName] = {}
-  BankManagerRules.defaults[ruleName].onlyStacks = 1
+  BankManagerRules.defaults[ruleName]                    = {}
+  BankManagerRules.defaults[ruleName].onlyStacks         = 1
 
   -- trait GBank
-  ruleName = "traitGBank"
-  BankManagerRules.data[ruleName] = { true }
+  ruleName                                               = "traitGBank"
+  BankManagerRules.data[ruleName]                        = { true }
 
-  BankManagerRules.defaults[ruleName] = {}
-  BankManagerRules.defaults[ruleName].associatedGuild = GetString(BMR_ACTION_NOTSET)
+  BankManagerRules.defaults[ruleName]                    = {}
+  BankManagerRules.defaults[ruleName].associatedGuild    = GetString(BMR_ACTION_NOTSET)
 
   -- style Stacks
-  ruleName = "styleStacks"
-  BankManagerRules.data[ruleName] = { true }
+  ruleName                                               = "styleStacks"
+  BankManagerRules.data[ruleName]                        = { true }
 
-  BankManagerRules.defaults[ruleName] = {}
-  BankManagerRules.defaults[ruleName].onlyStacks = 1
+  BankManagerRules.defaults[ruleName]                    = {}
+  BankManagerRules.defaults[ruleName].onlyStacks         = 1
 
   -- style GBank
-  ruleName = "styleGBank"
-  BankManagerRules.data[ruleName] = { true }
+  ruleName                                               = "styleGBank"
+  BankManagerRules.data[ruleName]                        = { true }
 
-  BankManagerRules.defaults[ruleName] = {}
-  BankManagerRules.defaults[ruleName].associatedGuild = GetString(BMR_ACTION_NOTSET)
+  BankManagerRules.defaults[ruleName]                    = {}
+  BankManagerRules.defaults[ruleName].associatedGuild    = GetString(BMR_ACTION_NOTSET)
 
   -- Trophy All
-  ruleName = "trophyAll"
-  BankManagerRules.data[ruleName] = { true }
+  ruleName                                               = "trophyAll"
+  BankManagerRules.data[ruleName]                        = { true }
 
-  BankManagerRules.defaults[ruleName] = {}
+  BankManagerRules.defaults[ruleName]                    = {}
   BankManagerRules.defaults[ruleName].onlyIfNotFullStack = true
 
   -- Trophy Stacks
-  ruleName = "trophyStacks"
-  BankManagerRules.data[ruleName] = { true }
+  ruleName                                               = "trophyStacks"
+  BankManagerRules.data[ruleName]                        = { true }
 
-  BankManagerRules.defaults[ruleName] = {}
-  BankManagerRules.defaults[ruleName].onlyStacks = 1
+  BankManagerRules.defaults[ruleName]                    = {}
+  BankManagerRules.defaults[ruleName].onlyStacks         = 1
 
   -- Trophy GBank
-  ruleName = "trophyGBank"
-  BankManagerRules.data[ruleName] = { true }
+  ruleName                                               = "trophyGBank"
+  BankManagerRules.data[ruleName]                        = { true }
 
-  BankManagerRules.defaults[ruleName] = {}
-  BankManagerRules.defaults[ruleName].associatedGuild = GetString(BMR_ACTION_NOTSET)
+  BankManagerRules.defaults[ruleName]                    = {}
+  BankManagerRules.defaults[ruleName].associatedGuild    = GetString(BMR_ACTION_NOTSET)
 
   -- Misc All
-  ruleName = "MiscAll"
-  BankManagerRules.data[ruleName] = { true }
+  ruleName                                               = "MiscAll"
+  BankManagerRules.data[ruleName]                        = { true }
 
-  BankManagerRules.defaults[ruleName] = {}
+  BankManagerRules.defaults[ruleName]                    = {}
   BankManagerRules.defaults[ruleName].onlyIfNotFullStack = true
 
   -- Misc Stacks
-  ruleName = "MiscStacks"
-  BankManagerRules.data[ruleName] = { true }
+  ruleName                                               = "MiscStacks"
+  BankManagerRules.data[ruleName]                        = { true }
 
-  BankManagerRules.defaults[ruleName] = {}
-  BankManagerRules.defaults[ruleName].onlyStacks = 1
+  BankManagerRules.defaults[ruleName]                    = {}
+  BankManagerRules.defaults[ruleName].onlyStacks         = 1
 
   -- Misc GBank
-  ruleName = "MiscGBank"
-  BankManagerRules.data[ruleName] = { true }
+  ruleName                                               = "MiscGBank"
+  BankManagerRules.data[ruleName]                        = { true }
 
-  BankManagerRules.defaults[ruleName] = {}
-  BankManagerRules.defaults[ruleName].associatedGuild = GetString(BMR_ACTION_NOTSET)
+  BankManagerRules.defaults[ruleName]                    = {}
+  BankManagerRules.defaults[ruleName].associatedGuild    = GetString(BMR_ACTION_NOTSET)
 
   -- Housing All
-  ruleName = "HousingAll"
-  BankManagerRules.data[ruleName] = { true }
+  ruleName                                               = "HousingAll"
+  BankManagerRules.data[ruleName]                        = { true }
 
-  BankManagerRules.defaults[ruleName] = {}
+  BankManagerRules.defaults[ruleName]                    = {}
   BankManagerRules.defaults[ruleName].onlyIfNotFullStack = true
 
   -- Housing Stacks
-  ruleName = "HousingStacks"
-  BankManagerRules.data[ruleName] = { true }
+  ruleName                                               = "HousingStacks"
+  BankManagerRules.data[ruleName]                        = { true }
 
-  BankManagerRules.defaults[ruleName] = {}
-  BankManagerRules.defaults[ruleName].onlyStacks = 1
+  BankManagerRules.defaults[ruleName]                    = {}
+  BankManagerRules.defaults[ruleName].onlyStacks         = 1
 
   -- Housing GBank
-  ruleName = "HousingGBank"
-  BankManagerRules.data[ruleName] = { true }
+  ruleName                                               = "HousingGBank"
+  BankManagerRules.data[ruleName]                        = { true }
 
-  BankManagerRules.defaults[ruleName] = {}
-  BankManagerRules.defaults[ruleName].associatedGuild = GetString(BMR_ACTION_NOTSET)
+  BankManagerRules.defaults[ruleName]                    = {}
+  BankManagerRules.defaults[ruleName].associatedGuild    = GetString(BMR_ACTION_NOTSET)
 
   -- Writ Quests
-  ruleName = "writsQuests"
-  BankManagerRules.data[ruleName] = {
+  ruleName                                               = "writsQuests"
+  BankManagerRules.data[ruleName]                        = {
     params    = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_POTION_BASE, ITEMTYPE_REAGENT, ITEMTYPE_ENCHANTING_RUNE_ASPECT, ITEMTYPE_ENCHANTING_RUNE_ESSENCE, ITEMTYPE_ENCHANTING_RUNE_POTENCY, ITEMTYPE_FOOD, ITEMTYPE_DRINK } },
       { func = IsWritItem, funcArgs = BMR_ITEMLINK, values = { true } },
@@ -952,12 +952,12 @@ function BankManagerRules.addFiltersTaggedAll()
   }
 
   -- Writ defaults
-  BankManagerRules.defaults[ruleName] = {}
-  BankManagerRules.defaults[ruleName].specialEnabled = false
+  BankManagerRules.defaults[ruleName]                    = {}
+  BankManagerRules.defaults[ruleName].specialEnabled     = false
 
   -- Writ Quests
-  ruleName = "writsQuestsGlyphs"
-  BankManagerRules.data[ruleName] = {
+  ruleName                                               = "writsQuestsGlyphs"
+  BankManagerRules.data[ruleName]                        = {
     params    = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_GLYPH_ARMOR } },
       { func = GetItemLinkFunctionalQuality, funcArgs = BMR_ITEMLINK, values = { ITEM_FUNCTIONAL_QUALITY_NORMAL } },
@@ -971,12 +971,12 @@ function BankManagerRules.addFiltersTaggedAll()
   }
 
   -- Writ defaults
-  BankManagerRules.defaults[ruleName] = {}
-  BankManagerRules.defaults[ruleName].specialEnabled = false
+  BankManagerRules.defaults[ruleName]                    = {}
+  BankManagerRules.defaults[ruleName].specialEnabled     = false
 
   -- Writ Quests
-  ruleName = "writsQuestsPots"
-  BankManagerRules.data[ruleName] = {
+  ruleName                                               = "writsQuestsPots"
+  BankManagerRules.data[ruleName]                        = {
     params    = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_POTION } },
       { func = IsCraftedPotion, funcArgs = BMR_ITEMLINK, values = { true } },
@@ -989,8 +989,8 @@ function BankManagerRules.addFiltersTaggedAll()
   }
 
   -- Writ defaults
-  BankManagerRules.defaults[ruleName] = {}
-  BankManagerRules.defaults[ruleName].specialEnabled = false
+  BankManagerRules.defaults[ruleName]                    = {}
+  BankManagerRules.defaults[ruleName].specialEnabled     = false
 
   -- To help sorting array
   for ruleName, ruleData in pairs(BankManagerRules.data) do
@@ -1003,64 +1003,64 @@ end
 function BankManagerRules.addFilters()
 
   -- Special rule (currency)
-  ruleName = "currency" .. CURT_MONEY
-  BankManagerRules.data[ruleName] = {
+  ruleName                                        = "currency" .. CURT_MONEY
+  BankManagerRules.data[ruleName]                 = {
     currencyType = CURT_MONEY, -- Currency to move
     min          = 0, -- Used by LAM
     max          = 200000,
     step         = 250,
   }
 
-  BankManagerRules.defaults[ruleName] = {}
-  BankManagerRules.defaults[ruleName].qtyToPull = 0
-  BankManagerRules.defaults[ruleName].qtyToPush = 0
+  BankManagerRules.defaults[ruleName]             = {}
+  BankManagerRules.defaults[ruleName].qtyToPull   = 0
+  BankManagerRules.defaults[ruleName].qtyToPush   = 0
   BankManagerRules.defaults[ruleName].keepNothing = false -- If slider is 0, is action to pull all at bank or it's just unset ?
-  BankManagerRules.defaults[ruleName].keepInBank = false -- If user prefer to Keep the desired amount in bank
+  BankManagerRules.defaults[ruleName].keepInBank  = false -- If user prefer to Keep the desired amount in bank
 
   -- Special rule (currency)
-  ruleName = "currency" .. CURT_TELVAR_STONES
-  BankManagerRules.data[ruleName] = {
+  ruleName                                        = "currency" .. CURT_TELVAR_STONES
+  BankManagerRules.data[ruleName]                 = {
     currencyType = CURT_TELVAR_STONES,
     min          = 0,
     max          = 10000,
     step         = 100,
   }
 
-  BankManagerRules.defaults[ruleName] = {}
-  BankManagerRules.defaults[ruleName].qtyToPull = 0
-  BankManagerRules.defaults[ruleName].qtyToPush = 0
+  BankManagerRules.defaults[ruleName]             = {}
+  BankManagerRules.defaults[ruleName].qtyToPull   = 0
+  BankManagerRules.defaults[ruleName].qtyToPush   = 0
   BankManagerRules.defaults[ruleName].keepNothing = false
-  BankManagerRules.defaults[ruleName].keepInBank = false
+  BankManagerRules.defaults[ruleName].keepInBank  = false
 
   -- Special rule (currency)
-  ruleName = "currency" .. CURT_ALLIANCE_POINTS
-  BankManagerRules.data[ruleName] = {
+  ruleName                                        = "currency" .. CURT_ALLIANCE_POINTS
+  BankManagerRules.data[ruleName]                 = {
     currencyType = CURT_ALLIANCE_POINTS, -- Currency to move
     min          = 0, -- Used by LAM
     max          = 200000,
     step         = 250,
   }
 
-  BankManagerRules.defaults[ruleName] = {}
-  BankManagerRules.defaults[ruleName].qtyToPull = 0
-  BankManagerRules.defaults[ruleName].qtyToPush = 0
+  BankManagerRules.defaults[ruleName]             = {}
+  BankManagerRules.defaults[ruleName].qtyToPull   = 0
+  BankManagerRules.defaults[ruleName].qtyToPush   = 0
   BankManagerRules.defaults[ruleName].keepNothing = false -- If slider is 0, is action to pull all at bank or it's just unset ?
-  BankManagerRules.defaults[ruleName].keepInBank = false -- If user prefer to Keep the desired amount in bank
+  BankManagerRules.defaults[ruleName].keepInBank  = false -- If user prefer to Keep the desired amount in bank
 
   -- Special rule (currency)
-  ruleName = "currency" .. CURT_WRIT_VOUCHERS
-  BankManagerRules.data[ruleName] = {
+  ruleName                                        = "currency" .. CURT_WRIT_VOUCHERS
+  BankManagerRules.data[ruleName]                 = {
     currencyType = CURT_WRIT_VOUCHERS, -- Currency to move
     min          = 0, -- Used by LAM
     max          = 5000,
     step         = 25,
   }
 
-  BankManagerRules.defaults[ruleName] = {}
-  BankManagerRules.defaults[ruleName].qtyToPull = 0
-  BankManagerRules.defaults[ruleName].qtyToPush = 0
+  BankManagerRules.defaults[ruleName]             = {}
+  BankManagerRules.defaults[ruleName].qtyToPull   = 0
+  BankManagerRules.defaults[ruleName].qtyToPush   = 0
   BankManagerRules.defaults[ruleName].keepNothing = false -- If slider is 0, is action to pull all at bank or it's just unset ?
-  BankManagerRules.defaults[ruleName].keepInBank = false -- If user prefer to Keep the desired amount in bank
+  BankManagerRules.defaults[ruleName].keepInBank  = false -- If user prefer to Keep the desired amount in bank
 
   -- To get an exemple of correct definition, please look at addFiltersTaggedAll()
 
@@ -1068,12 +1068,12 @@ function BankManagerRules.addFilters()
   for traitItemIndex = 1, GetNumSmithingTraitItems() do
 
     local traitType, itemName = GetSmithingTraitItemInfo(traitItemIndex)
-    local itemLink = GetSmithingTraitItemLink(traitItemIndex, LINK_STYLE_DEFAULT)
-    local itemType = GetItemLinkItemType(itemLink)
+    local itemLink            = GetSmithingTraitItemLink(traitItemIndex, LINK_STYLE_DEFAULT)
+    local itemType            = GetItemLinkItemType(itemLink)
 
     if itemType ~= ITEMTYPE_NONE and traitType ~= ITEM_TRAIT_TYPE_NONE then
 
-      ruleName = "trait" .. traitType
+      ruleName                        = "trait" .. traitType
       BankManagerRules.data[ruleName] = {
         params  = {
           { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_ARMOR_TRAIT, ITEMTYPE_WEAPON_TRAIT, ITEMTYPE_JEWELRY_TRAIT } },
@@ -1093,7 +1093,7 @@ function BankManagerRules.addFilters()
 
   for styleItemIndex, data in pairs(BankManagerRules.static.rawStyles) do
 
-    ruleName = "styleRaw" .. styleItemIndex
+    ruleName                        = "styleRaw" .. styleItemIndex
     BankManagerRules.data[ruleName] = {
       params  = {
         { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_RAW_MATERIAL } },
@@ -1108,7 +1108,7 @@ function BankManagerRules.addFilters()
 
   for rawItemIndex, data in pairs(BankManagerRules.static.jewelrycraftingRawTraits) do
 
-    ruleName = "jewelTraitRaw" .. rawItemIndex
+    ruleName                        = "jewelTraitRaw" .. rawItemIndex
     BankManagerRules.data[ruleName] = {
       params  = {
         { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_JEWELRY_RAW_TRAIT } },
@@ -1123,13 +1123,13 @@ function BankManagerRules.addFilters()
   -- Refeined Styles
   for styleItemIndex = 1, GetHighestItemStyleId() do
 
-    local styleItemLink = GetItemStyleMaterialLink(styleItemIndex)
-    local itemName = GetItemLinkName(styleItemLink)
+    local styleItemLink               = GetItemStyleMaterialLink(styleItemIndex)
+    local itemName                    = GetItemLinkName(styleItemLink)
     local _, _, meetsUsageRequirement = GetItemLinkInfo(styleItemLink)
 
     if meetsUsageRequirement then
 
-      ruleName = "style" .. styleItemIndex
+      ruleName                        = "style" .. styleItemIndex
 
       BankManagerRules.data[ruleName] = {
         params  = {
@@ -1151,12 +1151,12 @@ function BankManagerRules.addFilters()
     for improvementItemIndex = 1, GetNumSmithingImprovementItems() do
 
       local itemName, _, _, _, _, _, _, quality = GetSmithingImprovementItemInfo(craftId, improvementItemIndex)
-      sub = sub or 1
-      prefix = prefix or ''
-      ruleName = "improvement" .. (craftId * sub) .. improvementItemIndex
-      local color = GetItemQualityColor(quality)
+      sub                                       = sub or 1
+      prefix                                    = prefix or ''
+      ruleName                                  = "improvement" .. (craftId * sub) .. improvementItemIndex
+      local color                               = GetItemQualityColor(quality)
 
-      BankManagerRules.data[ruleName] = {
+      BankManagerRules.data[ruleName]           = {
         params  = {
           { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { craftBooster } },
           { func = GetItemLinkFunctionalQuality, funcArgs = BMR_ITEMLINK, values = { quality } },
@@ -1183,7 +1183,7 @@ function BankManagerRules.addFilters()
 
       if refinedMaterialArray[materialIndex] ~= "" then
 
-        ruleName = "refinedMaterial" .. craftId .. materialIndex
+        ruleName                        = "refinedMaterial" .. craftId .. materialIndex
         BankManagerRules.data[ruleName] = {
           params  = {
             { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { refinedMaterialType } },
@@ -1199,7 +1199,7 @@ function BankManagerRules.addFilters()
 
       if rawMaterialArray[materialIndex] ~= "" then
 
-        ruleName = "rawMaterial" .. craftId .. materialIndex
+        ruleName                        = "rawMaterial" .. craftId .. materialIndex
         BankManagerRules.data[ruleName] = {
           params  = {
             { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { rawMaterialType } },
@@ -1233,7 +1233,7 @@ function BankManagerRules.addFilters()
     BankManagerRules.static.rawMaterial[CRAFTING_TYPE_JEWELRYCRAFTING])
 
   -- Heavy Armors
-  ruleName = "armorTypeWeight" .. ARMORTYPE_HEAVY
+  ruleName                        = "armorTypeWeight" .. ARMORTYPE_HEAVY
   BankManagerRules.data[ruleName] = {
     params  = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_ARMOR } },
@@ -1248,7 +1248,7 @@ function BankManagerRules.addFilters()
   }
 
   -- Medium Armors
-  ruleName = "armorTypeWeight" .. ARMORTYPE_MEDIUM
+  ruleName                        = "armorTypeWeight" .. ARMORTYPE_MEDIUM
   BankManagerRules.data[ruleName] = {
     params  = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_ARMOR } },
@@ -1263,7 +1263,7 @@ function BankManagerRules.addFilters()
   }
 
   -- Light Armors
-  ruleName = "armorTypeWeight" .. ARMORTYPE_LIGHT
+  ruleName                        = "armorTypeWeight" .. ARMORTYPE_LIGHT
   BankManagerRules.data[ruleName] = {
     params  = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_ARMOR } },
@@ -1280,7 +1280,7 @@ function BankManagerRules.addFilters()
   --[[TODO why does this rule type say Quality but ARMORTYPE_LIGHT
   ]]--
   -- Light Armors
-  ruleName = "armorQuality" .. ARMORTYPE_LIGHT
+  ruleName                        = "armorQuality" .. ARMORTYPE_LIGHT
   BankManagerRules.data[ruleName] = {
     params  = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_ARMOR } },
@@ -1295,7 +1295,7 @@ function BankManagerRules.addFilters()
   }
 
   -- Intricate Heavy Armors
-  ruleName = "armorTypeTrait" .. ITEM_TRAIT_TYPE_ARMOR_INTRICATE .. "Weight" .. ARMORTYPE_HEAVY
+  ruleName                        = "armorTypeTrait" .. ITEM_TRAIT_TYPE_ARMOR_INTRICATE .. "Weight" .. ARMORTYPE_HEAVY
   BankManagerRules.data[ruleName] = {
     params  = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_ARMOR } },
@@ -1311,7 +1311,7 @@ function BankManagerRules.addFilters()
   }
 
   -- Intricate Medium Armors
-  ruleName = "armorTypeTrait" .. ITEM_TRAIT_TYPE_ARMOR_INTRICATE .. "Weight" .. ARMORTYPE_MEDIUM
+  ruleName                        = "armorTypeTrait" .. ITEM_TRAIT_TYPE_ARMOR_INTRICATE .. "Weight" .. ARMORTYPE_MEDIUM
   BankManagerRules.data[ruleName] = {
     params  = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_ARMOR } },
@@ -1327,7 +1327,7 @@ function BankManagerRules.addFilters()
   }
 
   -- Intricate Light Armors
-  ruleName = "armorTypeTrait" .. ITEM_TRAIT_TYPE_ARMOR_INTRICATE .. "Weight" .. ARMORTYPE_LIGHT
+  ruleName                        = "armorTypeTrait" .. ITEM_TRAIT_TYPE_ARMOR_INTRICATE .. "Weight" .. ARMORTYPE_LIGHT
   BankManagerRules.data[ruleName] = {
     params  = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_ARMOR } },
@@ -1343,7 +1343,7 @@ function BankManagerRules.addFilters()
   }
 
   -- Weapons (smithing)
-  ruleName = "weaponType" .. CRAFTING_TYPE_BLACKSMITHING
+  ruleName                        = "weaponType" .. CRAFTING_TYPE_BLACKSMITHING
   BankManagerRules.data[ruleName] = {
     params  = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_WEAPON } },
@@ -1358,7 +1358,7 @@ function BankManagerRules.addFilters()
   }
 
   -- Weapons (Woodworking)
-  ruleName = "weaponType" .. CRAFTING_TYPE_WOODWORKING
+  ruleName                        = "weaponType" .. CRAFTING_TYPE_WOODWORKING
   BankManagerRules.data[ruleName] = {
     params  = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_WEAPON } },
@@ -1373,7 +1373,7 @@ function BankManagerRules.addFilters()
   }
 
   -- Intricate Weapons (smithing)
-  ruleName = "weaponType" .. CRAFTING_TYPE_BLACKSMITHING .. "Trait" .. ITEM_TRAIT_TYPE_WEAPON_INTRICATE
+  ruleName                        = "weaponType" .. CRAFTING_TYPE_BLACKSMITHING .. "Trait" .. ITEM_TRAIT_TYPE_WEAPON_INTRICATE
   BankManagerRules.data[ruleName] = {
     params  = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_WEAPON } },
@@ -1389,7 +1389,7 @@ function BankManagerRules.addFilters()
   }
 
   -- Intricate (Woodworking)
-  ruleName = "weaponType" .. CRAFTING_TYPE_WOODWORKING .. "Trait" .. ITEM_TRAIT_TYPE_ARMOR_INTRICATE
+  ruleName                        = "weaponType" .. CRAFTING_TYPE_WOODWORKING .. "Trait" .. ITEM_TRAIT_TYPE_ARMOR_INTRICATE
   BankManagerRules.data[ruleName] = {
     params  = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_WEAPON } },
@@ -1407,7 +1407,7 @@ function BankManagerRules.addFilters()
   }
 
   -- Researchable Armor (heavy)
-  ruleName = "armorTypeResearchableWeight" .. ARMORTYPE_HEAVY
+  ruleName                        = "armorTypeResearchableWeight" .. ARMORTYPE_HEAVY
   BankManagerRules.data[ruleName] = {
     params  = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_ARMOR } },
@@ -1423,7 +1423,7 @@ function BankManagerRules.addFilters()
   }
 
   -- Researchable Armor (medium)
-  ruleName = "armorTypeResearchableWeight" .. ARMORTYPE_MEDIUM
+  ruleName                        = "armorTypeResearchableWeight" .. ARMORTYPE_MEDIUM
   BankManagerRules.data[ruleName] = {
     params  = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_ARMOR } },
@@ -1439,7 +1439,7 @@ function BankManagerRules.addFilters()
   }
 
   -- Researchable Armor (light)
-  ruleName = "armorTypeResearchableWeight" .. ARMORTYPE_LIGHT
+  ruleName                        = "armorTypeResearchableWeight" .. ARMORTYPE_LIGHT
   BankManagerRules.data[ruleName] = {
     params  = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_ARMOR } },
@@ -1455,7 +1455,7 @@ function BankManagerRules.addFilters()
   }
 
   -- Researchable Weapons (smithing)
-  ruleName = "weaponTypeResearchable" .. CRAFTING_TYPE_BLACKSMITHING
+  ruleName                        = "weaponTypeResearchable" .. CRAFTING_TYPE_BLACKSMITHING
   BankManagerRules.data[ruleName] = {
     params  = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_WEAPON } },
@@ -1471,7 +1471,7 @@ function BankManagerRules.addFilters()
   }
 
   -- Researchable Weapons (Woodworking)
-  ruleName = "weaponTypeResearchable" .. CRAFTING_TYPE_WOODWORKING
+  ruleName                        = "weaponTypeResearchable" .. CRAFTING_TYPE_WOODWORKING
   BankManagerRules.data[ruleName] = {
     params  = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_WEAPON } },
@@ -1491,7 +1491,7 @@ function BankManagerRules.addFilters()
   -- Cooking
 
   -- Ingredients for food
-  ruleName = "cookingIngredientsFood"
+  ruleName                        = "cookingIngredientsFood"
   BankManagerRules.data[ruleName] = {
     params  = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_INGREDIENT } },
@@ -1504,7 +1504,7 @@ function BankManagerRules.addFilters()
   }
 
   -- Ingredients for drink
-  ruleName = "cookingIngredientsDrink"
+  ruleName                        = "cookingIngredientsDrink"
   BankManagerRules.data[ruleName] = {
     params  = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_INGREDIENT } },
@@ -1517,7 +1517,7 @@ function BankManagerRules.addFilters()
   }
 
   -- Ingredients rare
-  ruleName = "cookingIngredientsRare"
+  ruleName                        = "cookingIngredientsRare"
   BankManagerRules.data[ruleName] = {
     params  = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_INGREDIENT } },
@@ -1534,7 +1534,7 @@ function BankManagerRules.addFilters()
   }
 
   -- Ingredients rare
-  ruleName = "cookingAmbrosia"
+  ruleName                        = "cookingAmbrosia"
   BankManagerRules.data[ruleName] = {
     params  = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_DRINK } },
@@ -1545,7 +1545,7 @@ function BankManagerRules.addFilters()
   }
 
   -- Recipes known
-  ruleName = "cookingRecipeKnown"
+  ruleName                        = "cookingRecipeKnown"
   BankManagerRules.data[ruleName] = {
     params  = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_RECIPE } },
@@ -1557,7 +1557,7 @@ function BankManagerRules.addFilters()
   }
 
   -- Recipes Unknown
-  ruleName = "cookingRecipeUnknown"
+  ruleName                        = "cookingRecipeUnknown"
   BankManagerRules.data[ruleName] = {
     params  = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_RECIPE } },
@@ -1569,7 +1569,7 @@ function BankManagerRules.addFilters()
   }
 
   -- Enchanting
-  ruleName = "enchantingEssence"
+  ruleName                        = "enchantingEssence"
   BankManagerRules.data[ruleName] = {
     params  = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_ENCHANTING_RUNE_ESSENCE } },
@@ -1578,9 +1578,9 @@ function BankManagerRules.addFilters()
     tooltip = GetString("SI_ITEMTYPE", ITEMTYPE_ENCHANTING_RUNE_ESSENCE),
   }
 
-  local MAX_ENCHANTING_SKILL = 10 -- No UI function for that
+  local MAX_ENCHANTING_SKILL      = 10 -- No UI function for that
   for enchantingSkill = 1, MAX_ENCHANTING_SKILL do
-    ruleName = "enchantingPotency" .. enchantingSkill
+    ruleName                        = "enchantingPotency" .. enchantingSkill
     BankManagerRules.data[ruleName] = {
       params  = {
         { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_ENCHANTING_RUNE_POTENCY } },
@@ -1594,7 +1594,7 @@ function BankManagerRules.addFilters()
 
   end
 
-  ruleName = "enchantingTa"
+  ruleName                        = "enchantingTa"
   BankManagerRules.data[ruleName] = {
     params  = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_ENCHANTING_RUNE_ASPECT } },
@@ -1604,7 +1604,7 @@ function BankManagerRules.addFilters()
     tooltip = "|H0:item:45850:20:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h",
   }
 
-  ruleName = "enchantingAspect"
+  ruleName                        = "enchantingAspect"
   BankManagerRules.data[ruleName] = {
     params  = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_ENCHANTING_RUNE_ASPECT } },
@@ -1614,7 +1614,7 @@ function BankManagerRules.addFilters()
     tooltip = GetString("SI_ITEMTYPE", ITEMTYPE_ENCHANTING_RUNE_ASPECT),
   }
 
-  ruleName = "enchantingGlyphs"
+  ruleName                        = "enchantingGlyphs"
   BankManagerRules.data[ruleName] = {
     params  = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_GLYPH_ARMOR, ITEMTYPE_GLYPH_JEWELRY, ITEMTYPE_GLYPH_WEAPON } },
@@ -1623,7 +1623,7 @@ function BankManagerRules.addFilters()
     tooltip = GetString(SI_GAMEPADITEMCATEGORY13),
   }
 
-  ruleName = "alchemyReagent"
+  ruleName                        = "alchemyReagent"
   BankManagerRules.data[ruleName] = {
     params  = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_REAGENT } },
@@ -1632,37 +1632,41 @@ function BankManagerRules.addFilters()
     tooltip = GetString("SI_ITEMTYPE", ITEMTYPE_REAGENT),
   }
 
-	local MAX_ALCHEMY_SKILL = 9 -- No UI function for that
-	for alchemySkill=1, MAX_ALCHEMY_SKILL do
-		ruleName = "alchemyPotionSolvent" .. alchemySkill
-		BankManagerRules.data[ruleName] = {
-			params = {
-				{func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = {ITEMTYPE_POTION_BASE}},
-				{func = GetItemLinkRequiredCraftingSkillRank, funcArgs = BMR_ITEMLINK, values = {alchemySkill}},
-			},
-			name = GetString(SI_GROUP_LIST_PANEL_LEVEL_HEADER) .. alchemySkill .. " - " .. zo_strformat(SI_TOOLTIP_ITEM_NAME, GetItemLinkName(BankManagerRules.static.alchemyPotionSolventArray[alchemySkill])),
-			tooltip = GetString(SI_GROUP_LIST_PANEL_LEVEL_HEADER) .. alchemySkill .. " - " .. zo_strformat(SI_TOOLTIP_ITEM_NAME, GetItemLinkName(BankManagerRules.static.alchemyPotionSolventArray[alchemySkill])),
-		}
+  local MAX_ALCHEMY_SKILL         = 9 -- No UI function for that
+  for alchemySkill = 1, MAX_ALCHEMY_SKILL do
+    ruleName                        = "alchemyPotionSolvent" .. alchemySkill
+    BankManagerRules.data[ruleName] = {
+      params  = {
+        { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_POTION_BASE } },
+        { func = GetItemLinkRequiredCraftingSkillRank, funcArgs = BMR_ITEMLINK, values = { alchemySkill } },
+      },
+      name    = GetString(SI_GROUP_LIST_PANEL_LEVEL_HEADER) .. alchemySkill .. " - " .. zo_strformat(SI_TOOLTIP_ITEM_NAME,
+        GetItemLinkName(BankManagerRules.static.alchemyPotionSolventArray[alchemySkill])),
+      tooltip = GetString(SI_GROUP_LIST_PANEL_LEVEL_HEADER) .. alchemySkill .. " - " .. zo_strformat(SI_TOOLTIP_ITEM_NAME,
+        GetItemLinkName(BankManagerRules.static.alchemyPotionSolventArray[alchemySkill])),
+    }
 
-	end
+  end
 
-	for alchemySkill=1, MAX_ALCHEMY_SKILL do
-		ruleName = "alchemyPoisonSolvent" .. alchemySkill
-		BankManagerRules.data[ruleName] = {
-			params = {
-				{func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = {ITEMTYPE_POISON_BASE}},
-				{func = GetItemLinkRequiredCraftingSkillRank, funcArgs = BMR_ITEMLINK, values = {alchemySkill}},
-			},
-			name = GetString(SI_GROUP_LIST_PANEL_LEVEL_HEADER) .. alchemySkill .. " - " .. zo_strformat(SI_TOOLTIP_ITEM_NAME, GetItemLinkName(BankManagerRules.static.alchemyPoisonSolventArray[alchemySkill])),
-			tooltip = GetString(SI_GROUP_LIST_PANEL_LEVEL_HEADER) .. alchemySkill .. " - " .. zo_strformat(SI_TOOLTIP_ITEM_NAME, GetItemLinkName(BankManagerRules.static.alchemyPoisonSolventArray[alchemySkill])),
-		}
+  for alchemySkill = 1, MAX_ALCHEMY_SKILL do
+    ruleName                        = "alchemyPoisonSolvent" .. alchemySkill
+    BankManagerRules.data[ruleName] = {
+      params  = {
+        { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_POISON_BASE } },
+        { func = GetItemLinkRequiredCraftingSkillRank, funcArgs = BMR_ITEMLINK, values = { alchemySkill } },
+      },
+      name    = GetString(SI_GROUP_LIST_PANEL_LEVEL_HEADER) .. alchemySkill .. " - " .. zo_strformat(SI_TOOLTIP_ITEM_NAME,
+        GetItemLinkName(BankManagerRules.static.alchemyPoisonSolventArray[alchemySkill])),
+      tooltip = GetString(SI_GROUP_LIST_PANEL_LEVEL_HEADER) .. alchemySkill .. " - " .. zo_strformat(SI_TOOLTIP_ITEM_NAME,
+        GetItemLinkName(BankManagerRules.static.alchemyPoisonSolventArray[alchemySkill])),
+    }
 
-	end
+  end
 
   -- Misc
 
   --AvA Repair (Stone/Wood)
-  ruleName = "MiscAvaRepair"
+  ruleName                        = "MiscAvaRepair"
   BankManagerRules.data[ruleName] = {
     params  = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_AVA_REPAIR } },
@@ -1672,7 +1676,7 @@ function BankManagerRules.addFilters()
   }
 
   -- Disguises
-  ruleName = "MiscDisguises"
+  ruleName                        = "MiscDisguises"
   BankManagerRules.data[ruleName] = {
     params  = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_DISGUISE } },
@@ -1682,7 +1686,7 @@ function BankManagerRules.addFilters()
   }
 
   -- Lockpics
-  ruleName = "MiscLockpick"
+  ruleName                        = "MiscLockpick"
   BankManagerRules.data[ruleName] = {
     params  = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_TOOL } },
@@ -1693,7 +1697,7 @@ function BankManagerRules.addFilters()
   }
 
   -- Lures
-  ruleName = "MiscLure"
+  ruleName                        = "MiscLure"
   BankManagerRules.data[ruleName] = {
     params  = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_LURE } },
@@ -1703,7 +1707,7 @@ function BankManagerRules.addFilters()
   }
 
   -- Potions
-  ruleName = "MiscPotion"
+  ruleName                        = "MiscPotion"
   BankManagerRules.data[ruleName] = {
     params  = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_POTION } },
@@ -1713,7 +1717,7 @@ function BankManagerRules.addFilters()
   }
 
   -- Poisons
-  ruleName = "MiscPoison"
+  ruleName                        = "MiscPoison"
   BankManagerRules.data[ruleName] = {
     params  = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_POISON } },
@@ -1723,7 +1727,7 @@ function BankManagerRules.addFilters()
   }
 
   -- Racial books
-  ruleName = "MiscRacial"
+  ruleName                        = "MiscRacial"
   BankManagerRules.data[ruleName] = {
     params  = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_RACIAL_STYLE_MOTIF } },
@@ -1733,7 +1737,7 @@ function BankManagerRules.addFilters()
   }
 
   -- Containers
-  ruleName = "MiscContainer"
+  ruleName                        = "MiscContainer"
   BankManagerRules.data[ruleName] = {
     params  = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_CONTAINER } },
@@ -1743,7 +1747,7 @@ function BankManagerRules.addFilters()
   }
 
   -- Repair kits & Crown Repair kits
-  ruleName = "MiscRepair"
+  ruleName                        = "MiscRepair"
   BankManagerRules.data[ruleName] = {
     params  = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_TOOL, ITEMTYPE_CROWN_REPAIR } },
@@ -1756,7 +1760,7 @@ function BankManagerRules.addFilters()
   }
 
   -- Soul Gems Little restriction here GetSoulGemItemInfo returns tier as first result instead of soulGemType, so use quality instead
-  ruleName = "MiscSoulGemsEmpty"
+  ruleName                        = "MiscSoulGemsEmpty"
   BankManagerRules.data[ruleName] = {
     params  = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_SOUL_GEM } },
@@ -1769,7 +1773,7 @@ function BankManagerRules.addFilters()
   }
 
   -- Soul Gems Fulfilled
-  ruleName = "MiscSoulGemsFulfilled"
+  ruleName                        = "MiscSoulGemsFulfilled"
   BankManagerRules.data[ruleName] = {
     params  = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_SOUL_GEM } },
@@ -1782,7 +1786,7 @@ function BankManagerRules.addFilters()
   }
 
   -- Master Writs
-  ruleName = "MiscMasterWrit"
+  ruleName                        = "MiscMasterWrit"
   BankManagerRules.data[ruleName] = {
     params  = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_MASTER_WRIT } },
@@ -1792,7 +1796,7 @@ function BankManagerRules.addFilters()
   }
 
   -- Treasure Maps
-  ruleName = "trophyTreasureMaps"
+  ruleName                        = "trophyTreasureMaps"
   BankManagerRules.data[ruleName] = {
     params  = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_TROPHY } },
@@ -1805,7 +1809,7 @@ function BankManagerRules.addFilters()
   }
 
   -- Craft Surveys
-  ruleName = "trophySurveys"
+  ruleName                        = "trophySurveys"
   BankManagerRules.data[ruleName] = {
     params  = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_TROPHY } },
@@ -1816,7 +1820,7 @@ function BankManagerRules.addFilters()
   }
 
   -- Frag motifs
-  ruleName = "trophyFragMotifs"
+  ruleName                        = "trophyFragMotifs"
   BankManagerRules.data[ruleName] = {
     params  = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_RACIAL_STYLE_MOTIF } },
@@ -1827,7 +1831,7 @@ function BankManagerRules.addFilters()
   }
 
   -- Recipe Fragments -- share same rules as IC trophies (sewers & exterior)
-  ruleName = "trophyFragRecipe"
+  ruleName                        = "trophyFragRecipe"
   BankManagerRules.data[ruleName] = {
     params  = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_TROPHY } },
@@ -1838,7 +1842,7 @@ function BankManagerRules.addFilters()
   }
 
   -- IC Trophies (dungeons)
-  ruleName = "trophyICPVE"
+  ruleName                        = "trophyICPVE"
   BankManagerRules.data[ruleName] = {
     params  = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_TROPHY } },
@@ -1849,7 +1853,7 @@ function BankManagerRules.addFilters()
   }
 
   -- Recipes known
-  ruleName = "HousingRecipeKnown"
+  ruleName                        = "HousingRecipeKnown"
   BankManagerRules.data[ruleName] = {
     params  = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_RECIPE } },
@@ -1861,7 +1865,7 @@ function BankManagerRules.addFilters()
   }
 
   -- Recipes Unknown
-  ruleName = "HousingRecipeUnknown"
+  ruleName                        = "HousingRecipeUnknown"
   BankManagerRules.data[ruleName] = {
     params  = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_RECIPE } },
@@ -1873,7 +1877,7 @@ function BankManagerRules.addFilters()
   }
 
   -- Furnitures
-  ruleName = "HousingFurnitures"
+  ruleName                        = "HousingFurnitures"
   BankManagerRules.data[ruleName] = {
     params  = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_FURNISHING } },
@@ -1883,7 +1887,7 @@ function BankManagerRules.addFilters()
   }
 
   -- Housing Ingredients
-  ruleName = "HousingIngredients"
+  ruleName                        = "HousingIngredients"
   BankManagerRules.data[ruleName] = {
     params  = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_FURNISHING_MATERIAL } },
@@ -1898,11 +1902,11 @@ function BankManagerRules.addDefaultFilters(rulesArray, defaultsArray)
 
   for ruleName, data in pairs(rulesArray) do
     if data.params then
-      defaultsArray[ruleName] = {} -- To dynamically build the defaults array for the SV.
-      defaultsArray[ruleName].action = ACTION_NOTSET -- Action per default
+      defaultsArray[ruleName]                    = {} -- To dynamically build the defaults array for the SV.
+      defaultsArray[ruleName].action             = ACTION_NOTSET -- Action per default
       defaultsArray[ruleName].onlyIfNotFullStack = true -- Value per default, even if the value is not configurable, it is present and checked
-      defaultsArray[ruleName].onlyStacks = 1 -- Same as onlyIfNotFullStack, but checked only if onlyIfNotFullStack = false
-      defaultsArray[ruleName].associatedGuild = GetString(BMR_ACTION_NOTSET) -- Default value
+      defaultsArray[ruleName].onlyStacks         = 1 -- Same as onlyIfNotFullStack, but checked only if onlyIfNotFullStack = false
+      defaultsArray[ruleName].associatedGuild    = GetString(BMR_ACTION_NOTSET) -- Default value
     end
   end
 

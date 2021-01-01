@@ -2,7 +2,7 @@
   <Layer name="SI_KEYBINDINGS_LAYER_GENERAL">
     <Category name="|c3366FFBank|r Manager |c990000Revived|r">
       <Action name="BMR_PROFILE1">
-        <Down>BankManagerRevived_runProfile(1)</Down>
+        <Down>BankManagerRevived_runProfile(1)</Down> 
       </Action>
       <Action name="BMR_PROFILE2">
         <Down>BankManagerRevived_runProfile(2)</Down>

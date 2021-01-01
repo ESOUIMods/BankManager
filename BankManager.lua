@@ -25,17 +25,17 @@ http://creativecommons.org/licenses/by-nc-sa/4.0/legalcode
 ]]
 
 -- Global Vars
-local LAM2 = LibAddonMenu2
+local LAM2                                  = LibAddonMenu2
 
-local db = { }
-local ADDON_NAME = "BankManagerRevived"
-local displayName = "|c3366FFBank|r Manager |c990000Revived|r |cF4EE42(Jewelry Crafting fix)|r"
-local ADDON_AUTHOR = "Sharlikran, Lexynide, SnowmanDK, Ayantir, Eldrni, Todo"
-local ADDON_VERSION = "1.6.00"
-local ADDON_WEBSITE = "https://www.esoui.com/downloads/info2249-BankManagerRevivedJewelryCraftingfix.html"
-local isBanking = false
-local actualProfile = 1
-local inProgress = false
+local db                                    = { }
+local ADDON_NAME                            = "BankManagerRevived"
+local displayName                           = "|c3366FFBank|r Manager |c990000Revived|r |cF4EE42(Jewelry Crafting fix)|r"
+local ADDON_AUTHOR                          = "Sharlikran, Lexynide, SnowmanDK, Ayantir, Eldrni, Todo"
+local ADDON_VERSION                         = "1.6.00"
+local ADDON_WEBSITE                         = "https://www.esoui.com/downloads/info2249-BankManagerRevivedJewelryCraftingfix.html"
+local isBanking                             = false
+local actualProfile                         = 1
+local inProgress                            = false
 local panel
 local guildList
 local checkingGBank
@@ -43,23 +43,23 @@ local currentGBank
 local restartFromAtGBank
 local hasAnyPullToDo
 local hasAnySpecialPullToDo
-local qtyMovedToGBank = 0
-local countMovedToGBank = 0
+local qtyMovedToGBank                       = 0
+local countMovedToGBank                     = 0
 local dataSorted
 local isESOPlusSubscriber
 
-local ACTION_NOTSET = 1
-local ACTION_PUSH = 2
-local ACTION_PULL = 3
-local ACTION_PUSH_GBANK = 4
-local ACTION_PUSH_BOTH = 5
+local ACTION_NOTSET                         = 1
+local ACTION_PUSH                           = 2
+local ACTION_PULL                           = 3
+local ACTION_PUSH_GBANK                     = 4
+local ACTION_PUSH_BOTH                      = 5
 
 local BMR_RULEWRITER_VALUE_OPTIONAL_KEYWORD = 1
-local BMR_RULEWRITER_VALUE_WITH_OPERATOR = 2
+local BMR_RULEWRITER_VALUE_WITH_OPERATOR    = 2
 local BMR_RULEWRITER_VALUE_WITHOUT_OPERATOR = 3
 
-local BMR_ITEMLINK = 1
-local BMR_BAG_AND_SLOT = 2
+local BMR_ITEMLINK                          = 1
+local BMR_BAG_AND_SLOT                      = 2
 --local startTimeInMs			= 0
 
 --[[
@@ -88,9 +88,9 @@ BAG_HOUSE_BANK_TEN 	16
 ** _Returns:_ *bool* _isGuildBankOpen_
 ]]--
 -- Array of queues for moving items to handle bag/bank capacity limits
-local pushQueue = {}
-local pullQueue = {}
-local movedItems = {
+local pushQueue                             = {}
+local pullQueue                             = {}
+local movedItems                            = {
   [BAG_BACKPACK]         = {},
   [BAG_BANK]             = {},
   [BAG_GUILDBANK]        = {},
@@ -109,7 +109,7 @@ local movedItems = {
 
 -- Defaults structure for SV
 -- memory is a bit wasted here, still need to try to find how to dynamically build defaults after the SV pull from file
-local defaults = {
+local defaults                              = {
   worldname     = GetWorldName(),
   actualProfile = 1,
   gui_x         = -600,
@@ -294,9 +294,9 @@ local function BuildWritsItems()
 
   local shouldBeWatched
 
-  BankManagerRules.static.special.writsQuests = {}
+  BankManagerRules.static.special.writsQuests       = {}
   BankManagerRules.static.special.writsQuestsGlyphs = {}  -- Bit dirty, see how to improve - BankManagerRules.lua#271
-  BankManagerRules.static.special.writsQuestsPots = {}
+  BankManagerRules.static.special.writsQuestsPots   = {}
 
   for journalQuestIndex = 1, GetNumJournalQuests() do
     if GetJournalQuestType(journalQuestIndex) == QUEST_TYPE_CRAFTING then
@@ -327,10 +327,10 @@ end
 local function OnCloseProcessAtGBank()
 
   restartFromAtGBank = nil
-  qtyMovedToGBank = 0
-  countMovedToGBank = 0
-  inProgress = false
-  pushQueue = {}
+  qtyMovedToGBank    = 0
+  countMovedToGBank  = 0
+  inProgress         = false
+  pushQueue          = {}
 
   EVENT_MANAGER:UnregisterForEvent(ADDON_NAME, EVENT_GUILD_BANK_TRANSFER_ERROR)
   EVENT_MANAGER:UnregisterForEvent(ADDON_NAME, EVENT_GUILD_BANK_ITEM_ADDED)
@@ -368,11 +368,11 @@ local function IsItemProtected(bagId, slotId)
     return true
   end
 
-	--FCO ItemSaver support
-	if FCOIS and FCOIS.IsItemLocked then
-		--return FCOIS.IsMarked(bagId, slotId, -1)
-		return FCOIS.IsItemLocked(bagId, slotId)
-	end
+  --FCO ItemSaver support
+  if FCOIS and FCOIS.IsItemLocked then
+    --return FCOIS.IsMarked(bagId, slotId, -1)
+    return FCOIS.IsItemLocked(bagId, slotId)
+  end
 
   --FilterIt support
   if FilterIt and FilterIt.AccountSavedVariables and FilterIt.AccountSavedVariables.FilteredItems then
@@ -410,7 +410,7 @@ end
 
 local function pairsByKeysAndPosition(array)
 
-  local i = 0
+  local i    = 0
   local iter = function()
     i = i + 1
     if array and array[i] then
@@ -439,14 +439,14 @@ local function prepareItem(bagId, slotId, checkingGBank)
   -- Cannot be moved to GBank
   if checkingGBank and GetItemLinkBindType(itemLink) == BIND_TYPE_ON_PICKUP then return end
 
-  local itemMatch = false
+  local itemMatch   = false
   local ruleMatch
   local forBankOnly = not checkingGBank
 
   -- For each item in bag, look all rules
   for ruleName, ruleData in pairsByKeysAndPosition(dataSorted) do
 
-    local action = db.profiles[actualProfile].rules[ruleName].action
+    local action          = db.profiles[actualProfile].rules[ruleName].action
     local associatedGuild = db.profiles[actualProfile].rules[ruleName].associatedGuild
 
     -- Check first if item didn't matched a previous rule
@@ -542,7 +542,7 @@ end
 local function moveItems(atGBank, errorReasonAtGBank)
 
   -- Our bagcache, because game don't have it in realtime
-  local tinyBagCache = {
+  local tinyBagCache          = {
     [BAG_BACKPACK]         = {},
     [BAG_BANK]             = {},
     [BAG_GUILDBANK]        = {},
@@ -560,7 +560,7 @@ local function moveItems(atGBank, errorReasonAtGBank)
   }
 
   -- Our bagcache for qty, because game don't have it in realtime
-  local qtyBagCache = {}
+  local qtyBagCache           = {}
 
   -- Avoid checking first 230 slots if we already did it.
   local tinyBagCacheFirstSlot = {
@@ -580,7 +580,7 @@ local function moveItems(atGBank, errorReasonAtGBank)
     [BAG_HOUSE_BANK_TEN]   = 0,
   }
 
-  local freeSlots = {
+  local freeSlots             = {
     [BAG_BACKPACK]         = 0,
     [BAG_BANK]             = 0,
     [BAG_GUILDBANK]        = 0,
@@ -598,10 +598,10 @@ local function moveItems(atGBank, errorReasonAtGBank)
   }
 
   -- Items moved in psuh + pull actions
-  local itemsMoved = 0
-  local qtyMoved = 0
-  local countMoved = 0
-  local pushInProgress = true
+  local itemsMoved            = 0
+  local qtyMoved              = 0
+  local countMoved            = 0
+  local pushInProgress        = true
 
   -- Thanks Merlight & circonian, FindFirstEmptySlotInBag don't refresh in realtime.
   local function FindEmptySlotInBag(bagId)
@@ -616,8 +616,8 @@ local function moveItems(atGBank, errorReasonAtGBank)
         if not SHARED_INVENTORY.bagCache[bagId][slotIndex] and not tinyBagCache[bagId][slotIndex] then
           --d("tinyBagCache -> " .. bagId .. " " .. slotIndex)
           tinyBagCache[bagId][slotIndex] = true
-          tinyBagCacheFirstSlot[bagId] = slotIndex + 1
-          freeSlots[bagId] = freeSlots[bagId] - 1
+          tinyBagCacheFirstSlot[bagId]   = slotIndex + 1
+          freeSlots[bagId]               = freeSlots[bagId] - 1
           return bagId, slotIndex
         end
       end
@@ -666,7 +666,7 @@ local function moveItems(atGBank, errorReasonAtGBank)
     end
 
     -- qtyBagCache[itemLink] is always set, because set just before.
-    qtyBagCache[itemLink][bagIdTo] = qtyBagCache[itemLink][bagIdTo] + qtyToMove
+    qtyBagCache[itemLink][bagIdTo]   = qtyBagCache[itemLink][bagIdTo] + qtyToMove
     qtyBagCache[itemLink][bagIdFrom] = qtyBagCache[itemLink][bagIdFrom] - qtyToMove
 
     -- to check
@@ -700,14 +700,14 @@ local function moveItems(atGBank, errorReasonAtGBank)
     local stackCountBackpack, stackCountBank
 
     if not qtyBagCache[itemLink] then
-      stackCountBackpack, stackCountBank = GetItemLinkStacks(itemLink) -- Not updated in realtime
-      qtyBagCache[itemLink] = {}
-      qtyBagCache[itemLink][BAG_BACKPACK] = stackCountBackpack
-      qtyBagCache[itemLink][BAG_BANK] = stackCountBank
+      stackCountBackpack, stackCountBank         = GetItemLinkStacks(itemLink) -- Not updated in realtime
+      qtyBagCache[itemLink]                      = {}
+      qtyBagCache[itemLink][BAG_BACKPACK]        = stackCountBackpack
+      qtyBagCache[itemLink][BAG_BANK]            = stackCountBank
       qtyBagCache[itemLink][BAG_SUBSCRIBER_BANK] = stackCountBank
     else
       stackCountBackpack = qtyBagCache[itemLink][BAG_BACKPACK]
-      stackCountBank = qtyBagCache[itemLink][BAG_BANK] + qtyBagCache[itemLink][BAG_SUBSCRIBER_BANK]
+      stackCountBank     = qtyBagCache[itemLink][BAG_BANK] + qtyBagCache[itemLink][BAG_SUBSCRIBER_BANK]
     end
 
     local stackSize, maxStack = GetSlotStackSize(bagIdFrom, slotIdFrom)
@@ -728,9 +728,9 @@ local function moveItems(atGBank, errorReasonAtGBank)
   local function FinishBankMoves()
 
     hasAnyPullToDo = nil
-    pushQueue = {}
-    pullQueue = {}
-    movedItems = {
+    pushQueue      = {}
+    pullQueue      = {}
+    movedItems     = {
       [BAG_BACKPACK]         = {},
       [BAG_BANK]             = {},
       [BAG_GUILDBANK]        = {},
@@ -747,7 +747,7 @@ local function moveItems(atGBank, errorReasonAtGBank)
       [BAG_HOUSE_BANK_TEN]   = {},
     }
 
-    inProgress = false
+    inProgress     = false
 
   end
 
@@ -766,13 +766,13 @@ local function moveItems(atGBank, errorReasonAtGBank)
         -- Is slot at max size in bank ?
         local isFullStack, stackSize, maxStack, stackCountBackpack, stackCountBank = StackInfoInBag(bagIdTo,
           moveData.slotId, moveData.bagId, moveData.itemLink)
-        local itemMoved = false
+        local itemMoved                                                            = false
         local qtyToMove, destSlot
 
         if BankManagerRules.data[moveData.ruleName].isSpecial then
 
           if bagIdTo == BAG_BACKPACK then
-            qtyToMove = BankManagerRules.static.special[moveData.ruleName][moveData.itemLink]
+            qtyToMove         = BankManagerRules.static.special[moveData.ruleName][moveData.itemLink]
             bagIdTo, destSlot = FindDestSlotInBag(stackCountBackpack, bagIdTo, moveData.bagId, moveData.slotId,
               maxStack)
           end
@@ -788,11 +788,11 @@ local function moveItems(atGBank, errorReasonAtGBank)
         elseif not isFullStack and db.profiles[actualProfile].rules[moveData.ruleName].onlyIfNotFullStack then
 
           if bagIdTo == BAG_BACKPACK then
-            qtyToMove = math.min(stackSize, (maxStack - stackCountBackpack))
+            qtyToMove         = math.min(stackSize, (maxStack - stackCountBackpack))
             bagIdTo, destSlot = FindDestSlotInBag(stackCountBackpack, bagIdTo, moveData.bagId, moveData.slotId,
               maxStack)
           elseif bagIdTo == BAG_BANK or bagIdTo == BAG_SUBSCRIBER_BANK then
-            qtyToMove = math.min(stackSize, (maxStack - stackCountBank))
+            qtyToMove         = math.min(stackSize, (maxStack - stackCountBank))
             bagIdTo, destSlot = FindDestSlotInBag(stackCountBank, bagIdTo, moveData.bagId, moveData.slotId,
               maxStack) -- bagIdTo can change because of BAG_SUBSCRIBER_BANK
           end
@@ -821,7 +821,7 @@ local function moveItems(atGBank, errorReasonAtGBank)
           end
 
           local maxQtyAuthorized = db.profiles[actualProfile].rules[moveData.ruleName].onlyStacks * maxStack
-          qtyToMove = math.min(stackSize, maxStack - (stackCountInBag % maxStack))
+          qtyToMove              = math.min(stackSize, maxStack - (stackCountInBag % maxStack))
 
           if qtyToMove + stackCountInBag <= maxQtyAuthorized then
             bagIdTo, destSlot = FindDestSlotInBag(stackCountInBag, bagIdTo, moveData.bagId, moveData.slotId, maxStack)
@@ -875,7 +875,7 @@ local function moveItems(atGBank, errorReasonAtGBank)
         end
 
         if itemMoved then
-          qtyMoved = qtyMoved + qtyToMove
+          qtyMoved   = qtyMoved + qtyToMove
           countMoved = countMoved + 1
           itemsMoved = itemsMoved + 1
           if db.profiles[actualProfile].detailledDisplay then
@@ -913,8 +913,8 @@ local function moveItems(atGBank, errorReasonAtGBank)
         end
       end
 
-      qtyMoved = 0
-      countMoved = 0
+      qtyMoved                = 0
+      countMoved              = 0
 
       freeSlots[BAG_BACKPACK] = GetNumBagFreeSlots(BAG_BACKPACK)
       zo_callLater(function() tryMoveSlots(pullQueue, BAG_BACKPACK) end, db.profiles[actualProfile].pauseInMs)
@@ -944,7 +944,7 @@ local function moveItems(atGBank, errorReasonAtGBank)
       -- Is slot at max size in bank ?
       local isFullStack, stackSize, maxStack, stackCountBackpack, stackCountBank = StackInfoInBag(BAG_BANK,
         moveData.slotId, moveData.bagId, moveData.itemLink)
-      local itemMoved = false
+      local itemMoved                                                            = false
       local qtyToMove
 
       if db.profiles[actualProfile].rules[moveData.ruleName].onlyStacks == true
@@ -1032,13 +1032,13 @@ local function moveItems(atGBank, errorReasonAtGBank)
         local itemMoved, qtyMoved = doSingleMove(moveData)
 
         -- It will make the loop
-        restartFromAtGBank = moveIndex
+        restartFromAtGBank        = moveIndex
 
         -- If we didn't moved our item, EVENT_MANAGER won't send anything.
         if not itemMoved then
           tryMoveSlotsToGBank()
         else
-          qtyMovedToGBank = qtyMovedToGBank + qtyMoved
+          qtyMovedToGBank   = qtyMovedToGBank + qtyMoved
           countMovedToGBank = countMovedToGBank + 1
         end
 
@@ -1083,7 +1083,7 @@ local function moveItems(atGBank, errorReasonAtGBank)
 
   else
 
-    freeSlots[BAG_BANK] = GetNumBagFreeSlots(BAG_BANK)
+    freeSlots[BAG_BANK]            = GetNumBagFreeSlots(BAG_BANK)
     freeSlots[BAG_SUBSCRIBER_BANK] = GetNumBagFreeSlots(BAG_SUBSCRIBER_BANK)
     tryMoveSlots(pushQueue, BAG_BANK)
 
@@ -1096,9 +1096,9 @@ local function moveCurrency(ruleName, currencyType)
 
   -- Our currencies
   local currentCurrencyInInventory = GetCarriedCurrencyAmount(currencyType)
-  local currentCurrencyInBank = GetBankedCurrencyAmount(currencyType)
+  local currentCurrencyInBank      = GetBankedCurrencyAmount(currencyType)
 
-  local inverted = db.profiles[actualProfile].rules[ruleName].keepInBank
+  local inverted                   = db.profiles[actualProfile].rules[ruleName].keepInBank
   local currencyActionDone
   local currencyAmountMoved
   local actionDone
@@ -1165,15 +1165,15 @@ end
 -- Move currencies
 local function moveCurrencies()
 
-  local moves = {}
-  local amounts = {}
+  local moves                                                = {}
+  local amounts                                              = {}
 
-  moves[CURT_MONEY], amounts[CURT_MONEY] = moveCurrency("currency" .. CURT_MONEY, CURT_MONEY)
-  moves[CURT_TELVAR_STONES], amounts[CURT_TELVAR_STONES] = moveCurrency("currency" .. CURT_TELVAR_STONES,
+  moves[CURT_MONEY], amounts[CURT_MONEY]                     = moveCurrency("currency" .. CURT_MONEY, CURT_MONEY)
+  moves[CURT_TELVAR_STONES], amounts[CURT_TELVAR_STONES]     = moveCurrency("currency" .. CURT_TELVAR_STONES,
     CURT_TELVAR_STONES)
   moves[CURT_ALLIANCE_POINTS], amounts[CURT_ALLIANCE_POINTS] = moveCurrency("currency" .. CURT_ALLIANCE_POINTS,
     CURT_ALLIANCE_POINTS)
-  moves[CURT_WRIT_VOUCHERS], amounts[CURT_WRIT_VOUCHERS] = moveCurrency("currency" .. CURT_WRIT_VOUCHERS,
+  moves[CURT_WRIT_VOUCHERS], amounts[CURT_WRIT_VOUCHERS]     = moveCurrency("currency" .. CURT_WRIT_VOUCHERS,
     CURT_WRIT_VOUCHERS)
 
   if db.profiles[actualProfile].summary and (NonContiguousCount(moves) > 1 or (not db.profiles[actualProfile].detailledDisplay and NonContiguousCount(moves) == 1)) then
@@ -1273,7 +1273,7 @@ local function nextRule(step)
   local changed
   for i = actualProfile + step, 9, step do
     if db.profiles[i].defined then
-      changed = true
+      changed       = true
       actualProfile = i
       break
     end
@@ -1355,11 +1355,11 @@ end
 -- onCloseBank, resets
 local function onCloseBank()
 
-  isBanking = false
+  isBanking      = false
   hasAnyPullToDo = nil
-  pushQueue = {}
-  pullQueue = {}
-  movedItems = {
+  pushQueue      = {}
+  pullQueue      = {}
+  movedItems     = {
     [BAG_BACKPACK]         = {},
     [BAG_BANK]             = {},
     [BAG_GUILDBANK]        = {},
@@ -1376,7 +1376,7 @@ local function onCloseBank()
     [BAG_HOUSE_BANK_TEN]   = {},
   }
 
-  inProgress = false
+  inProgress     = false
   BankManager:SetHidden(true)
 
 end
@@ -1462,8 +1462,8 @@ end
 local function onGuildBankSelected(_, guildId)
 
   BankManager:SetHidden(true)
-  checkingGBank = false
-  currentGBank = guildId
+  checkingGBank    = false
+  currentGBank     = guildId
   currentGBankName = GetGuildName(currentGBank)
 
   EVENT_MANAGER:UnregisterForEvent(ADDON_NAME, EVENT_GUILD_BANK_TRANSFER_ERROR)
@@ -1474,8 +1474,8 @@ end
 -- onCloseGuildBank
 local function onCloseGuildBank()
 
-  checkingGBank = false
-  currentGBank = nil
+  checkingGBank    = false
+  currentGBank     = nil
   currentGBankName = nil
   OnCloseProcessAtGBank()
   BankManager:SetHidden(true)
@@ -1564,21 +1564,21 @@ end
 local function panelRule(ruleName)
 
   if BankManagerRules.data[ruleName] then
-    local choices = {}
-    choices[ACTION_NOTSET] = GetString(BMR_ACTION_NOTSET)
-    choices[ACTION_PUSH] = GetString(BMR_ACTION_PUSH)
-    choices[ACTION_PULL] = GetString(BMR_ACTION_PULL)
-    choices[ACTION_PUSH_GBANK] = GetString(BMR_ACTION_PUSH_GBANK)
-    choices[ACTION_PUSH_BOTH] = GetString(BMR_ACTION_PUSH_BOTH)
+    local choices                                    = {}
+    choices[ACTION_NOTSET]                           = GetString(BMR_ACTION_NOTSET)
+    choices[ACTION_PUSH]                             = GetString(BMR_ACTION_PUSH)
+    choices[ACTION_PULL]                             = GetString(BMR_ACTION_PULL)
+    choices[ACTION_PUSH_GBANK]                       = GetString(BMR_ACTION_PUSH_GBANK)
+    choices[ACTION_PUSH_BOTH]                        = GetString(BMR_ACTION_PUSH_BOTH)
 
-    local reverseChoices = {}
-    reverseChoices[GetString(BMR_ACTION_NOTSET)] = ACTION_NOTSET
-    reverseChoices[GetString(BMR_ACTION_PUSH)] = ACTION_PUSH
-    reverseChoices[GetString(BMR_ACTION_PULL)] = ACTION_PULL
+    local reverseChoices                             = {}
+    reverseChoices[GetString(BMR_ACTION_NOTSET)]     = ACTION_NOTSET
+    reverseChoices[GetString(BMR_ACTION_PUSH)]       = ACTION_PUSH
+    reverseChoices[GetString(BMR_ACTION_PULL)]       = ACTION_PULL
     reverseChoices[GetString(BMR_ACTION_PUSH_GBANK)] = ACTION_PUSH_GBANK
-    reverseChoices[GetString(BMR_ACTION_PUSH_BOTH)] = ACTION_PUSH_BOTH
+    reverseChoices[GetString(BMR_ACTION_PUSH_BOTH)]  = ACTION_PUSH_BOTH
 
-    local optionPanel = {
+    local optionPanel                                = {
       type    = "dropdown",
       name    = BankManagerRules.data[ruleName].name,
       tooltip = BankManagerRules.data[ruleName].tooltip,
@@ -1666,7 +1666,7 @@ local function listOfActiveGuilds()
   guildList = { GetString(BMR_ACTION_NOTSET) }
   if GetNumGuilds() > 0 then
     for guild = 1, GetNumGuilds() do
-      local guildId = GetGuildId(guild)
+      local guildId   = GetGuildId(guild)
       local guildName = GetGuildName(guildId)
       if (not guildName or (guildName):len() < 1) then
         guildName = "Guild " .. guildId
@@ -1710,7 +1710,7 @@ local function panelSpecialFilter(ruleName)
     writsQuests = { writsQuests = true, writsQuestsGlyphs = true, writsQuestsPots = true }
   }
 
-  local optionPanel = {
+  local optionPanel    = {
     type    = "checkbox",
     name    = BankManagerRules.data[ruleName].name,
     tooltip = BankManagerRules.data[ruleName].tooltip,
@@ -1721,10 +1721,10 @@ local function panelSpecialFilter(ruleName)
         if type(rulesData) == "table" and ruleNameToFollow == ruleName then
           for realRule in pairs(rulesData) do
             if newValue then
-              db.profiles[actualProfile].rules[realRule].action = ACTION_PULL
+              db.profiles[actualProfile].rules[realRule].action         = ACTION_PULL
               db.profiles[actualProfile].rules[realRule].specialEnabled = newValue
             else
-              db.profiles[actualProfile].rules[realRule].action = ACTION_NOTSET
+              db.profiles[actualProfile].rules[realRule].action         = ACTION_NOTSET
               db.profiles[actualProfile].rules[realRule].specialEnabled = newValue
             end
           end
@@ -1751,7 +1751,7 @@ local function Explode(div, str)
 end
 
 local BMR_RULEWRITER_VALUE_SPECIAL_KEYWORD = "acceptOptionalParam"
-local BMR_RULEWRITER_VALUE_WITH_OPERATOR = "requireParamWithOperator"
+local BMR_RULEWRITER_VALUE_WITH_OPERATOR   = "requireParamWithOperator"
 
 local function GetValuesForCondition(keywordCondition, values, arg1, arg2)
 
@@ -1794,7 +1794,7 @@ end
 
 local function GetRuleWriterCondition(conditionTable)
 
-  local mainKeyword = string.lower(conditionTable[1])
+  local mainKeyword      = string.lower(conditionTable[1])
   local keywordCondition = BankManagerRules.keywordConditionTable[mainKeyword]
 
   local conditionData
@@ -1804,7 +1804,7 @@ local function GetRuleWriterCondition(conditionTable)
     if keywordCondition[BMR_RULEWRITER_VALUE_WITH_OPERATOR] then
 
       local rawOperator = conditionTable[2]
-      local rawValues = conditionTable[3]
+      local rawValues   = conditionTable[3]
 
       if IsValidRuleWriterOperator(rawOperator) and rawValues then
         local isValidValuesForCondition, builtValues = GetValuesForCondition(keywordCondition,
@@ -1830,8 +1830,8 @@ local function EvaluateRuleWriterParams(paramString)
     local validParams = {}
 
     for conditionIndex, conditionData in ipairs(conditions) do
-      local conditionText = string.gsub(conditionData, "^%s*(.-)%s*$", "%1")
-      local conditionKeywords = Explode(" ", conditionText)
+      local conditionText            = string.gsub(conditionData, "^%s*(.-)%s*$", "%1")
+      local conditionKeywords        = Explode(" ", conditionText)
       local isValidCondition, params = GetRuleWriterCondition(conditionKeywords)
       if isValidCondition then
         table.insert(validParams, params)
@@ -1853,7 +1853,7 @@ end
 
 local function AddRuleToUserList(params, action)
 
-  local ruleName = GenerateRuleShortNameFromParams(params)
+  local ruleName                  = GenerateRuleShortNameFromParams(params)
 
   BankManagerRules.data[ruleName] = {
     params = { params },
@@ -1865,15 +1865,15 @@ end
 
 local function CheckAndAddRule(ruleString, fromLAM)
 
-  local lines = Explode("\n", ruleString) -- Only line 1
+  local lines   = Explode("\n", ruleString) -- Only line 1
   local newRule = lines[1]
 
-  local line = Explode("=", newRule) -- Check presence of the result
+  local line    = Explode("=", newRule) -- Check presence of the result
 
   if line[1] and line[2] and not line[3] then
 
     local isParameterValid, params = EvaluateRuleWriterParams(line[1])
-    local isActionValid, action = EvaluateRuleWriterAction(line[2])
+    local isActionValid, action    = EvaluateRuleWriterAction(line[2])
 
     if isParameterValid and isActionValid then
       AddRuleToUserList(params, action)
@@ -1892,7 +1892,7 @@ end
 -- Build the Rule Writer engine. it permit to the user to write its own rules
 local function RuleWriterPanel()
 
-  local optionPanel = {
+  local optionPanel      = {
     {
       type  = "header",
       name  = GetString(BMR_RULE_WRITER),
@@ -2001,8 +2001,8 @@ local function LAMSubmenu(subMenu)
     -- Courtesy of Dustman (Garkin)
     for traitItemIndex = 1, GetNumSmithingTraitItems() do
       local traitType, itemName = GetSmithingTraitItemInfo(traitItemIndex)
-      local itemLink = GetSmithingTraitItemLink(traitItemIndex, LINK_STYLE_DEFAULT)
-      local itemType = GetItemLinkItemType(itemLink)
+      local itemLink            = GetSmithingTraitItemLink(traitItemIndex, LINK_STYLE_DEFAULT)
+      local itemType            = GetItemLinkItemType(itemLink)
       if itemType ~= ITEMTYPE_NONE and traitType ~= ITEM_TRAIT_TYPE_NONE then
         table.insert(submenuControls, panelRule("trait" .. traitType))
       end
@@ -2383,10 +2383,10 @@ local function NamesToIDSavedVars()
   if not db.namesToIDSavedVars then
 
     local displayName = GetDisplayName()
-    local name = GetUnitName("player")
+    local name        = GetUnitName("player")
 
     if BMVars.Default[displayName][name] then
-      db = BMVars.Default[displayName][name]
+      db                    = BMVars.Default[displayName][name]
       db.namesToIDSavedVars = true -- should not be necessary because data don't exist anymore in BMVars.Default[displayName][name]
     end
 
@@ -2400,7 +2400,7 @@ local function buildLAMPanel()
   local function GetIdFromName(choice)
 
     local charName, server = zo_strsplit("@", choice)
-    local data = BMVars.Default[GetDisplayName()]
+    local data             = BMVars.Default[GetDisplayName()]
     for entryIndex, entryData in pairs(data) do
       local name = entryData["$LastCharacterName"]
       if charName == name and server == entryData.worldname then
@@ -2423,34 +2423,34 @@ local function buildLAMPanel()
     slashCommand        = "/bmr",
   }
 
-  panel = LAM2:RegisterAddonPanel(ADDON_NAME .. "LAM2Options", panelData)
+  panel           = LAM2:RegisterAddonPanel(ADDON_NAME .. "LAM2Options", panelData)
 
   -- Get the SV data
-  db = ZO_SavedVars:NewCharacterIdSettings("BMVars", 4, nil, defaults, nil)
+  db              = ZO_SavedVars:NewCharacterIdSettings("BMVars", 4, nil, defaults, nil)
 
   NamesToIDSavedVars()
 
   -- Load profile
-  actualProfile = tonumber(db.actualProfile)
+  actualProfile                        = tonumber(db.actualProfile)
 
   -- Creating LAM optionPanel following the rules
-  local currenciesSubmenuControls = LAMSubmenu("currencies")
-  local traitSubmenuControls = LAMSubmenu("traits")
-  local styleSubmenuControls = LAMSubmenu("styles")
-  local blacksmithingSubmenuControls = LAMSubmenu("blacksmithing")
-  local clothierSubmenuControls = LAMSubmenu("clothier")
-  local woodworkingSubmenuControls = LAMSubmenu("woodworking")
+  local currenciesSubmenuControls      = LAMSubmenu("currencies")
+  local traitSubmenuControls           = LAMSubmenu("traits")
+  local styleSubmenuControls           = LAMSubmenu("styles")
+  local blacksmithingSubmenuControls   = LAMSubmenu("blacksmithing")
+  local clothierSubmenuControls        = LAMSubmenu("clothier")
+  local woodworkingSubmenuControls     = LAMSubmenu("woodworking")
   local jewelrycraftingSubmenuControls = LAMSubmenu("jewelrycrafting")
-  local cookingSubmenuControls = LAMSubmenu("cooking")
-  local enchantmentSubmenuControls = LAMSubmenu("enchanting")
-  local alchemySubmenuControls = LAMSubmenu("alchemy")
-  local trophiesSubmenuControls = LAMSubmenu("trophies")
-  local diverseSubmenuControls = LAMSubmenu("misc")
-  local housingSubmenuControls = LAMSubmenu("housing")
-  local specialFiltersControls = LAMSubmenu("special")
-  local ruleWriterControls = LAMSubmenu("ruleWriter")
+  local cookingSubmenuControls         = LAMSubmenu("cooking")
+  local enchantmentSubmenuControls     = LAMSubmenu("enchanting")
+  local alchemySubmenuControls         = LAMSubmenu("alchemy")
+  local trophiesSubmenuControls        = LAMSubmenu("trophies")
+  local diverseSubmenuControls         = LAMSubmenu("misc")
+  local housingSubmenuControls         = LAMSubmenu("housing")
+  local specialFiltersControls         = LAMSubmenu("special")
+  local ruleWriterControls             = LAMSubmenu("ruleWriter")
 
-  local charactersKnown = {}
+  local charactersKnown                = {}
   if BMVars and BMVars.Default and BMVars.Default[GetDisplayName()] then
     for id, data in pairs(BMVars.Default[GetDisplayName()]) do
       if data.worldname then
@@ -2480,8 +2480,8 @@ local function buildLAMPanel()
           width   = "full",
           getFunc = function() return db.actualProfile end,
           setFunc = function(choice)
-            actualProfile = tonumber(choice)
-            db.actualProfile = choice
+            actualProfile                      = tonumber(choice)
+            db.actualProfile                   = choice
             db.profiles[actualProfile].defined = true
           end,
         },
@@ -2499,9 +2499,9 @@ local function buildLAMPanel()
           tooltip = GetString(BMR_PROFILE_RESET_TOOLTIP),
           width   = "full",
           func    = function()
-            local profileToDelete = actualProfile
-            actualProfile = 1
-            db.actualProfile = "1"
+            local profileToDelete        = actualProfile
+            actualProfile                = 1
+            db.actualProfile             = "1"
             db.profiles[profileToDelete] = defaults.profiles[profileToDelete]
           end,
         },
@@ -2686,14 +2686,14 @@ local function buildLAMPanel()
       warning = "ReloadUI",
       setFunc = function(choice)
 
-        local playerId = GetCurrentCharacterId()
+        local playerId    = GetCurrentCharacterId()
         local referenceId = GetIdFromName(choice)
 
         if referenceId then
 
           for entryIndex, entryData in pairs(BMVars.Default[GetDisplayName()][referenceId]) do
             if entryIndex ~= "$LastCharacterName" then
-              db[entryIndex] = entryData
+              db[entryIndex]                                         = entryData
               BMVars.Default[GetDisplayName()][playerId][entryIndex] = entryData
             end
           end
@@ -2783,10 +2783,10 @@ end
 function BankManagerRevived_saveGuiPosition()
 
   local _, _, rightScreen, bottomScreen = GuiRoot:GetScreenRect()
-  local _, _, right, bottom = BankManager:GetScreenRect()
+  local _, _, right, bottom             = BankManager:GetScreenRect()
 
-  db.gui_x = math.floor(right - rightScreen)
-  db.gui_y = math.floor(bottom - bottomScreen)
+  db.gui_x                              = math.floor(right - rightScreen)
+  db.gui_y                              = math.floor(bottom - bottomScreen)
 
 end
 
@@ -2795,7 +2795,7 @@ function BankManagerRevived_runProfile(profile)
 
   if db.profiles[profile].defined then
 
-    actualProfile = profile
+    actualProfile    = profile
     db.actualProfile = profile
 
     -- Sync LAM
