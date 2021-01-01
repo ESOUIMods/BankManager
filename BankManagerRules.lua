@@ -1272,23 +1272,6 @@ function BankManagerRules.addFilters()
       GetString("SI_ARMORTYPE", ARMORTYPE_LIGHT)),
   }
 
-  --[[TODO why does this rule type say Quality but ARMORTYPE_LIGHT
-  ]]--
-  -- Light Armors
-  ruleName                        = "armorQuality" .. ARMORTYPE_LIGHT
-  BankManagerRules.data[ruleName] = {
-    params  = {
-      { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_ARMOR } },
-      { func = GetItemLinkArmorType, funcArgs = BMR_ITEMLINK, values = { ARMORTYPE_LIGHT } },
-      { func = GetItemLinkSetInfo, funcArgs = BMR_ITEMLINK, values = { false } },
-      { func = IsItemJunk, funcArgs = BMR_BAG_AND_SLOT, values = { false } },
-    },
-    name    = zo_strformat("<<1>> : <<2>>", GetString(SI_ITEM_FORMAT_STR_ARMOR),
-      GetString("SI_ARMORTYPE", ARMORTYPE_LIGHT)),
-    tooltip = zo_strformat("<<1>> : <<2>>", GetString(SI_ITEM_FORMAT_STR_ARMOR),
-      GetString("SI_ARMORTYPE", ARMORTYPE_LIGHT)),
-  }
-
   -- Intricate Heavy Armors
   ruleName                        = "armorTypeTrait" .. ITEM_TRAIT_TYPE_ARMOR_INTRICATE .. "Weight" .. ARMORTYPE_HEAVY
   BankManagerRules.data[ruleName] = {
