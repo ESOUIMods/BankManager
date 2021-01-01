@@ -1115,7 +1115,7 @@ function BankManagerRules.addFilters()
 
   end
 
-  -- Refeined Styles
+  -- Refined Styles
   for styleItemIndex = 1, GetHighestItemStyleId() do
 
     local styleItemLink               = GetItemStyleMaterialLink(styleItemIndex)
