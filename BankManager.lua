@@ -254,35 +254,97 @@ local defaults                              = {
   }
 }
 
+BankManagerRevived = { }
+if LibDebugLogger then
+  local logger          = LibDebugLogger.Create(ADDON_NAME)
+  BankManagerRevived.logger = logger
+end
+local SDLV = DebugLogViewer
+if SDLV then BankManagerRevived.viewer = true else BankManagerRevived.viewer = false end
+
+local function create_log(log_type, log_content)
+  if log_type == "Debug" then
+    BankManagerRevived.logger:Debug(log_content)
+  end
+  if log_type == "Info" then
+    BankManagerRevived.logger:Info(log_content)
+  end
+  if log_type == "Verbose" then
+    BankManagerRevived.logger:Verbose(log_content)
+  end
+  if log_type == "Warn" then
+    BankManagerRevived.logger:Warn(log_content)
+  end
+end
+
+local function emit_message(log_type, text)
+  if (text == "") then
+    text = "[Empty String]"
+  end
+  create_log(log_type, text)
+end
+
+local function emit_table(log_type, t, indent, table_history)
+  indent        = indent or "."
+  table_history = table_history or {}
+
+  for k, v in pairs(t) do
+    local vType = type(v)
+
+    emit_message(log_type, indent .. "(" .. vType .. "): " .. tostring(k) .. " = " .. tostring(v))
+
+    if (vType == "table") then
+      if (table_history[v]) then
+        emit_message(log_type, indent .. "Avoiding cycle on table...")
+      else
+        table_history[v] = true
+        emit_table(log_type, v, indent .. "  ", table_history)
+      end
+    end
+  end
+end
+
+function BankManagerRevived:dm(log_type, ...)
+  if not BankManagerRevived.logger then return end
+  for i = 1, select("#", ...) do
+    local value = select(i, ...)
+    if (type(value) == "table") then
+      emit_table(log_type, value)
+    else
+      emit_message(log_type, tostring(value))
+    end
+  end
+end
+
 -- BMR code
 
 -- Display a movement
 local function PrintItemsToBag(itemLink, itemIcon, bagIdTo, qty, currentGBankName)
-  CHAT_SYSTEM:AddMessage(zo_strformat(BMR_ACTION_ITEMS_MOVED, zo_strformat(SI_TOOLTIP_ITEM_NAME, itemLink), itemIcon,
+  CHAT_ROUTER:AddSystemMessage(zo_strformat(BMR_ACTION_ITEMS_MOVED, zo_strformat(SI_TOOLTIP_ITEM_NAME, itemLink), itemIcon,
     qty, GetString("BMR_ACTION_ITEMS_MOVED_TO", bagIdTo), currentGBankName))
 end
 
 local function PrintItemsNotMovedToBag(itemLink, itemIcon, bagIdTo, qty, currentGBankName)
-  CHAT_SYSTEM:AddMessage(zo_strformat(BMR_ACTION_ITEMS_NOT_MOVED, zo_strformat(SI_TOOLTIP_ITEM_NAME, itemLink),
+  CHAT_ROUTER:AddSystemMessage(zo_strformat(BMR_ACTION_ITEMS_NOT_MOVED, zo_strformat(SI_TOOLTIP_ITEM_NAME, itemLink),
     itemIcon, qty, GetString("BMR_ACTION_ITEMS_MOVED_TO", bagIdTo), currentGBankName))
 end
 
 -- Display movement summary
 local function PrintSummaryToBag(bagIdTo, countMoved, qtyMoved, currentGBankName)
-  CHAT_SYSTEM:AddMessage(zo_strformat(BMR_ACTION_ITEMS_SUMMARY, countMoved, qtyMoved,
+  CHAT_ROUTER:AddSystemMessage(zo_strformat(BMR_ACTION_ITEMS_SUMMARY, countMoved, qtyMoved,
     GetString("BMR_ACTION_ITEMS_MOVED_TO", bagIdTo), currentGBankName))
 end
 
 -- Display currency movement
 local function PrintCurrencyToBank(currencyType, qtyMoved)
-  CHAT_SYSTEM:AddMessage(zo_strformat(BMR_ACTION_CURRENCY_SUMMARY,
+  CHAT_ROUTER:AddSystemMessage(zo_strformat(BMR_ACTION_CURRENCY_SUMMARY,
     ZO_CurrencyControl_FormatCurrencyAndAppendIcon(qtyMoved, true, currencyType),
     GetString(BMR_ACTION_ITEMS_MOVED_TO2)))
 end
 
 -- Display currency movement
 local function PrintCurrencyToBag(currencyType, qtyMoved)
-  CHAT_SYSTEM:AddMessage(zo_strformat(BMR_ACTION_CURRENCY_SUMMARY,
+  CHAT_ROUTER:AddSystemMessage(zo_strformat(BMR_ACTION_CURRENCY_SUMMARY,
     ZO_CurrencyControl_FormatCurrencyAndAppendIcon(qtyMoved, true, currencyType),
     GetString(BMR_ACTION_ITEMS_MOVED_TO1)))
 end
@@ -344,11 +406,13 @@ local function queueAction(ruleName, bagId, slotId)
   local whichAction = db.profiles[actualProfile].rules[ruleName].action
   if (whichAction == ACTION_PUSH or whichAction == ACTION_PUSH_GBANK or whichAction == ACTION_PUSH_BOTH) and bagId == BAG_BACKPACK then
     -- Push item to bank
+    BankManagerRevived:dm("Debug", string.format("BY ACTION: whichAction : %s ; ruleName: %s ; bagId: %s ; slotId: %s ; activeBankBag: %s",  whichAction, ruleName, bagId, slotId, activeBankBag))
     --d("ACTION " .. whichAction .. " " .. ruleName .. " " .. bagId .. " " .. slotId)
     table.insert(pushQueue, { ruleName = ruleName, bagId = bagId, slotId = slotId, itemLink = GetItemLink(bagId,
       slotId), itemIcon                = GetItemLinkInfo(GetItemLink(bagId, slotId)) })
   elseif whichAction == ACTION_PULL and (bagId == BAG_BANK or bagId == BAG_SUBSCRIBER_BANK) then
     -- Pull item to bank
+    BankManagerRevived:dm("Debug", string.format("ACTION_PULL: whichAction : %s ; ruleName: %s ; bagId: %s ; slotId: %s ; activeBankBag: %s",  whichAction, ruleName, bagId, slotId, activeBankBag))
     --d("ACTION_PULL " .. ruleName .. " " .. bagId .. " " .. slotId)
     table.insert(pullQueue, { ruleName = ruleName, bagId = bagId, slotId = slotId, itemLink = GetItemLink(bagId,
       slotId), itemIcon                = GetItemLinkInfo(GetItemLink(bagId, slotId)) })
@@ -505,6 +569,7 @@ local function prepareItem(bagId, slotId, checkingGBank)
             -- The item match our filter .. for now
             itemMatch = true
             ruleMatch = ruleName
+            BankManagerRevived:dm("Debug", string.format("ITEM MATCH VALUE: itemLink : %s ; ( bagId: %s ; slotId: %s ) ; ruleMatch: %s ; ruleName / #: (%s , %s) activeBankBag: %s",  itemLink, bagId, slotId, ruleMatch, ruleName, ruleParamIndex, activeBankBag))
             --d(itemLink .. " (" .. bagId .. " " .. slotId.. ") ruleMatch:" .. ruleName .. " #" .. ruleParamIndex)
           end
 
@@ -514,6 +579,7 @@ local function prepareItem(bagId, slotId, checkingGBank)
         if itemMatch and checkingGBank and action == ACTION_PUSH then
           -- this item must not be queued, it has been flagged to go to bank only
           forBankOnly = true
+          BankManagerRevived:dm("Debug", string.format("ITEM MATCH GUILD BANK ONLY: itemLink : %s ; ( bagId: %s ; slotId: %s ) ; ruleMatch: %s ; activeBankBag: %s : set flag 'For Bank Only' ",  itemLink, bagId, slotId, ruleMatch, activeBankBag))
           --d(itemLink .. " (" .. bagId .. " " .. slotId.. ") ruleMatch:" .. ruleMatch .. " set flag 'For Bank Only' ")
         end
 
@@ -527,11 +593,14 @@ local function prepareItem(bagId, slotId, checkingGBank)
     if checkingGBank then
       if not forBankOnly then
         --d(itemLink .. " (" .. bagId .. " " .. slotId.. ") ruleMatch:" .. ruleMatch .. " is not flagged for Bank Only. Will move")
+        BankManagerRevived:dm("Debug", string.format("ITEM MATCH Guild Bank: itemLink : %s ; ( bagId: %s ; slotId: %s ) ; ruleMatch: %s ; activeBankBag: %s : is not flagged for Bank Only. Will move.",  itemLink, bagId, slotId, ruleMatch, activeBankBag))
         queueAction(ruleMatch, bagId, slotId)
       else
+        BankManagerRevived:dm("Debug", string.format("ITEM MATCH Guild Bank: itemLink : %s ; ( bagId: %s ; slotId: %s ) ; ruleMatch: %s ; activeBankBag: %s : is flagged for Bank Only. Don't move.",  itemLink, bagId, slotId, ruleMatch, activeBankBag))
         --d(itemLink .. " (" .. bagId .. " " .. slotId.. ") ruleMatch:" .. ruleMatch .. " is flagged for Bank Only. Don't move")
       end
     else
+      BankManagerRevived:dm("Debug", string.format("ITEM MATCH: itemLink : %s ; ( bagId: %s ; slotId: %s ) ; ruleMatch: %s ; activeBankBag: %s. Queueing for move.",  itemLink, bagId, slotId, ruleMatch, activeBankBag))
       queueAction(ruleMatch, bagId, slotId)
     end
   end
@@ -887,7 +956,7 @@ local function moveItems(atGBank, errorReasonAtGBank)
 
       else
 
-        CHAT_SYSTEM:AddMessage(GetString(BMR_ZOS_LIMITATIONS))
+        CHAT_ROUTER:AddSystemMessage(GetString(BMR_ZOS_LIMITATIONS))
         pushInProgress = false -- Don't do pull
 
         -- End of moves
@@ -1191,7 +1260,7 @@ local function moveCurrencies()
       end
     end
 
-    CHAT_SYSTEM:AddMessage(message)
+    CHAT_ROUTER:AddSystemMessage(message)
 
   end
 
@@ -2685,7 +2754,7 @@ local function buildLAMPanel()
           end
 
           SCENE_MANAGER:ShowBaseScene()
-          CHAT_SYSTEM:AddMessage(zo_strformat(BMR_IMPORTED, choice))
+          CHAT_ROUTER:AddSystemMessage(zo_strformat(BMR_IMPORTED, choice))
 
           zo_callLater(function() ReloadUI() end, 2000)
 

@@ -12,6 +12,7 @@
 ## AddOnVersion: 1600
 ## SavedVariables: BMVars
 ## DependsOn: LibResearch>=042 LibAddonMenu-2.0>=32
+## OptionalDependsOn: LibDebugLogger>=196 DebugLogViewer
 
 languages\en.lua
 languages\$(language).lua
