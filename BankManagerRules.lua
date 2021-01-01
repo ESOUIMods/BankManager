@@ -1575,6 +1575,60 @@ function BankManagerRules.addFilters()
     tooltip = GetString("SI_ITEMTYPE", ITEMTYPE_ENCHANTING_RUNE_ASPECT),
   }
 
+  --[[If you add all these seperatly then only enchantingTa will
+  pull the correct amount of stacks
+
+  ruleName                        = "enchantingTa"
+  BankManagerRules.data[ruleName] = {
+    params  = {
+      { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_ENCHANTING_RUNE_ASPECT } },
+      { func = GetItemLinkFunctionalQuality, funcArgs = BMR_ITEMLINK, values = { ITEM_FUNCTIONAL_QUALITY_NORMAL } },
+    },
+    name    = "|H0:item:45850:20:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h", -- "Ta" item
+    tooltip = "|H0:item:45850:20:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h",
+  }
+
+  ruleName                        = "enchantingJejota"
+  BankManagerRules.data[ruleName] = {
+    params  = {
+      { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_ENCHANTING_RUNE_ASPECT } },
+      { func = GetItemLinkFunctionalQuality, funcArgs = BMR_ITEMLINK, values = { ITEM_FUNCTIONAL_QUALITY_MAGIC } },
+    },
+    name    = "|H0:item:45851:21:6:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h", -- "Jejota" item
+    tooltip = "|H0:item:45851:21:6:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h",
+  }
+
+  ruleName                        = "enchantingDenata"
+  BankManagerRules.data[ruleName] = {
+    params  = {
+      { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_ENCHANTING_RUNE_ASPECT } },
+      { func = GetItemLinkFunctionalQuality, funcArgs = BMR_ITEMLINK, values = { ITEM_FUNCTIONAL_QUALITY_ARCANE } },
+    },
+    name    = "|H0:item:45852:22:11:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h", -- "Denata" item
+    tooltip = "|H0:item:45852:22:11:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h",
+  }
+
+  ruleName                        = "enchantingRekuta"
+  BankManagerRules.data[ruleName] = {
+    params  = {
+      { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_ENCHANTING_RUNE_ASPECT } },
+      { func = GetItemLinkFunctionalQuality, funcArgs = BMR_ITEMLINK, values = { ITEM_FUNCTIONAL_QUALITY_ARTIFACT } },
+    },
+    name    = "|H0:item:45853:23:16:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h", -- "Rekuta" item
+    tooltip = "|H0:item:45853:23:16:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h",
+  }
+
+  ruleName                        = "enchantingKuta"
+  BankManagerRules.data[ruleName] = {
+    params  = {
+      { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_ENCHANTING_RUNE_ASPECT } },
+      { func = GetItemLinkFunctionalQuality, funcArgs = BMR_ITEMLINK, values = { ITEM_FUNCTIONAL_QUALITY_LEGENDARY } },
+    },
+    name    = "|H0:item:45854:24:21:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h", -- "Kuta" item
+    tooltip = "|H0:item:45854:24:21:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h",
+  }
+  ]]--
+
   ruleName                        = "enchantingGlyphs"
   BankManagerRules.data[ruleName] = {
     params  = {

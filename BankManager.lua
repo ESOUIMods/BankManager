@@ -2360,6 +2360,16 @@ local function LAMSubmenu(subMenu)
 
     table.insert(submenuControls, panelRule("enchantingAll"))
 
+    --[[If you add all these seperatly then only enchantingTa will
+    pull the correct amount of stacks
+
+    table.insert(submenuControls, panelRule("enchantingTa"))
+    table.insert(submenuControls, panelRule("enchantingJejota"))
+    table.insert(submenuControls, panelRule("enchantingDenata"))
+    table.insert(submenuControls, panelRule("enchantingRekuta"))
+    table.insert(submenuControls, panelRule("enchantingKuta"))
+    ]]--
+
     table.insert(submenuControls,
       { type = "texture", image = "EsoUI/Art/Miscellaneous/horizontalDivider.dds", imageWidth = 510, imageHeight = 4 })
 
