@@ -2474,7 +2474,9 @@ local function buildLAMPanel()
     version             = ADDON_VERSION,
     website             = ADDON_WEBSITE,
     registerForRefresh  = true,
-    registerForDefaults = true,
+    --[[TODO Figure out a way to make this work
+    ]]--
+    registerForDefaults = false,
     slashCommand        = "/bmr",
   }
 
