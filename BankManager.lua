@@ -33,6 +33,7 @@ local displayName                           = "|c3366FFBank|r Manager |c990000Re
 local ADDON_AUTHOR                          = "Sharlikran, Lexynide, SnowmanDK, Ayantir, Eldrni, Todo"
 local ADDON_VERSION                         = "1.6.00"
 local ADDON_WEBSITE                         = "https://www.esoui.com/downloads/info2249-BankManagerRevivedJewelryCraftingfix.html"
+local activeBankBag                         = 0
 local isBanking                             = false
 local actualProfile                         = 1
 local inProgress                            = false
@@ -339,7 +340,7 @@ end
 
 -- Build the push/pull array
 local function queueAction(ruleName, bagId, slotId)
-
+  -- if activeBankBag ~= BAG_BACKPACK or activeBankBag ~= BAG_BANK or activeBankBag ~= BAG_GUILDBANK or activeBankBag ~= BAG_SUBSCRIBER_BANK then return end
   local whichAction = db.profiles[actualProfile].rules[ruleName].action
   if (whichAction == ACTION_PUSH or whichAction == ACTION_PUSH_GBANK or whichAction == ACTION_PUSH_BOTH) and bagId == BAG_BACKPACK then
     -- Push item to bank
@@ -426,7 +427,6 @@ end
 
 -- Check if slotId match a rule
 local function prepareItem(bagId, slotId, checkingGBank)
-
   -- Inits
   if IsItemStolen(bagId, slotId) then return end
   if db.profiles[actualProfile].protected and IsItemProtected(bagId, slotId) then return end
@@ -1299,7 +1299,7 @@ local function nextRule(step)
 end
 
 -- onSingleSlotUpdate (only between onOpenBank and onOpenBank+2s)
-local function onSingleSlotUpdate(_, bagId, slotId)
+local function onSingleSlotUpdate(eventCode, bagId, slotId)
 
   -- if not, item has been moved elsewhere? We can't use SHARED_INVENTORY, it's still not updated.
   if GetItemType(bagId, slotId) ~= ITEMTYPE_NONE then
@@ -1310,8 +1310,8 @@ local function onSingleSlotUpdate(_, bagId, slotId)
 end
 
 -- onOpenBank
-local function onOpenBank()
-
+local function onOpenBank(eventCode, bankBag)
+  activeBankBag = bankBag or 0
   isBanking = true
 
   -- Trace all items moved by another addon while BMR waits
