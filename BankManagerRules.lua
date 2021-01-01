@@ -328,11 +328,6 @@ BankManagerRules.keywordConditionTable            = {
 }
 
 
--- Local function for BankManagerRules.static
-local function GetItemLinkItemId(itemLink)
-  return select(4, ZO_LinkHandler_ParseLink(itemLink))
-end
-
 -- Local function for Recipes and Housing
 local function GetItemLinkSpecializedItemType(itemLink)
   return select(2, GetItemLinkItemType(itemLink))
@@ -1569,6 +1564,15 @@ function BankManagerRules.addFilters()
   }
 
   -- Enchanting
+  ruleName                        = "enchantingPotency"
+  BankManagerRules.data[ruleName] = {
+    params  = {
+      { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_ENCHANTING_RUNE_POTENCY } },
+    },
+    name    = GetString("SI_ITEMTYPE", ITEMTYPE_ENCHANTING_RUNE_POTENCY),
+    tooltip = GetString("SI_ITEMTYPE", ITEMTYPE_ENCHANTING_RUNE_POTENCY),
+  }
+
   ruleName                        = "enchantingEssence"
   BankManagerRules.data[ruleName] = {
     params  = {
@@ -1578,37 +1582,11 @@ function BankManagerRules.addFilters()
     tooltip = GetString("SI_ITEMTYPE", ITEMTYPE_ENCHANTING_RUNE_ESSENCE),
   }
 
-  local MAX_ENCHANTING_SKILL      = 10 -- No UI function for that
-  for enchantingSkill = 1, MAX_ENCHANTING_SKILL do
-    ruleName                        = "enchantingPotency" .. enchantingSkill
-    BankManagerRules.data[ruleName] = {
-      params  = {
-        { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_ENCHANTING_RUNE_POTENCY } },
-        { func = GetItemLinkRequiredCraftingSkillRank, funcArgs = BMR_ITEMLINK, values = { enchantingSkill } },
-      },
-      name    = GetString("SI_ITEMTYPE",
-        ITEMTYPE_ENCHANTING_RUNE_POTENCY) .. " " .. zo_strformat(SI_QUEST_JOURNAL_QUEST_LEVEL, enchantingSkill),
-      tooltip = GetString("SI_ITEMTYPE",
-        ITEMTYPE_ENCHANTING_RUNE_POTENCY) .. " " .. zo_strformat(SI_QUEST_JOURNAL_QUEST_LEVEL, enchantingSkill),
-    }
-
-  end
-
-  ruleName                        = "enchantingTa"
-  BankManagerRules.data[ruleName] = {
-    params  = {
-      { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_ENCHANTING_RUNE_ASPECT } },
-      { func = GetItemLinkFunctionalQuality, funcArgs = BMR_ITEMLINK, values = { ITEM_FUNCTIONAL_QUALITY_NORMAL } },
-    },
-    name    = "|H0:item:45850:20:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h", -- "Ta" item
-    tooltip = "|H0:item:45850:20:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h",
-  }
-
   ruleName                        = "enchantingAspect"
   BankManagerRules.data[ruleName] = {
     params  = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_ENCHANTING_RUNE_ASPECT } },
-      { func = GetItemLinkFunctionalQuality, funcArgs = BMR_ITEMLINK, values = { ITEM_FUNCTIONAL_QUALITY_MAGIC, ITEM_FUNCTIONAL_QUALITY_ARCANE, ITEM_FUNCTIONAL_QUALITY_ARTIFACT, ITEM_FUNCTIONAL_QUALITY_LEGENDARY } },
+      { func = GetItemLinkFunctionalQuality, funcArgs = BMR_ITEMLINK, values = { ITEM_FUNCTIONAL_QUALITY_NORMAL, ITEM_FUNCTIONAL_QUALITY_MAGIC, ITEM_FUNCTIONAL_QUALITY_ARCANE, ITEM_FUNCTIONAL_QUALITY_ARTIFACT, ITEM_FUNCTIONAL_QUALITY_LEGENDARY } },
     },
     name    = GetString("SI_ITEMTYPE", ITEMTYPE_ENCHANTING_RUNE_ASPECT),
     tooltip = GetString("SI_ITEMTYPE", ITEMTYPE_ENCHANTING_RUNE_ASPECT),
@@ -1619,8 +1597,8 @@ function BankManagerRules.addFilters()
     params  = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_GLYPH_ARMOR, ITEMTYPE_GLYPH_JEWELRY, ITEMTYPE_GLYPH_WEAPON } },
     },
-    name    = GetString(SI_GAMEPADITEMCATEGORY13),
-    tooltip = GetString(SI_GAMEPADITEMCATEGORY13),
+    name    = GetString(SI_ITEMTYPEDISPLAYCATEGORY30),
+    tooltip = GetString(SI_ITEMTYPEDISPLAYCATEGORY30),
   }
 
   ruleName                        = "alchemyReagent"

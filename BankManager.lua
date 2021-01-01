@@ -2286,7 +2286,7 @@ local function LAMSubmenu(subMenu)
     -- Enchanting
   elseif subMenu == "enchanting" then
     table.insert(submenuControls, panelOnlyIfNotFullStack("enchanting", "enchantingAll"))
-    table.insert(submenuControls, panelGuildBank("enchanting[A]+[P]+[E]+", "enchantingGBank"))
+    table.insert(submenuControls, panelGuildBank("enchanting", "enchantingGBank"))
     table.insert(submenuControls, panelMaxStacks("enchanting", "enchantingAll", "enchantingStacks"))
 
     table.insert(submenuControls, panelRule("enchantingAll"))
@@ -2294,28 +2294,14 @@ local function LAMSubmenu(subMenu)
     table.insert(submenuControls,
       { type = "texture", image = "EsoUI/Art/Miscellaneous/horizontalDivider.dds", imageWidth = 510, imageHeight = 4 })
 
+    table.insert(submenuControls, panelRule("enchantingPotency"))
     table.insert(submenuControls, panelRule("enchantingEssence"))
     table.insert(submenuControls, panelRule("enchantingAspect"))
-    table.insert(submenuControls,
-      { type = "texture", image = "EsoUI/Art/Miscellaneous/horizontalDivider.dds", imageWidth = 510, imageHeight = 4 })
-
-    local MAX_ENCHANTING_SKILL = 10
-    for enchantingSkill = 1, MAX_ENCHANTING_SKILL do
-      table.insert(submenuControls, panelRule("enchantingPotency" .. enchantingSkill))
-    end
-
     table.insert(submenuControls,
       { type = "texture", image = "EsoUI/Art/Miscellaneous/horizontalDivider.dds", imageWidth = 510, imageHeight = 4 })
     table.insert(submenuControls, { type = "description", text = "", width = "half" }) -- Placeholder for next line
     table.insert(submenuControls, panelGuildBank("enchantingGlyphs", "enchantingGlyphsGBank"))
     table.insert(submenuControls, panelRule("enchantingGlyphs"))
-
-    table.insert(submenuControls,
-      { type = "texture", image = "EsoUI/Art/Miscellaneous/horizontalDivider.dds", imageWidth = 510, imageHeight = 4 })
-    table.insert(submenuControls, panelOnlyIfNotFullStack("enchantingTa", "enchantingTa"))
-    table.insert(submenuControls, panelGuildBank("enchantingTa", "enchantingTa"))
-    table.insert(submenuControls, panelMaxStacks("enchantingTa", "enchantingTa", "enchantingTa"))
-    table.insert(submenuControls, panelRule("enchantingTa"))
 
     -- Diverse
   elseif subMenu == "trophies" then
