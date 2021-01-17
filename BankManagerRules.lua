@@ -1002,7 +1002,7 @@ function BankManagerRules.addFilters()
   BankManagerRules.data[ruleName]                 = {
     currencyType = CURT_MONEY, -- Currency to move
     min          = 0, -- Used by LAM
-    max          = 200000,
+    max          = 500000,
     step         = 250,
   }
 
