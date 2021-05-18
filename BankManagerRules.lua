@@ -892,6 +892,27 @@ function BankManagerRules.addFiltersTaggedAll()
   BankManagerRules.defaults[ruleName]                    = {}
   BankManagerRules.defaults[ruleName].associatedGuild    = GetString(BMR_ACTION_NOTSET)
 
+  -- Style Pages All
+  ruleName                                               = "stylePagesAll"
+  BankManagerRules.data[ruleName]                        = { true }
+
+  BankManagerRules.defaults[ruleName]                    = {}
+  BankManagerRules.defaults[ruleName].onlyIfNotFullStack = true
+
+  -- Style Pages Stacks
+  ruleName                                               = "stylePagesStacks"
+  BankManagerRules.data[ruleName]                        = { true }
+
+  BankManagerRules.defaults[ruleName]                    = {}
+  BankManagerRules.defaults[ruleName].onlyStacks         = 1
+
+  -- Style Pages GBank
+  ruleName                                               = "stylePagesGBank"
+  BankManagerRules.data[ruleName]                        = { true }
+
+  BankManagerRules.defaults[ruleName]                    = {}
+  BankManagerRules.defaults[ruleName].associatedGuild    = GetString(BMR_ACTION_NOTSET)
+
   -- Misc All
   ruleName                                               = "MiscAll"
   BankManagerRules.data[ruleName]                        = { true }
@@ -1755,7 +1776,6 @@ function BankManagerRules.addFilters()
     name    = GetString("SI_ITEMTYPE", ITEMTYPE_MASTER_WRIT),
     tooltip = GetString("SI_ITEMTYPE", ITEMTYPE_MASTER_WRIT),
   }
-
   -- Treasure Maps
   ruleName                        = "trophyTreasureMaps"
   BankManagerRules.data[ruleName] = {
@@ -1769,6 +1789,20 @@ function BankManagerRules.addFilters()
     tooltip = GetString(BMR_TROPHY_TREASURE_MAP),
   }
 
+  -- Style Pages SI_SPECIALIZEDITEMTYPE852
+  -- |H1:item:147324:124:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h
+  -- /script d(GetItemLinkItemType("|H1:item:147324:124:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h"))
+  -- Style Pages
+  ruleName                        = "stylePagesRule"
+  BankManagerRules.data[ruleName] = {
+    params  = {
+      { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_CONTAINER } },
+      { func = GetItemLinkSpecializedItemType, funcArgs = BMR_ITEMLINK, values = { SPECIALIZED_ITEMTYPE_CONTAINER_STYLE_PAGE } },
+    },
+    name    = GetString(BMR_MENU_STYLEPAGES_NAME),
+    tooltip = GetString(BMR_MENU_STYLEPAGES_TOOLTIP),
+  }
+
   -- Craft Surveys
   ruleName                        = "trophySurveys"
   BankManagerRules.data[ruleName] = {
@@ -1780,15 +1814,30 @@ function BankManagerRules.addFilters()
     tooltip = GetString(BMR_TROPHY_SURVEY_MAP),
   }
 
-  -- Frag motifs
-  ruleName                        = "trophyFragMotifs"
+  -- Frag motifs Known
+  -- SI_LORE_LIBRARY_IN_LIBRARY
+  ruleName                        = "trophyFragMotifsKnown"
   BankManagerRules.data[ruleName] = {
     params  = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_RACIAL_STYLE_MOTIF } },
       { func = GetItemLinkSpecializedItemType, funcArgs = BMR_ITEMLINK, values = { SPECIALIZED_ITEMTYPE_RACIAL_STYLE_MOTIF_CHAPTER } },
+      { func = IsItemLinkBookKnown, funcArgs = BMR_ITEMLINK, values = { true } },
     },
-    name    = GetString(BMR_TROPHY_MOTIF_FRAGMENT),
-    tooltip = GetString(BMR_TROPHY_MOTIF_FRAGMENT),
+    name    = GetString(BMR_TROPHY_MOTIF_FRAGMENT_KNOWN),
+    tooltip = GetString(BMR_TROPHY_MOTIF_FRAGMENT_KNOWN),
+  }
+
+  -- Frag motifs Unknown
+  -- SI_LORE_LIBRARY_USE_TO_LEARN
+  ruleName                        = "trophyFragMotifsUnknown"
+  BankManagerRules.data[ruleName] = {
+    params  = {
+      { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_RACIAL_STYLE_MOTIF } },
+      { func = GetItemLinkSpecializedItemType, funcArgs = BMR_ITEMLINK, values = { SPECIALIZED_ITEMTYPE_RACIAL_STYLE_MOTIF_CHAPTER } },
+      { func = IsItemLinkBookKnown, funcArgs = BMR_ITEMLINK, values = { false } },
+    },
+    name    = GetString(BMR_TROPHY_MOTIF_FRAGMENT_UNKNOWN),
+    tooltip = GetString(BMR_TROPHY_MOTIF_FRAGMENT_UNKNOWN),
   }
 
   -- Recipe Fragments -- share same rules as IC trophies (sewers & exterior)

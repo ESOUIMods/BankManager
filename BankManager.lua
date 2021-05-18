@@ -2383,11 +2383,24 @@ local function LAMSubmenu(subMenu)
 
     table.insert(submenuControls, panelRule("trophyTreasureMaps"))
     table.insert(submenuControls, panelRule("trophySurveys"))
-    table.insert(submenuControls, panelRule("trophyFragMotifs"))
+    table.insert(submenuControls, panelRule("trophyFragMotifsKnown"))
+    table.insert(submenuControls, panelRule("trophyFragMotifsUnknown"))
     table.insert(submenuControls, panelRule("trophyFragRecipe"))
     table.insert(submenuControls, panelRule("trophyICPVE"))
 
-    -- Diverse
+    --[[
+    -- Style Pages
+  elseif subMenu == "stylepages" then
+    table.insert(submenuControls, panelOnlyIfNotFullStack("Style", "stylePagesAll"))
+    table.insert(submenuControls, panelGuildBank("Style", "stylePagesGBank"))
+    table.insert(submenuControls, panelMaxStacks("Style", "stylePagesAll", "stylePagesStacks"))
+
+    table.insert(submenuControls,
+      { type = "texture", image = "EsoUI/Art/Miscellaneous/horizontalDivider.dds", imageWidth = 510, imageHeight = 4 })
+    table.insert(submenuControls, panelRule("stylePagesRule"))
+    ]]--
+
+    -- Misc - Diverse
   elseif subMenu == "misc" then
     table.insert(submenuControls, panelOnlyIfNotFullStack("Misc", "MiscAll"))
     table.insert(submenuControls, panelGuildBank("Misc", "MiscGBank"))
@@ -2502,6 +2515,7 @@ local function buildLAMPanel()
   local enchantmentSubmenuControls     = LAMSubmenu("enchanting")
   local alchemySubmenuControls         = LAMSubmenu("alchemy")
   local trophiesSubmenuControls        = LAMSubmenu("trophies")
+  -- local stylePagesSubmenuControls      = LAMSubmenu("stylepages")
   local diverseSubmenuControls         = LAMSubmenu("misc")
   local housingSubmenuControls         = LAMSubmenu("housing")
   local specialFiltersControls         = LAMSubmenu("special")
@@ -2712,6 +2726,13 @@ local function buildLAMPanel()
       name     = GetString(SI_HOUSING_BOOK_TITLE),
       controls = housingSubmenuControls,
     },
+    --[[
+    {
+      type     = "submenu",
+      name     = GetString(BMR_MENU_STYLEPAGES),
+      controls = stylePagesSubmenuControls,
+    },
+    ]]--
     {
       type     = "submenu",
       name     = GetString(SI_PLAYER_MENU_MISC),

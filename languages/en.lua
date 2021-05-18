@@ -81,7 +81,8 @@ local lang = {
   -- Trophies are hardcoded because there is nothing to label them
   BMR_TROPHY_TREASURE_MAP               = "Treasure Maps",
   BMR_TROPHY_SURVEY_MAP                 = "Survey Maps",
-  BMR_TROPHY_MOTIF_FRAGMENT             = "Style Motif Fragments",
+  BMR_TROPHY_MOTIF_FRAGMENT_KNOWN       = "Known Style Motif Fragments",
+  BMR_TROPHY_MOTIF_FRAGMENT_UNKNOWN     = "Unknown Style Motif Fragments",
   BMR_TROPHY_RECIPE_FRAGMENT            = "Recipe Fragments",
   BMR_TROPHY_IMPERIALCITY_PVE           = "Imperial City Trophies",
   BMR_TROPHY_QUEST_REWARD               = "Quest Rewards Trophies",
@@ -142,6 +143,11 @@ local lang = {
   BMR_RULE_WRITER_RUNAFTER              = "Run user rules after BMR ones",
   BMR_RULE_WRITER_RUNAFTER              = "Your rules will be run after BMR ones",
 
+  -- Currencies qtyToPush
+  BMR_MENU_STYLEPAGES                   = "Style Pages",
+
+  BMR_MENU_STYLEPAGES_NAME             = "Style Pages",
+  BMR_MENU_STYLEPAGES_TOOLTIP          = "Select whether or not to pull or push Style Pages to guild bank.",
 }
 
 --Create the string values, so other languages can add new versions
