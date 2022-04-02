@@ -434,9 +434,8 @@ local function IsItemProtected(bagId, slotId)
   end
 
   --FCO ItemSaver support
-  if FCOIS and FCOIS.IsItemLocked then
-    --return FCOIS.IsMarked(bagId, slotId, -1)
-    return FCOIS.IsItemLocked(bagId, slotId)
+  if FCOIS and FCOIS.IsLocked then
+    return FCOIS.IsLocked(bagid, slotindex)
   end
 
   --FilterIt support
