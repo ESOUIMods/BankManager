@@ -7,7 +7,7 @@
 ## Title: BankManagerRevived |cF4EE42(Jewelry Crafting fix)|r
 ## Author: Sharlikran, |c2DFFF7@Lexynide|r, |c990000Snowman|r|cFFFFFFDK|r, Ayantir, Eldrni, Todo
 ## Description: Manage your Banks with automated push/pull
-## APIVersion: 101033 101034
+## APIVersion: 101035 101036
 ## Version: 1.6.01
 ## AddOnVersion: 1601
 ## SavedVariables: BMVars
