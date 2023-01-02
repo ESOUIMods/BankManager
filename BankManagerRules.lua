@@ -43,6 +43,7 @@ local LR = LibResearch
 local BMR_RULEWRITER_VALUE_OPTIONAL_KEYWORD = 1
 local BMR_RULEWRITER_VALUE_WITH_OPERATOR = 2
 local BMR_RULEWRITER_VALUE_WITHOUT_OPERATOR = 3
+local BMR_RULEWRITER_VALUE_NOTHING = 4
 
 -- List of all things we cannot dynamically get
 BankManagerRules.static = {}
@@ -883,27 +884,6 @@ function BankManagerRules.addFiltersTaggedAll()
   BankManagerRules.defaults[ruleName] = {}
   BankManagerRules.defaults[ruleName].associatedGuild = GetString(BMR_ACTION_NOTSET)
 
-  -- Style Pages All
-  ruleName = "stylePagesAll"
-  BankManagerRules.data[ruleName] = { true }
-
-  BankManagerRules.defaults[ruleName] = {}
-  BankManagerRules.defaults[ruleName].onlyIfNotFullStack = true
-
-  -- Style Pages Stacks
-  ruleName = "stylePagesStacks"
-  BankManagerRules.data[ruleName] = { true }
-
-  BankManagerRules.defaults[ruleName] = {}
-  BankManagerRules.defaults[ruleName].onlyStacks = 1
-
-  -- Style Pages GBank
-  ruleName = "stylePagesGBank"
-  BankManagerRules.data[ruleName] = { true }
-
-  BankManagerRules.defaults[ruleName] = {}
-  BankManagerRules.defaults[ruleName].associatedGuild = GetString(BMR_ACTION_NOTSET)
-
   -- Misc All
   ruleName = "MiscAll"
   BankManagerRules.data[ruleName] = { true }
@@ -1014,7 +994,7 @@ function BankManagerRules.addFilters()
   BankManagerRules.data[ruleName] = {
     currencyType = CURT_MONEY, -- Currency to move
     min = 0, -- Used by LAM
-    max = 500000,
+    max = 5000000,
     step = 250,
   }
 

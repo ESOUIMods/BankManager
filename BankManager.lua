@@ -41,6 +41,7 @@ local panel
 local guildList
 local checkingGBank
 local currentGBank
+local currentGBankName
 local restartFromAtGBank
 local hasAnyPullToDo
 local hasAnySpecialPullToDo
@@ -55,9 +56,15 @@ local ACTION_PULL = 3
 local ACTION_PUSH_GBANK = 4
 local ACTION_PUSH_BOTH = 5
 
+--[[TODO Optional Keyword, Returns true when keywordCondition.acceptedKeyword[arg1] is true ]]--
 local BMR_RULEWRITER_VALUE_OPTIONAL_KEYWORD = 1
+--[[TODO With Operator, Returns true when keywordCondition.acceptedKeyword[arg1] is true ]]--
+--[[TODO Why is only "With Operator" used for GetRuleWriterCondition ]]--
 local BMR_RULEWRITER_VALUE_WITH_OPERATOR = 2
+--[[TODO Without Operator, second argument is converted to a number. Returns true if number is between 1 and 10000]]--
 local BMR_RULEWRITER_VALUE_WITHOUT_OPERATOR = 3
+--[[TODO Nothing, added because it wasn't defined. Requires 2 arguments and returns true if both false]]--
+local BMR_RULEWRITER_VALUE_NOTHING = 4
 
 local BMR_ITEMLINK = 1
 local BMR_BAG_AND_SLOT = 2
@@ -1792,9 +1799,6 @@ local function Explode(div, str)
   return arr
 end
 
-local BMR_RULEWRITER_VALUE_SPECIAL_KEYWORD = "acceptOptionalParam"
-local BMR_RULEWRITER_VALUE_WITH_OPERATOR = "requireParamWithOperator"
-
 local function GetValuesForCondition(keywordCondition, values, arg1, arg2)
 
   local acceptedValues = keywordCondition[values]
@@ -2293,17 +2297,6 @@ local function LAMSubmenu(subMenu)
     table.insert(submenuControls, panelRule("trophyFragRecipe"))
     table.insert(submenuControls, panelRule("trophyICPVE"))
 
-    --[[
-    -- Style Pages
-  elseif subMenu == "stylepages" then
-    table.insert(submenuControls, panelOnlyIfNotFullStack("Style", "stylePagesAll"))
-    table.insert(submenuControls, panelGuildBank("Style", "stylePagesGBank"))
-    table.insert(submenuControls, panelMaxStacks("Style", "stylePagesAll", "stylePagesStacks"))
-
-    table.insert(submenuControls, { type = "texture", image = "EsoUI/Art/Miscellaneous/horizontalDivider.dds", imageWidth = 510, imageHeight = 4 })
-    table.insert(submenuControls, panelRule("stylePagesRule"))
-    ]]--
-
     -- Misc - Diverse
   elseif subMenu == "misc" then
     table.insert(submenuControls, panelOnlyIfNotFullStack("Misc", "MiscAll"))
@@ -2418,7 +2411,6 @@ local function buildLAMPanel()
   local enchantmentSubmenuControls = LAMSubmenu("enchanting")
   local alchemySubmenuControls = LAMSubmenu("alchemy")
   local trophiesSubmenuControls = LAMSubmenu("trophies")
-  -- local stylePagesSubmenuControls      = LAMSubmenu("stylepages")
   local diverseSubmenuControls = LAMSubmenu("misc")
   local housingSubmenuControls = LAMSubmenu("housing")
   local specialFiltersControls = LAMSubmenu("special")
@@ -2581,47 +2573,47 @@ local function buildLAMPanel()
     },
     {
       type = "submenu",
-      name = zo_strformat("<<1>>", GetString("SI_ITEMTYPE", ITEMTYPE_STYLE_MATERIAL)),
+      name = zo_strformat("<<1>>", GetString(SI_ITEMTYPE44)),
       controls = styleSubmenuControls,
     },
     {
       type = "submenu",
-      name = zo_strformat("<<1>>", GetString(BMR_TRADESKILL_BLACKSMITHING)),
+      name = zo_strformat("<<1>>", GetString(SI_TRADESKILLTYPE1)),
       controls = blacksmithingSubmenuControls,
     },
     {
       type = "submenu",
-      name = zo_strformat("<<1>>", GetString(BMR_TRADESKILL_CLOTHIER)),
+      name = zo_strformat("<<1>>", GetString(SI_TRADESKILLTYPE2)),
       controls = clothierSubmenuControls,
     },
     {
       type = "submenu",
-      name = zo_strformat("<<1>>", GetString(BMR_TRADESKILL_WOODWORKING)),
+      name = zo_strformat("<<1>>", GetString(SI_TRADESKILLTYPE6)),
       controls = woodworkingSubmenuControls,
     },
     {
       type = "submenu",
-      name = zo_strformat("<<1>>", GetString(BMR_TRADESKILL_JEWELRYCRAFTING)),
+      name = zo_strformat("<<1>>", GetString(SI_TRADESKILLTYPE7)),
       controls = jewelrycraftingSubmenuControls,
     },
     {
       type = "submenu",
-      name = zo_strformat("<<1>>", GetString(BMR_TRADESKILL_PROVISIONING)),
+      name = zo_strformat("<<1>>", GetString(SI_TRADESKILLTYPE5)),
       controls = cookingSubmenuControls,
     },
     {
       type = "submenu",
-      name = zo_strformat("<<1>>", GetString(BMR_TRADESKILL_ENCHANTING)),
+      name = zo_strformat("<<1>>", GetString(SI_TRADESKILLTYPE3)),
       controls = enchantmentSubmenuControls,
     },
     {
       type = "submenu",
-      name = zo_strformat("<<1>>", GetString(BMR_TRADESKILL_ALCHEMY)),
+      name = zo_strformat("<<1>>", GetString(SI_TRADESKILLTYPE4)),
       controls = alchemySubmenuControls,
     },
     {
       type = "submenu",
-      name = GetString("SI_ITEMTYPE", ITEMTYPE_TROPHY),
+      name = GetString(SI_ITEMTYPE5),
       controls = trophiesSubmenuControls,
     },
     {
@@ -2629,13 +2621,6 @@ local function buildLAMPanel()
       name = GetString(SI_HOUSING_BOOK_TITLE),
       controls = housingSubmenuControls,
     },
-    --[[
-    {
-      type     = "submenu",
-      name     = GetString(BMR_MENU_STYLEPAGES),
-      controls = stylePagesSubmenuControls,
-    },
-    ]]--
     {
       type = "submenu",
       name = GetString(SI_PLAYER_MENU_MISC),
@@ -2782,6 +2767,8 @@ function BankManagerRevived_runProfile(profile)
     CALLBACK_MANAGER:FireCallbacks("LAM-RefreshPanel", panel)
 
     if isBanking then
+
+      local multipleProfiles = false
 
       for i = 2, 9 do
         if db.profiles[i].defined == true then
