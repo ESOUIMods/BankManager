@@ -261,25 +261,36 @@ local defaults = {
   }
 }
 
+-------------------------------------------------
+----- Logger Function                       -----
+-------------------------------------------------
+
 BankManagerRevived = { }
+BankManagerRevived.show_log = false
 if LibDebugLogger then
-  local logger = LibDebugLogger.Create(ADDON_NAME)
-  BankManagerRevived.logger = logger
+  BankManagerRevived.logger = LibDebugLogger.Create(ADDON_NAME)
 end
-local SDLV = DebugLogViewer
-if SDLV then BankManagerRevived.viewer = true else BankManagerRevived.viewer = false end
+local logger
+local viewer
+if DebugLogViewer then viewer = true else viewer = false end
+if LibDebugLogger then logger = true else logger = false end
 
 local function create_log(log_type, log_content)
-  if log_type == "Debug" then
+  if not viewer and log_type == "Info" then
+    CHAT_ROUTER:AddSystemMessage(log_content)
+    return
+  end
+  if not BankManagerRevived.show_log then return end
+  if logger and log_type == "Debug" then
     BankManagerRevived.logger:Debug(log_content)
   end
-  if log_type == "Info" then
+  if logger and log_type == "Info" then
     BankManagerRevived.logger:Info(log_content)
   end
-  if log_type == "Verbose" then
+  if logger and log_type == "Verbose" then
     BankManagerRevived.logger:Verbose(log_content)
   end
-  if log_type == "Warn" then
+  if logger and log_type == "Warn" then
     BankManagerRevived.logger:Warn(log_content)
   end
 end
@@ -312,7 +323,6 @@ local function emit_table(log_type, t, indent, table_history)
 end
 
 function BankManagerRevived:dm(log_type, ...)
-  if not BankManagerRevived.logger then return end
   for i = 1, select("#", ...) do
     local value = select(i, ...)
     if (type(value) == "table") then
