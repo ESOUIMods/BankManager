@@ -142,12 +142,6 @@ local lang = {
 
   BMR_RULE_WRITER_RUNAFTER              = "Run user rules after BMR ones",
   BMR_RULE_WRITER_RUNAFTER              = "Your rules will be run after BMR ones",
-
-  -- Currencies qtyToPush
-  BMR_MENU_STYLEPAGES                   = "Style Pages",
-
-  BMR_MENU_STYLEPAGES_NAME             = "Style Pages",
-  BMR_MENU_STYLEPAGES_TOOLTIP          = "Select whether or not to pull or push Style Pages to guild bank.",
 }
 
 --Create the string values, so other languages can add new versions

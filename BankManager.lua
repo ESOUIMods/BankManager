@@ -68,6 +68,8 @@ local BMR_RULEWRITER_VALUE_NOTHING = 4
 
 local BMR_ITEMLINK = 1
 local BMR_BAG_AND_SLOT = 2
+local BMR_ITEMTYPE = 3
+local BMR_ITEMTYPE_SPECIALIZED = 4
 --local startTimeInMs			= 0
 
 --[[
@@ -415,12 +417,12 @@ local function queueAction(ruleName, bagId, slotId)
   local whichAction = db.profiles[actualProfile].rules[ruleName].action
   if (whichAction == ACTION_PUSH or whichAction == ACTION_PUSH_GBANK or whichAction == ACTION_PUSH_BOTH) and bagId == BAG_BACKPACK then
     -- Push item to bank
-    BankManagerRevived:dm("Debug", string.format("BY ACTION: whichAction : %s ; ruleName: %s ; bagId: %s ; slotId: %s ; activeBankBag: %s", whichAction, ruleName, bagId, slotId, activeBankBag))
+    --BankManagerRevived:dm("Debug", string.format("BY ACTION: whichAction : %s ; ruleName: %s ; bagId: %s ; slotId: %s ; activeBankBag: %s", whichAction, ruleName, bagId, slotId, activeBankBag))
     --d("ACTION " .. whichAction .. " " .. ruleName .. " " .. bagId .. " " .. slotId)
     table.insert(pushQueue, { ruleName = ruleName, bagId = bagId, slotId = slotId, itemLink = GetItemLink(bagId, slotId), itemIcon = GetItemLinkInfo(GetItemLink(bagId, slotId)) })
   elseif whichAction == ACTION_PULL and (bagId == BAG_BANK or bagId == BAG_SUBSCRIBER_BANK) then
     -- Pull item to bank
-    BankManagerRevived:dm("Debug", string.format("ACTION_PULL: whichAction : %s ; ruleName: %s ; bagId: %s ; slotId: %s ; activeBankBag: %s", whichAction, ruleName, bagId, slotId, activeBankBag))
+    --BankManagerRevived:dm("Debug", string.format("ACTION_PULL: whichAction : %s ; ruleName: %s ; bagId: %s ; slotId: %s ; activeBankBag: %s", whichAction, ruleName, bagId, slotId, activeBankBag))
     --d("ACTION_PULL " .. ruleName .. " " .. bagId .. " " .. slotId)
     table.insert(pullQueue, { ruleName = ruleName, bagId = bagId, slotId = slotId, itemLink = GetItemLink(bagId, slotId), itemIcon = GetItemLinkInfo(GetItemLink(bagId, slotId)) })
   end
@@ -512,7 +514,6 @@ local function prepareItem(bagId, slotId, checkingGBank)
   local itemMatch = false
   local ruleMatch
   local forBankOnly = not checkingGBank
-
   -- For each item in bag, look all rules
   for ruleName, ruleData in pairsByKeysAndPosition(dataSorted) do
 
@@ -537,7 +538,6 @@ local function prepareItem(bagId, slotId, checkingGBank)
         end
         shouldMove = (bagId == BAG_BACKPACK and action == ACTION_PUSH) or ((bagId == BAG_BANK or bagId == BAG_SUBSCRIBER_BANK) and action == ACTION_PULL) or (bagId == BAG_BACKPACK and action == ACTION_PUSH_BOTH)
       end
-
       -- If rule is well writen and set to do something
       if ruleData.params and shouldMove then
 
@@ -548,7 +548,6 @@ local function prepareItem(bagId, slotId, checkingGBank)
 
           if funcToUse then
             if ruleParamData.funcArgs == BMR_ITEMLINK then
-
               -- Is item matching values ?
               for funcChoices, funcMatches in ipairs(ruleParamData.values) do
                 if funcToUse(itemLink) == funcMatches then
@@ -556,14 +555,30 @@ local function prepareItem(bagId, slotId, checkingGBank)
                 end
               end
 
-            elseif ruleParamData.funcArgs == BMR_BAG_AND_SLOT then
+            elseif ruleParamData.funcArgs == BMR_ITEMTYPE then
+              for funcChoices, funcMatches in ipairs(ruleParamData.values) do
+                local itemType = funcToUse(itemLink)
+                if itemType == funcMatches then
+                  itemMatchValue = true
+                end
+              end
+
+          elseif ruleParamData.funcArgs == BMR_ITEMTYPE_SPECIALIZED then
+            for funcChoices, funcMatches in ipairs(ruleParamData.values) do
+              local _, specializedItemType = funcToUse(itemLink)
+              if specializedItemType == funcMatches then
+                itemMatchValue = true
+              end
+            end
+
+          elseif ruleParamData.funcArgs == BMR_BAG_AND_SLOT then
               for funcChoices, funcMatches in ipairs(ruleParamData.values) do
                 if funcToUse(bagId, slotId) == funcMatches then
                   itemMatchValue = true
                 end
               end
-
             end
+
           end
 
           -- The item didn't match our filter, don't try other params, go to next rule
@@ -575,7 +590,7 @@ local function prepareItem(bagId, slotId, checkingGBank)
             -- The item match our filter .. for now
             itemMatch = true
             ruleMatch = ruleName
-            BankManagerRevived:dm("Debug", string.format("ITEM MATCH VALUE: itemLink : %s ; ( bagId: %s ; slotId: %s ) ; ruleMatch: %s ; ruleName / #: (%s , %s) activeBankBag: %s", itemLink, bagId, slotId, ruleMatch, ruleName, ruleParamIndex, activeBankBag))
+            --BankManagerRevived:dm("Debug", string.format("ITEM MATCH VALUE: itemLink : %s ; ( bagId: %s ; slotId: %s ) ; ruleMatch: %s ; ruleName / #: (%s , %s) activeBankBag: %s", itemLink, bagId, slotId, ruleMatch, ruleName, ruleParamIndex, activeBankBag))
             --d(itemLink .. " (" .. bagId .. " " .. slotId.. ") ruleMatch:" .. ruleName .. " #" .. ruleParamIndex)
           end
 
@@ -585,7 +600,7 @@ local function prepareItem(bagId, slotId, checkingGBank)
         if itemMatch and checkingGBank and action == ACTION_PUSH then
           -- this item must not be queued, it has been flagged to go to bank only
           forBankOnly = true
-          BankManagerRevived:dm("Debug", string.format("ITEM MATCH GUILD BANK ONLY: itemLink : %s ; ( bagId: %s ; slotId: %s ) ; ruleMatch: %s ; activeBankBag: %s : set flag 'For Bank Only' ", itemLink, bagId, slotId, ruleMatch, activeBankBag))
+          --BankManagerRevived:dm("Debug", string.format("ITEM MATCH GUILD BANK ONLY: itemLink : %s ; ( bagId: %s ; slotId: %s ) ; ruleMatch: %s ; activeBankBag: %s : set flag 'For Bank Only' ", itemLink, bagId, slotId, ruleMatch, activeBankBag))
           --d(itemLink .. " (" .. bagId .. " " .. slotId.. ") ruleMatch:" .. ruleMatch .. " set flag 'For Bank Only' ")
         end
 
@@ -599,14 +614,14 @@ local function prepareItem(bagId, slotId, checkingGBank)
     if checkingGBank then
       if not forBankOnly then
         --d(itemLink .. " (" .. bagId .. " " .. slotId.. ") ruleMatch:" .. ruleMatch .. " is not flagged for Bank Only. Will move")
-        BankManagerRevived:dm("Debug", string.format("ITEM MATCH Guild Bank: itemLink : %s ; ( bagId: %s ; slotId: %s ) ; ruleMatch: %s ; activeBankBag: %s : is not flagged for Bank Only. Will move.", itemLink, bagId, slotId, ruleMatch, activeBankBag))
+        --BankManagerRevived:dm("Debug", string.format("ITEM MATCH Guild Bank: itemLink : %s ; ( bagId: %s ; slotId: %s ) ; ruleMatch: %s ; activeBankBag: %s : is not flagged for Bank Only. Will move.", itemLink, bagId, slotId, ruleMatch, activeBankBag))
         queueAction(ruleMatch, bagId, slotId)
       else
-        BankManagerRevived:dm("Debug", string.format("ITEM MATCH Guild Bank: itemLink : %s ; ( bagId: %s ; slotId: %s ) ; ruleMatch: %s ; activeBankBag: %s : is flagged for Bank Only. Don't move.", itemLink, bagId, slotId, ruleMatch, activeBankBag))
+        --BankManagerRevived:dm("Debug", string.format("ITEM MATCH Guild Bank: itemLink : %s ; ( bagId: %s ; slotId: %s ) ; ruleMatch: %s ; activeBankBag: %s : is flagged for Bank Only. Don't move.", itemLink, bagId, slotId, ruleMatch, activeBankBag))
         --d(itemLink .. " (" .. bagId .. " " .. slotId.. ") ruleMatch:" .. ruleMatch .. " is flagged for Bank Only. Don't move")
       end
     else
-      BankManagerRevived:dm("Debug", string.format("ITEM MATCH: itemLink : %s ; ( bagId: %s ; slotId: %s ) ; ruleMatch: %s ; activeBankBag: %s. Queueing for move.", itemLink, bagId, slotId, ruleMatch, activeBankBag))
+      --BankManagerRevived:dm("Debug", string.format("ITEM MATCH: itemLink : %s ; ( bagId: %s ; slotId: %s ) ; ruleMatch: %s ; activeBankBag: %s. Queueing for move.", itemLink, bagId, slotId, ruleMatch, activeBankBag))
       queueAction(ruleMatch, bagId, slotId)
     end
   end
@@ -1763,6 +1778,32 @@ local function panelGuildBank(ruleNamePatern, ruleNameToFollow)
 
 end
 
+-- Will change the name of the associatedGuild for all rules who match ruleNamePatern
+local function panelGuildBankFull(ruleNamePatern, ruleNameToFollow)
+
+  local optionPanel = {
+    type = "dropdown",
+    name = GetString(BMR_GUILD_LIST),
+    tooltip = GetString(BMR_GUILD_LIST_TOOLTIP),
+    choices = guildList,
+    getFunc = function() return db.profiles[actualProfile].rules[ruleNameToFollow].associatedGuild end,
+    setFunc = function(value)
+      for optionName, optionData in pairs(db.profiles[actualProfile].rules) do
+        if type(optionData) == "table" then
+          if string.find(optionName, ruleNamePatern) then
+            optionData.associatedGuild = value
+          end
+        end
+      end
+      db.profiles[actualProfile].rules[ruleNameToFollow].associatedGuild = value
+    end,
+    default = GetString(BMR_ACTION_NOTSET),
+  }
+
+  return optionPanel
+
+end
+
 local function panelSpecialFilter(ruleName)
 
   local specialConvert = {
@@ -2246,10 +2287,10 @@ local function LAMSubmenu(subMenu)
     table.insert(submenuControls, panelRule("cookingIngredientsDrink"))
     table.insert(submenuControls, panelRule("cookingIngredientsRare"))
     table.insert(submenuControls, panelRule("cookingAmbrosia"))
+
     table.insert(submenuControls, { type = "texture", image = "EsoUI/Art/Miscellaneous/horizontalDivider.dds", imageWidth = 510, imageHeight = 4 })
 
-    table.insert(submenuControls, { type = "description", text = "", width = "half" }) -- Placeholder for next line
-    table.insert(submenuControls, panelGuildBank("cookingRecipe", "cookingRecipeGBank"))
+    table.insert(submenuControls, panelGuildBankFull("cookingRecipe", "cookingRecipeGBank"))
     table.insert(submenuControls, panelRule("cookingRecipeKnown"))
     table.insert(submenuControls, panelRule("cookingRecipeUnknown"))
 
@@ -2281,18 +2322,16 @@ local function LAMSubmenu(subMenu)
 
     table.insert(submenuControls, panelRule("enchantingAll"))
 
-    table.insert(submenuControls,
-      { type = "texture", image = "EsoUI/Art/Miscellaneous/horizontalDivider.dds", imageWidth = 510, imageHeight = 4 })
+    table.insert(submenuControls, { type = "texture", image = "EsoUI/Art/Miscellaneous/horizontalDivider.dds", imageWidth = 510, imageHeight = 4 })
 
     table.insert(submenuControls, panelRule("enchantingPotency"))
     table.insert(submenuControls, panelRule("enchantingEssence"))
     table.insert(submenuControls, panelRule("enchantingAspect"))
     table.insert(submenuControls, { type = "texture", image = "EsoUI/Art/Miscellaneous/horizontalDivider.dds", imageWidth = 510, imageHeight = 4 })
-    table.insert(submenuControls, { type = "description", text = "", width = "half" }) -- Placeholder for next line
-    table.insert(submenuControls, panelGuildBank("enchantingGlyphs", "enchantingGlyphsGBank"))
+    table.insert(submenuControls, panelGuildBankFull("enchantingGlyphs", "enchantingGlyphsGBank"))
     table.insert(submenuControls, panelRule("enchantingGlyphs"))
 
-    -- Diverse
+    -- Trophies - Diverse
   elseif subMenu == "trophies" then
     table.insert(submenuControls, panelOnlyIfNotFullStack("trophy", "trophyAll"))
     table.insert(submenuControls, panelGuildBank("trophy", "trophyGBank"))
@@ -2302,10 +2341,9 @@ local function LAMSubmenu(subMenu)
 
     table.insert(submenuControls, panelRule("trophyTreasureMaps"))
     table.insert(submenuControls, panelRule("trophySurveys"))
-    table.insert(submenuControls, panelRule("trophyFragMotifsKnown"))
-    table.insert(submenuControls, panelRule("trophyFragMotifsUnknown"))
     table.insert(submenuControls, panelRule("trophyFragRecipe"))
     table.insert(submenuControls, panelRule("trophyICPVE"))
+    table.insert(submenuControls, panelRule("trophyToy"))
 
     -- Misc - Diverse
   elseif subMenu == "misc" then
@@ -2313,17 +2351,20 @@ local function LAMSubmenu(subMenu)
     table.insert(submenuControls, panelGuildBank("Misc", "MiscGBank"))
     table.insert(submenuControls, panelMaxStacks("Misc", "MiscAll", "MiscStacks"))
 
-    table.insert(submenuControls,
-      { type = "texture", image = "EsoUI/Art/Miscellaneous/horizontalDivider.dds", imageWidth = 510, imageHeight = 4 })
+    table.insert(submenuControls, { type = "texture", image = "EsoUI/Art/Miscellaneous/horizontalDivider.dds", imageWidth = 510, imageHeight = 4 })
 
     table.insert(submenuControls, panelRule("MiscAvaRepair"))
+    table.insert(submenuControls, panelRule("MiscContainer"))
     table.insert(submenuControls, panelRule("MiscDisguises"))
     table.insert(submenuControls, panelRule("MiscLockpick"))
     table.insert(submenuControls, panelRule("MiscLure"))
+    table.insert(submenuControls, panelRule("MiscFragMotifsKnown"))
+    table.insert(submenuControls, panelRule("MiscFragMotifsUnknown"))
+    table.insert(submenuControls, panelRule("MiscPoison"))
     table.insert(submenuControls, panelRule("MiscPotion"))
-    table.insert(submenuControls, panelRule("MiscRacial"))
-    table.insert(submenuControls, panelRule("MiscContainer"))
     table.insert(submenuControls, panelRule("MiscRepair"))
+    table.insert(submenuControls, panelRule("MiscStylePagesKnown"))
+    table.insert(submenuControls, panelRule("MiscStylePagesUnknown"))
     table.insert(submenuControls, panelRule("MiscSoulGemsEmpty"))
     table.insert(submenuControls, panelRule("MiscSoulGemsFulfilled"))
     table.insert(submenuControls, panelRule("MiscMasterWrit"))

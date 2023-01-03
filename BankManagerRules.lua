@@ -35,8 +35,12 @@ BankManagerRules.data = {}
 BankManagerRules.defaults = {}
 
 local ACTION_NOTSET = 1
+
 local BMR_ITEMLINK = 1
 local BMR_BAG_AND_SLOT = 2
+local BMR_ITEMTYPE = 3
+local BMR_ITEMTYPE_SPECIALIZED = 4
+
 local ruleName
 local LR = LibResearch
 
@@ -332,6 +336,28 @@ BankManagerRules.keywordConditionTable = {
 -- Local function for Recipes and Housing
 local function GetItemLinkSpecializedItemType(itemLink)
   return select(2, GetItemLinkItemType(itemLink))
+end
+
+local function IsKnownStylePage(itemLink)
+  if not itemLink then return false end
+  local specializedItemtypesOfContainers = {
+    [SPECIALIZED_ITEMTYPE_CONTAINER_STYLE_PAGE] = true,
+    [SPECIALIZED_ITEMTYPE_COLLECTIBLE_STYLE_PAGE] = true,
+    [SPECIALIZED_ITEMTYPE_CONTAINER] = true,
+  }
+  local learnableStylePage = false
+  local known = false
+
+  local _, specializedItemType = GetItemLinkItemType(itemLink)
+  if specializedItemtypesOfContainers[specializedItemType] then
+    learnableStylePage = true
+  end
+
+  if learnableStylePage then
+    local containerCollectibleId = GetItemLinkContainerCollectibleId(itemLink)
+    known = IsCollectibleUnlocked(containerCollectibleId)
+  end
+  return known
 end
 
 -- Local function for items Researchable
@@ -1614,16 +1640,6 @@ function BankManagerRules.addFilters()
     tooltip = zo_strformat("<<1>>", GetString("SI_ITEMTYPE", ITEMTYPE_POISON)),
   }
 
-  -- Racial books
-  ruleName = "MiscRacial"
-  BankManagerRules.data[ruleName] = {
-    params = {
-      { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_RACIAL_STYLE_MOTIF } },
-    },
-    name = GetString("SI_ITEMTYPE", ITEMTYPE_RACIAL_STYLE_MOTIF),
-    tooltip = GetString("SI_ITEMTYPE", ITEMTYPE_RACIAL_STYLE_MOTIF),
-  }
-
   -- Containers
   ruleName = "MiscContainer"
   BankManagerRules.data[ruleName] = {
@@ -1632,6 +1648,56 @@ function BankManagerRules.addFilters()
     },
     name = GetString("SI_ITEMTYPE", ITEMTYPE_CONTAINER),
     tooltip = GetString("SI_ITEMTYPE", ITEMTYPE_CONTAINER),
+  }
+
+  -- Frag motifs Known
+  -- SI_LORE_LIBRARY_IN_LIBRARY
+  ruleName = "MiscFragMotifsKnown"
+  BankManagerRules.data[ruleName] = {
+    params = {
+      { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_RACIAL_STYLE_MOTIF } },
+      { func = GetItemLinkSpecializedItemType, funcArgs = BMR_ITEMLINK, values = { SPECIALIZED_ITEMTYPE_RACIAL_STYLE_MOTIF_CHAPTER } },
+      { func = IsItemLinkBookKnown, funcArgs = BMR_ITEMLINK, values = { true } },
+    },
+    name = GetString(SI_ITEMTYPE8) .. " Known",
+    tooltip = GetString(SI_ITEMTYPE8) .. " Known",
+  }
+
+  -- Frag motifs Unknown
+  -- SI_LORE_LIBRARY_USE_TO_LEARN
+  ruleName = "MiscFragMotifsUnknown"
+  BankManagerRules.data[ruleName] = {
+    params = {
+      { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_RACIAL_STYLE_MOTIF } },
+      { func = GetItemLinkSpecializedItemType, funcArgs = BMR_ITEMLINK, values = { SPECIALIZED_ITEMTYPE_RACIAL_STYLE_MOTIF_CHAPTER } },
+      { func = IsItemLinkBookKnown, funcArgs = BMR_ITEMLINK, values = { false } },
+    },
+    name = GetString(SI_ITEMTYPE8) .. " Unknown",
+    tooltip = GetString(SI_ITEMTYPE8) .. " Unknown",
+  }
+
+  -- Style Pages
+  ruleName = "MiscStylePagesKnown"
+  BankManagerRules.data[ruleName] = {
+    params = {
+      { func = GetItemLinkItemType, funcArgs = BMR_ITEMTYPE, values = { ITEMTYPE_COLLECTIBLE } },
+      { func = GetItemLinkItemType, funcArgs = BMR_ITEMTYPE_SPECIALIZED, values = { SPECIALIZED_ITEMTYPE_COLLECTIBLE_STYLE_PAGE } },
+      { func = IsKnownStylePage, funcArgs = BMR_ITEMLINK, values = { true } },
+    },
+    name = GetString(SI_SPECIALIZEDITEMTYPE82) .. " Known",
+    tooltip = GetString(SI_SPECIALIZEDITEMTYPE82) .. " Known",
+  }
+
+  -- Style Pages
+  ruleName = "MiscStylePagesUnknown"
+  BankManagerRules.data[ruleName] = {
+    params = {
+      { func = GetItemLinkItemType, funcArgs = BMR_ITEMTYPE, values = { ITEMTYPE_COLLECTIBLE } },
+      { func = GetItemLinkItemType, funcArgs = BMR_ITEMTYPE_SPECIALIZED, values = { SPECIALIZED_ITEMTYPE_COLLECTIBLE_STYLE_PAGE } },
+      { func = IsKnownStylePage, funcArgs = BMR_ITEMLINK, values = { false } },
+    },
+    name = GetString(SI_SPECIALIZEDITEMTYPE82) .. " Unknown",
+    tooltip = GetString(SI_SPECIALIZEDITEMTYPE82) .. " Unknown",
   }
 
   -- Repair kits & Crown Repair kits
@@ -1689,20 +1755,6 @@ function BankManagerRules.addFilters()
     tooltip = GetString(BMR_TROPHY_TREASURE_MAP),
   }
 
-  -- Style Pages SI_SPECIALIZEDITEMTYPE852
-  -- |H1:item:147324:124:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h
-  -- /script d(GetItemLinkItemType("|H1:item:147324:124:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h"))
-  -- Style Pages
-  ruleName = "stylePagesRule"
-  BankManagerRules.data[ruleName] = {
-    params = {
-      { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_CONTAINER } },
-      { func = GetItemLinkSpecializedItemType, funcArgs = BMR_ITEMLINK, values = { SPECIALIZED_ITEMTYPE_CONTAINER_STYLE_PAGE } },
-    },
-    name = GetString(BMR_MENU_STYLEPAGES_NAME),
-    tooltip = GetString(BMR_MENU_STYLEPAGES_TOOLTIP),
-  }
-
   -- Craft Surveys
   ruleName = "trophySurveys"
   BankManagerRules.data[ruleName] = {
@@ -1712,32 +1764,6 @@ function BankManagerRules.addFilters()
     },
     name = GetString(BMR_TROPHY_SURVEY_MAP),
     tooltip = GetString(BMR_TROPHY_SURVEY_MAP),
-  }
-
-  -- Frag motifs Known
-  -- SI_LORE_LIBRARY_IN_LIBRARY
-  ruleName = "trophyFragMotifsKnown"
-  BankManagerRules.data[ruleName] = {
-    params = {
-      { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_RACIAL_STYLE_MOTIF } },
-      { func = GetItemLinkSpecializedItemType, funcArgs = BMR_ITEMLINK, values = { SPECIALIZED_ITEMTYPE_RACIAL_STYLE_MOTIF_CHAPTER } },
-      { func = IsItemLinkBookKnown, funcArgs = BMR_ITEMLINK, values = { true } },
-    },
-    name = GetString(BMR_TROPHY_MOTIF_FRAGMENT_KNOWN),
-    tooltip = GetString(BMR_TROPHY_MOTIF_FRAGMENT_KNOWN),
-  }
-
-  -- Frag motifs Unknown
-  -- SI_LORE_LIBRARY_USE_TO_LEARN
-  ruleName = "trophyFragMotifsUnknown"
-  BankManagerRules.data[ruleName] = {
-    params = {
-      { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_RACIAL_STYLE_MOTIF } },
-      { func = GetItemLinkSpecializedItemType, funcArgs = BMR_ITEMLINK, values = { SPECIALIZED_ITEMTYPE_RACIAL_STYLE_MOTIF_CHAPTER } },
-      { func = IsItemLinkBookKnown, funcArgs = BMR_ITEMLINK, values = { false } },
-    },
-    name = GetString(BMR_TROPHY_MOTIF_FRAGMENT_UNKNOWN),
-    tooltip = GetString(BMR_TROPHY_MOTIF_FRAGMENT_UNKNOWN),
   }
 
   -- Recipe Fragments -- share same rules as IC trophies (sewers & exterior)
@@ -1750,16 +1776,27 @@ function BankManagerRules.addFilters()
     name = GetString(BMR_TROPHY_RECIPE_FRAGMENT),
     tooltip = GetString(BMR_TROPHY_RECIPE_FRAGMENT),
   }
-
-  -- IC Trophies (dungeons)
+-- /script d(GetItemLinkItemType("|H1:item:64487:123:50:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h"))
+  -- Trophy Key Fragments
   ruleName = "trophyICPVE"
   BankManagerRules.data[ruleName] = {
     params = {
-      { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_TROPHY } },
-      { func = GetItemLinkSpecializedItemType, funcArgs = BMR_ITEMLINK, values = { SPECIALIZED_ITEMTYPE_TROPHY_KEY_FRAGMENT } },
+      { func = GetItemLinkItemType, funcArgs = BMR_ITEMTYPE, values = { ITEMTYPE_TROPHY } },
+      { func = GetItemLinkItemType, funcArgs = BMR_ITEMTYPE_SPECIALIZED, values = { SPECIALIZED_ITEMTYPE_TROPHY_KEY_FRAGMENT } },
     },
-    name = GetString(BMR_TROPHY_IMPERIALCITY_PVE),
-    tooltip = GetString(BMR_TROPHY_IMPERIALCITY_PVE),
+    name = GetString(SI_SPECIALIZEDITEMTYPE102),
+    tooltip = GetString(SI_SPECIALIZEDITEMTYPE102),
+  }
+
+  -- Trophy Toy
+  ruleName = "trophyToy"
+  BankManagerRules.data[ruleName] = {
+    params = {
+      { func = GetItemLinkItemType, funcArgs = BMR_ITEMTYPE, values = { ITEMTYPE_TROPHY } },
+      { func = GetItemLinkItemType, funcArgs = BMR_ITEMTYPE_SPECIALIZED, values = { SPECIALIZED_ITEMTYPE_TROPHY_TOY } },
+    },
+    name = GetString(SI_SPECIALIZEDITEMTYPE111),
+    tooltip = GetString(SI_SPECIALIZEDITEMTYPE111),
   }
 
   -- Recipes known
