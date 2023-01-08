@@ -441,6 +441,15 @@ local function GetNumberOfTraits(itemLink)
 
 end
 
+local function IsCompanionItem(itemLink)
+  local itemType, specializedItemType = GetItemLinkItemType(itemLink)
+  local isCompanionItem = false
+  if itemType == ITEMTYPE_WEAPON or itemType == ITEMTYPE_ARMOR then
+    isCompanionItem = GetItemLinkActorCategory(itemLink) == GAMEPLAY_ACTOR_CATEGORY_COMPANION
+  end
+  return isCompanionItem
+end
+
 -- Rules definitions
 function BankManagerRules.addFiltersTaggedAll()
 
@@ -947,6 +956,27 @@ function BankManagerRules.addFiltersTaggedAll()
 
   -- Housing GBank
   ruleName = "HousingGBank"
+  BankManagerRules.data[ruleName] = { true }
+
+  BankManagerRules.defaults[ruleName] = {}
+  BankManagerRules.defaults[ruleName].associatedGuild = GetString(BMR_ACTION_NOTSET)
+
+  -- Companion All
+  ruleName = "companionAll"
+  BankManagerRules.data[ruleName] = { true }
+
+  BankManagerRules.defaults[ruleName] = {}
+  BankManagerRules.defaults[ruleName].onlyIfNotFullStack = true
+
+  -- Companion Stacks
+  ruleName = "companionStacks"
+  BankManagerRules.data[ruleName] = { true }
+
+  BankManagerRules.defaults[ruleName] = {}
+  BankManagerRules.defaults[ruleName].onlyStacks = 1
+
+  -- Companion GBank
+  ruleName = "companionGBank"
   BankManagerRules.data[ruleName] = { true }
 
   BankManagerRules.defaults[ruleName] = {}
@@ -1776,7 +1806,7 @@ function BankManagerRules.addFilters()
     name = GetString(BMR_TROPHY_RECIPE_FRAGMENT),
     tooltip = GetString(BMR_TROPHY_RECIPE_FRAGMENT),
   }
--- /script d(GetItemLinkItemType("|H1:item:64487:123:50:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h"))
+  -- /script d(GetItemLinkItemType("|H1:item:64487:123:50:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|h|h"))
   -- Trophy Key Fragments
   ruleName = "trophyICPVE"
   BankManagerRules.data[ruleName] = {
@@ -1804,11 +1834,11 @@ function BankManagerRules.addFilters()
   BankManagerRules.data[ruleName] = {
     params = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_RECIPE } },
-      { func = GetItemLinkSpecializedItemType, funcArgs = BMR_ITEMLINK, values = { SPECIALIZED_ITEMTYPE_RECIPE_ALCHEMY_FORMULA_FURNISHING, SPECIALIZED_ITEMTYPE_RECIPE_BLACKSMITHING_DIAGRAM_FURNISHING, SPECIALIZED_ITEMTYPE_RECIPE_CLOTHIER_PATTERN_FURNISHING, SPECIALIZED_ITEMTYPE_RECIPE_ENCHANTING_SCHEMATIC_FURNISHING, SPECIALIZED_ITEMTYPE_RECIPE_PROVISIONING_DESIGN_FURNISHING, SPECIALIZED_ITEMTYPE_RECIPE_WOODWORKING_BLUEPRINT_FURNISHING } },
+      { func = GetItemLinkSpecializedItemType, funcArgs = BMR_ITEMLINK, values = { SPECIALIZED_ITEMTYPE_RECIPE_ALCHEMY_FORMULA_FURNISHING, SPECIALIZED_ITEMTYPE_RECIPE_BLACKSMITHING_DIAGRAM_FURNISHING, SPECIALIZED_ITEMTYPE_RECIPE_CLOTHIER_PATTERN_FURNISHING, SPECIALIZED_ITEMTYPE_RECIPE_ENCHANTING_SCHEMATIC_FURNISHING, SPECIALIZED_ITEMTYPE_RECIPE_JEWELRYCRAFTING_SKETCH_FURNISHING, SPECIALIZED_ITEMTYPE_RECIPE_PROVISIONING_DESIGN_FURNISHING, SPECIALIZED_ITEMTYPE_RECIPE_WOODWORKING_BLUEPRINT_FURNISHING } },
       { func = IsItemLinkRecipeKnown, funcArgs = BMR_ITEMLINK, values = { true } },
     },
-    name = GetString(SI_RECIPE_ALREADY_KNOWN),
-    tooltip = GetString(SI_RECIPE_ALREADY_KNOWN),
+    name = GetString(SI_INSTANCEDISPLAYTYPE8) .. " " .. GetString(SI_ITEMTYPE29) .. " Known",
+    tooltip = GetString(SI_INSTANCEDISPLAYTYPE8) .. " " .. GetString(SI_ITEMTYPE29) .. " Known",
   }
 
   -- Recipes Unknown
@@ -1819,8 +1849,8 @@ function BankManagerRules.addFilters()
       { func = GetItemLinkSpecializedItemType, funcArgs = BMR_ITEMLINK, values = { SPECIALIZED_ITEMTYPE_RECIPE_ALCHEMY_FORMULA_FURNISHING, SPECIALIZED_ITEMTYPE_RECIPE_BLACKSMITHING_DIAGRAM_FURNISHING, SPECIALIZED_ITEMTYPE_RECIPE_CLOTHIER_PATTERN_FURNISHING, SPECIALIZED_ITEMTYPE_RECIPE_ENCHANTING_SCHEMATIC_FURNISHING, SPECIALIZED_ITEMTYPE_RECIPE_PROVISIONING_DESIGN_FURNISHING, SPECIALIZED_ITEMTYPE_RECIPE_WOODWORKING_BLUEPRINT_FURNISHING } },
       { func = IsItemLinkRecipeKnown, funcArgs = BMR_ITEMLINK, values = { false } },
     },
-    name = GetString(SI_ITEM_FORMAT_STR_UNKNOWN_RECIPE),
-    tooltip = GetString(SI_ITEM_FORMAT_STR_UNKNOWN_RECIPE),
+    name = GetString(SI_INSTANCEDISPLAYTYPE8) .. " " .. GetString(SI_ITEMTYPE29) .. " Unknown",
+    tooltip = GetString(SI_INSTANCEDISPLAYTYPE8) .. " " .. GetString(SI_ITEMTYPE29) .. " Unknown",
   }
 
   -- Furnitures
@@ -1841,6 +1871,17 @@ function BankManagerRules.addFilters()
     },
     name = GetString("SI_ITEMTYPE", ITEMTYPE_FURNISHING_MATERIAL),
     tooltip = GetString("SI_ITEMTYPE", ITEMTYPE_FURNISHING_MATERIAL),
+  }
+
+  -- Companion Items
+  ruleName = "companionItems"
+  BankManagerRules.data[ruleName] = {
+    params = {
+      { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_WEAPON, ITEMTYPE_ARMOR } },
+      { func = IsCompanionItem, funcArgs = BMR_ITEMLINK, values = { true } },
+    },
+    name = GetString(SI_INSTANCEDISPLAYTYPE11) .. " All Items",
+    tooltip = GetString(SI_INSTANCEDISPLAYTYPE11) .. " All Items",
   }
 
 end

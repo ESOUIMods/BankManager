@@ -98,6 +98,8 @@ BAG_HOUSE_BANK_TEN 	16
 ** _Returns:_ *bool* _isGuildBankOpen_
 ]]--
 -- Array of queues for moving items to handle bag/bank capacity limits
+BankManagerRevived = {}
+BankManagerRevived.a_test = {} -- for testing and not spamming to chat
 local pushQueue = {}
 local pullQueue = {}
 local movedItems = {
@@ -266,8 +268,6 @@ local defaults = {
 -------------------------------------------------
 ----- Logger Function                       -----
 -------------------------------------------------
-
-BankManagerRevived = { }
 BankManagerRevived.show_log = false
 if LibDebugLogger then
   BankManagerRevived.logger = LibDebugLogger.Create(ADDON_NAME)
@@ -499,45 +499,48 @@ end
 
 -- Check if slotId match a rule
 local function prepareItem(bagId, slotId, checkingGBank)
-  -- Inits
-  if IsItemStolen(bagId, slotId) then return end
-  if db.profiles[actualProfile].protected and IsItemProtected(bagId, slotId) then return end
-
+  local itemLinkMoveRestricted = false
   local itemLink = GetItemLink(bagId, slotId)
+  -- Inits
+  if IsItemStolen(bagId, slotId) then itemLinkMoveRestricted = true end
+  if db.profiles[actualProfile].protected and IsItemProtected(bagId, slotId) then itemLinkMoveRestricted = true end
 
   -- Cannot be moved to bank
-  if bagId == BAG_BACKPACK and GetItemLinkBindType(itemLink) == BIND_TYPE_ON_PICKUP_BACKPACK then return end
+  if bagId == BAG_BACKPACK and GetItemLinkBindType(itemLink) == BIND_TYPE_ON_PICKUP_BACKPACK then itemLinkMoveRestricted = true end
 
   -- Cannot be moved to GBank
-  if checkingGBank and GetItemLinkBindType(itemLink) == BIND_TYPE_ON_PICKUP then return end
+  if checkingGBank and GetItemLinkBindType(itemLink) == BIND_TYPE_ON_PICKUP then itemLinkMoveRestricted = true end
+
+  -- Might be BOE but item is Bound
+  if checkingGBank and IsItemLinkBound(itemLink) then itemLinkMoveRestricted = true end
+
+  if itemLinkMoveRestricted then return end
 
   local itemMatch = false
   local ruleMatch
-  local forBankOnly = not checkingGBank
   -- For each item in bag, look all rules
   for ruleName, ruleData in pairsByKeysAndPosition(dataSorted) do
 
     local action = db.profiles[actualProfile].rules[ruleName].action
     local associatedGuild = db.profiles[actualProfile].rules[ruleName].associatedGuild
 
+    local actionPullValid = action == ACTION_PULL and (bagId == BAG_BANK or bagId == BAG_SUBSCRIBER_BANK)
+    local actionPushValid = action == ACTION_PUSH and bagId == BAG_BACKPACK
+    local actionPushGBankValid = currentGBankName == associatedGuild and action == ACTION_PUSH_GBANK and bagId == BAG_BACKPACK
+    local actionPushBothValid = action == ACTION_PUSH_BOTH and ((currentGBankName == associatedGuild and IsGuildBankOpen()) or IsBankOpen()) and bagId == BAG_BACKPACK
+
     -- Check first if item didn't matched a previous rule
     if not itemMatch then
 
-      local shouldMove
-
-      if checkingGBank then
-        -- the 3rd is here to allow easy rules, see under
-        shouldMove = (currentGBankName == associatedGuild) and ((bagId == BAG_BACKPACK and action == ACTION_PUSH_GBANK) or (bagId == BAG_BACKPACK and action == ACTION_PUSH_BOTH) or (bagId == BAG_BACKPACK and action == ACTION_PUSH))
-      else
-        if action == ACTION_PULL then
-          if db.profiles[actualProfile].rules[ruleName].specialEnabled then
-            hasAnySpecialPullToDo = true
-          else
-            hasAnyPullToDo = true
-          end
+      local shouldMove = false
+      if action == ACTION_PULL then
+        if db.profiles[actualProfile].rules[ruleName].specialEnabled then
+          hasAnySpecialPullToDo = true
+        else
+          hasAnyPullToDo = true
         end
-        shouldMove = (bagId == BAG_BACKPACK and action == ACTION_PUSH) or ((bagId == BAG_BANK or bagId == BAG_SUBSCRIBER_BANK) and action == ACTION_PULL) or (bagId == BAG_BACKPACK and action == ACTION_PUSH_BOTH)
       end
+      if actionPullValid or actionPushValid or actionPushGBankValid or actionPushBothValid then shouldMove = true end
       -- If rule is well writen and set to do something
       if ruleData.params and shouldMove then
 
@@ -563,15 +566,15 @@ local function prepareItem(bagId, slotId, checkingGBank)
                 end
               end
 
-          elseif ruleParamData.funcArgs == BMR_ITEMTYPE_SPECIALIZED then
-            for funcChoices, funcMatches in ipairs(ruleParamData.values) do
-              local _, specializedItemType = funcToUse(itemLink)
-              if specializedItemType == funcMatches then
-                itemMatchValue = true
+            elseif ruleParamData.funcArgs == BMR_ITEMTYPE_SPECIALIZED then
+              for funcChoices, funcMatches in ipairs(ruleParamData.values) do
+                local _, specializedItemType = funcToUse(itemLink)
+                if specializedItemType == funcMatches then
+                  itemMatchValue = true
+                end
               end
-            end
 
-          elseif ruleParamData.funcArgs == BMR_BAG_AND_SLOT then
+            elseif ruleParamData.funcArgs == BMR_BAG_AND_SLOT then
               for funcChoices, funcMatches in ipairs(ruleParamData.values) do
                 if funcToUse(bagId, slotId) == funcMatches then
                   itemMatchValue = true
@@ -594,15 +597,7 @@ local function prepareItem(bagId, slotId, checkingGBank)
             --d(itemLink .. " (" .. bagId .. " " .. slotId.. ") ruleMatch:" .. ruleName .. " #" .. ruleParamIndex)
           end
 
-        end
-
-        -- Our item matched a rule - was it an ACTION_PUSH + checkingGBank ?
-        if itemMatch and checkingGBank and action == ACTION_PUSH then
-          -- this item must not be queued, it has been flagged to go to bank only
-          forBankOnly = true
-          --BankManagerRevived:dm("Debug", string.format("ITEM MATCH GUILD BANK ONLY: itemLink : %s ; ( bagId: %s ; slotId: %s ) ; ruleMatch: %s ; activeBankBag: %s : set flag 'For Bank Only' ", itemLink, bagId, slotId, ruleMatch, activeBankBag))
-          --d(itemLink .. " (" .. bagId .. " " .. slotId.. ") ruleMatch:" .. ruleMatch .. " set flag 'For Bank Only' ")
-        end
+        end -- end params loop
 
       end
     else
@@ -610,26 +605,17 @@ local function prepareItem(bagId, slotId, checkingGBank)
     end
   end
 
-  if itemMatch then
-    if checkingGBank then
-      if not forBankOnly then
-        --d(itemLink .. " (" .. bagId .. " " .. slotId.. ") ruleMatch:" .. ruleMatch .. " is not flagged for Bank Only. Will move")
-        --BankManagerRevived:dm("Debug", string.format("ITEM MATCH Guild Bank: itemLink : %s ; ( bagId: %s ; slotId: %s ) ; ruleMatch: %s ; activeBankBag: %s : is not flagged for Bank Only. Will move.", itemLink, bagId, slotId, ruleMatch, activeBankBag))
-        queueAction(ruleMatch, bagId, slotId)
-      else
-        --BankManagerRevived:dm("Debug", string.format("ITEM MATCH Guild Bank: itemLink : %s ; ( bagId: %s ; slotId: %s ) ; ruleMatch: %s ; activeBankBag: %s : is flagged for Bank Only. Don't move.", itemLink, bagId, slotId, ruleMatch, activeBankBag))
-        --d(itemLink .. " (" .. bagId .. " " .. slotId.. ") ruleMatch:" .. ruleMatch .. " is flagged for Bank Only. Don't move")
-      end
-    else
-      --BankManagerRevived:dm("Debug", string.format("ITEM MATCH: itemLink : %s ; ( bagId: %s ; slotId: %s ) ; ruleMatch: %s ; activeBankBag: %s. Queueing for move.", itemLink, bagId, slotId, ruleMatch, activeBankBag))
-      queueAction(ruleMatch, bagId, slotId)
-    end
+  if itemMatch and ruleMatch ~= nil then
+    queueAction(ruleMatch, bagId, slotId)
   end
 
 end
 
 -- Move all items defined in push/pull arrays
-local function moveItems(atGBank, errorReasonAtGBank)
+local function moveItems(errorReasonAtGBank)
+  BankManagerRevived:dm("Debug", "moveItems")
+  local atGuildBank = IsGuildBankOpen()
+  local atBank = IsBankOpen()
 
   -- Our bagcache, because game don't have it in realtime
   local tinyBagCache = {
@@ -695,13 +681,14 @@ local function moveItems(atGBank, errorReasonAtGBank)
 
   -- Thanks Merlight & circonian, FindFirstEmptySlotInBag don't refresh in realtime.
   local function FindEmptySlotInBag(bagId)
+    BankManagerRevived:dm("Debug", "FindEmptySlotInBag")
 
     if isESOPlusSubscriber and bagId == BAG_BANK and freeSlots[bagId] == 0 then
       bagId = BAG_SUBSCRIBER_BANK
     end
 
     --d("FindEmptySlotInBag (" .. bagId .. ")" .. " ; isESOPlusSubscriber=" .. tostring(isESOPlusSubscriber))
-    if atGBank or (bagId == BAG_BANK and not isESOPlusSubscriber and freeSlots[bagId] > db.profiles[actualProfile].overfill) or (isESOPlusSubscriber and (bagId == BAG_BANK or bagId == BAG_SUBSCRIBER_BANK) and freeSlots[BAG_SUBSCRIBER_BANK] > db.profiles[actualProfile].overfill) or (bagId == BAG_BACKPACK and freeSlots[bagId] > db.profiles[actualProfile].overfill) then
+    if atGuildBank or (bagId == BAG_BANK and not isESOPlusSubscriber and freeSlots[bagId] > db.profiles[actualProfile].overfill) or (isESOPlusSubscriber and (bagId == BAG_BANK or bagId == BAG_SUBSCRIBER_BANK) and freeSlots[BAG_SUBSCRIBER_BANK] > db.profiles[actualProfile].overfill) or (bagId == BAG_BACKPACK and freeSlots[bagId] > db.profiles[actualProfile].overfill) then
       for slotIndex = tinyBagCacheFirstSlot[bagId], (GetBagSize(bagId) - 1) do
         if not SHARED_INVENTORY.bagCache[bagId][slotIndex] and not tinyBagCache[bagId][slotIndex] then
           --d("tinyBagCache -> " .. bagId .. " " .. slotIndex)
@@ -717,6 +704,7 @@ local function moveItems(atGBank, errorReasonAtGBank)
 
   -- Return the slotIndex if the stack is not fulfilled or a newslot
   local function FindItemInBag(bagIdTo, bagIdFrom, slotIdFrom, maxStack)
+    BankManagerRevived:dm("Debug", "FindItemInBag")
     --d("FindItemInBag")
     local itemInstanceId = SHARED_INVENTORY.bagCache[bagIdFrom][slotIdFrom].itemInstanceId
     for slotId, data in pairs(SHARED_INVENTORY.bagCache[bagIdTo]) do
@@ -739,6 +727,7 @@ local function moveItems(atGBank, errorReasonAtGBank)
   end
 
   local function FindDestSlotInBag(stackCountTo, bagIdTo, bagIdFrom, slotIdFrom, maxStack)
+    BankManagerRevived:dm("Debug", "FindDestSlotInBag")
     --d("FindDestSlotInBag " .. bagIdFrom .. " " .. slotIdFrom)
     if stackCountTo > 0 then
       return FindItemInBag(bagIdTo, bagIdFrom, slotIdFrom, maxStack)
@@ -749,6 +738,7 @@ local function moveItems(atGBank, errorReasonAtGBank)
   end
 
   local function moveItemInSlot(bagIdFrom, slotIdFrom, bagIdTo, slotIdTo, qtyToMove, itemLink)
+    BankManagerRevived:dm("Debug", "moveItemInSlot")
     if IsProtectedFunction("RequestMoveItem") then
       CallSecureProtected("RequestMoveItem", bagIdFrom, slotIdFrom, bagIdTo, slotIdTo, qtyToMove)
     else
@@ -766,6 +756,7 @@ local function moveItems(atGBank, errorReasonAtGBank)
 
   -- Move a slot or a partial slot to GBank
   local function moveItemInGBank(bagIdFrom, slotIdFrom, qtyToMove, itemLink)
+    BankManagerRevived:dm("Debug", "moveItemInGBank")
 
     --d("moveItemInGBank")
     if qtyToMove then
@@ -786,6 +777,7 @@ local function moveItems(atGBank, errorReasonAtGBank)
   end
 
   local function StackInfoInBag(bagToCheck, slotIdFrom, bagIdFrom, itemLink)
+    BankManagerRevived:dm("Debug", "StackInfoInBag")
 
     local stackCountBackpack, stackCountBank
 
@@ -809,6 +801,7 @@ local function moveItems(atGBank, errorReasonAtGBank)
   end
 
   local function RestackBags()
+    BankManagerRevived:dm("Debug", "RestackBags")
     -- Sometimes needed (2 stacks, first 79, 2nd 200, but limit is 200 -> will push 79 , then 121, resulting 2 stacks), maybe need to optimize tinyBagCache
     StackBag(BAG_BANK)
     StackBag(BAG_SUBSCRIBER_BANK)
@@ -816,6 +809,7 @@ local function moveItems(atGBank, errorReasonAtGBank)
   end
 
   local function FinishBankMoves()
+    BankManagerRevived:dm("Debug", "FinishBankMoves")
 
     hasAnyPullToDo = nil
     pushQueue = {}
@@ -842,6 +836,7 @@ local function moveItems(atGBank, errorReasonAtGBank)
   end
 
   local function tryMoveSlots(data, bagIdTo, restartAt)
+    BankManagerRevived:dm("Debug", "tryMoveSlots")
 
     -- Need to push/pull?
     if not restartAt then restartAt = 1 end
@@ -1019,22 +1014,37 @@ local function moveItems(atGBank, errorReasonAtGBank)
   end
 
   local function doSingleMove(moveData)
+    BankManagerRevived:dm("Debug", "doSingleMove")
+    local associatedGuild = db.profiles[actualProfile].rules[moveData.ruleName].associatedGuild
+    local action = db.profiles[actualProfile].rules[moveData.ruleName].action
+    local onlyIfNotFullStack = db.profiles[actualProfile].rules[moveData.ruleName].onlyIfNotFullStack
+    local onlyStacksValue
+    if type(db.profiles[actualProfile].rules[moveData.ruleName].onlyStacks) == 'boolean' then onlyStacksValue = 1
+    else onlyStacksValue = db.profiles[actualProfile].rules[moveData.ruleName].onlyStacks end
+    local validGuild = associatedGuild == currentGBankName
 
-    if db.profiles[actualProfile].rules[moveData.ruleName].associatedGuild and db.profiles[actualProfile].rules[moveData.ruleName].associatedGuild == currentGBankName then
+    local actionPushGBankValid = validGuild and action == ACTION_PUSH_GBANK and moveData.bagId == BAG_BACKPACK
+    local actionPushBothValid = validGuild and (action == ACTION_PUSH_BOTH and IsGuildBankOpen()) and moveData.bagId == BAG_BACKPACK
+    local shouldPushGuildBank = onlyIfNotFullStack and (actionPushGBankValid or actionPushBothValid)
+
+    if validGuild then
+      BankManagerRevived:dm("Debug", "validGuild")
 
       --d(moveData.ruleName .. " will check qty and if, move " .. GetItemName(moveData.bagId, moveData.slotId))
 
       -- Is slot at max size in bank ?
       local isFullStack, stackSize, maxStack, stackCountBackpack, stackCountBank = StackInfoInBag(BAG_BANK, moveData.slotId, moveData.bagId, moveData.itemLink)
+      local stackSizeAndStackCountBank = stackSize + stackCountBank
+      local stackSizeAndCountGreaterThanMaxStack = stackSizeAndStackCountBank > maxStack
+      local stackSizeAndCountGreaterThanOnlyStacksValueTimesMaxStack = stackSizeAndStackCountBank > onlyStacksValue * maxStack
       local itemMoved = false
       local qtyToMove
 
-      if db.profiles[actualProfile].rules[moveData.ruleName].onlyStacks == true
-        or db.profiles[actualProfile].rules[moveData.ruleName].onlyStacks == false then
-        db.profiles[actualProfile].rules[moveData.ruleName].onlyStacks = 1
-      end
-
-      if db.profiles[actualProfile].rules[moveData.ruleName].action == ACTION_PUSH_GBANK then
+      BankManagerRevived:dm("Debug", tostring(stackSizeAndCountGreaterThanMaxStack))
+      BankManagerRevived:dm("Debug", tostring(stackSizeAndCountGreaterThanOnlyStacksValueTimesMaxStack))
+      -- TODO verify shouldPushGuildBank will not interfere with the next two conditions
+      if shouldPushGuildBank and (not stackSizeAndCountGreaterThanMaxStack or not stackSizeAndCountGreaterThanOnlyStacksValueTimesMaxStack) then
+        BankManagerRevived:dm("Debug", "shouldPushGuildBank")
 
         --d(moveData.ruleName .. " is set to push everything to GBank (ACTION_PUSH_GBANK)")
 
@@ -1045,7 +1055,9 @@ local function moveItems(atGBank, errorReasonAtGBank)
           PrintItemsNotMovedToBag(moveData.itemLink, moveData.itemIcon, BAG_GUILDBANK, qtyToMove, currentGBankName)
         end
 
-      elseif db.profiles[actualProfile].rules[moveData.ruleName].onlyIfNotFullStack and stackSize + stackCountBank > maxStack then
+      -- TODO the next two conditions are the same, revise because the previous condition changed
+      elseif onlyIfNotFullStack and stackSizeAndCountGreaterThanMaxStack then
+        BankManagerRevived:dm("Debug", "onlyIfNotFullStack, stackSize and bank > maxStack")
 
         qtyToMove = math.min(stackSize, stackCountBank + stackSize - maxStack)
 
@@ -1061,7 +1073,8 @@ local function moveItems(atGBank, errorReasonAtGBank)
           PrintItemsNotMovedToBag(moveData.itemLink, moveData.itemIcon, BAG_GUILDBANK, qtyToMove, currentGBankName)
         end
 
-      elseif not db.profiles[actualProfile].rules[moveData.ruleName].onlyIfNotFullStack and stackSize + stackCountBank > db.profiles[actualProfile].rules[moveData.ruleName].onlyStacks * maxStack then
+      elseif not onlyIfNotFullStack and stackSizeAndCountGreaterThanOnlyStacksValueTimesMaxStack then
+        BankManagerRevived:dm("Debug", "not onlyIfNotFullStack, onlyStacks * maxStack")
 
         qtyToMove = math.min(stackSize, stackCountBank + stackSize - maxStack)
 
@@ -1098,6 +1111,7 @@ local function moveItems(atGBank, errorReasonAtGBank)
   end
 
   local function tryMoveSlotsToGBank()
+    BankManagerRevived:dm("Debug", "tryMoveSlotsToGBank")
 
     -- Need to push/pull?
     if #pushQueue > 0 then
@@ -1146,10 +1160,11 @@ local function moveItems(atGBank, errorReasonAtGBank)
 
   end
 
-  if atGBank then
+  if atGuildBank then
 
     freeSlots[BAG_BACKPACK] = GetNumBagFreeSlots(BAG_BACKPACK)
 
+    BankManagerRevived:dm("Debug", string.format("errorReasonAtGBank: %s", tostring(errorReasonAtGBank)))
     if not errorReasonAtGBank then
       tryMoveSlotsToGBank(errorReasonAtGBank)
     elseif errorReasonAtGBank == GUILD_BANK_TRANSFER_PENDING then
@@ -1475,10 +1490,10 @@ local function doInteractionWithGBank()
 
       --d("Registering events")
       -- This will make the loop, because GBank cannot be looped
-      EVENT_MANAGER:RegisterForEvent(ADDON_NAME, EVENT_GUILD_BANK_TRANSFER_ERROR, function() moveItems(true) end)
-      EVENT_MANAGER:RegisterForEvent(ADDON_NAME, EVENT_GUILD_BANK_ITEM_ADDED, function(_, errorReason) moveItems(true, errorReason) end)
+      EVENT_MANAGER:RegisterForEvent(ADDON_NAME, EVENT_GUILD_BANK_TRANSFER_ERROR, function(eventCode, reason) moveItems(reason) end)
+      EVENT_MANAGER:RegisterForEvent(ADDON_NAME, EVENT_GUILD_BANK_ITEM_ADDED, function(eventCode, slotId, addedByLocalPlayer, itemSoundCategory, isLastUpdateForMessage) moveItems() end)
 
-      moveItems(true)
+      moveItems()
     else
       inProgress = false
     end
@@ -2314,6 +2329,16 @@ local function LAMSubmenu(subMenu)
       table.insert(submenuControls, panelRule("alchemyPoisonSolvent" .. alchemySkill))
     end
 
+    -- Companion
+  elseif subMenu == "companion" then
+    table.insert(submenuControls, panelOnlyIfNotFullStack("companion", "companionAll"))
+    table.insert(submenuControls, panelGuildBank("companion", "companionGBank"))
+    table.insert(submenuControls, panelMaxStacks("companion", "companionAll", "companionStacks"))
+
+    table.insert(submenuControls, { type = "texture", image = "EsoUI/Art/Miscellaneous/horizontalDivider.dds", imageWidth = 510, imageHeight = 4 })
+
+    table.insert(submenuControls, panelRule("companionItems"))
+
     -- Enchanting
   elseif subMenu == "enchanting" then
     table.insert(submenuControls, panelOnlyIfNotFullStack("enchanting", "enchantingAll"))
@@ -2461,6 +2486,7 @@ local function buildLAMPanel()
   local cookingSubmenuControls = LAMSubmenu("cooking")
   local enchantmentSubmenuControls = LAMSubmenu("enchanting")
   local alchemySubmenuControls = LAMSubmenu("alchemy")
+  local companionsSubmenuControls = LAMSubmenu("companion")
   local trophiesSubmenuControls = LAMSubmenu("trophies")
   local diverseSubmenuControls = LAMSubmenu("misc")
   local housingSubmenuControls = LAMSubmenu("housing")
@@ -2661,6 +2687,11 @@ local function buildLAMPanel()
       type = "submenu",
       name = zo_strformat("<<1>>", GetString(SI_TRADESKILLTYPE4)),
       controls = alchemySubmenuControls,
+    },
+    {
+      type = "submenu",
+      name = zo_strformat("<<1>>", GetString(SI_ITEMFILTERTYPE27)),
+      controls = companionsSubmenuControls,
     },
     {
       type = "submenu",
