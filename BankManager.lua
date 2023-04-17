@@ -56,6 +56,17 @@ local ACTION_PULL = 3
 local ACTION_PUSH_GBANK = 4
 local ACTION_PUSH_BOTH = 5
 
+local function GetActionName(action)
+  local actionTable = {
+    [ACTION_NOTSET] = "ACTION_NOTSET",
+    [ACTION_PUSH] = "ACTION_PUSH",
+    [ACTION_PULL] = "ACTION_PULL",
+    [ACTION_PUSH_GBANK] = "ACTION_PUSH_GBANK",
+    [ACTION_PUSH_BOTH] = "ACTION_PUSH_BOTH",
+  }
+  return actionTable[action]
+end
+
 --[[TODO Optional Keyword, Returns true when keywordCondition.acceptedKeyword[arg1] is true ]]--
 local BMR_RULEWRITER_VALUE_OPTIONAL_KEYWORD = 1
 --[[TODO With Operator, Returns true when keywordCondition.acceptedKeyword[arg1] is true ]]--
@@ -514,6 +525,9 @@ local function prepareItem(bagId, slotId, checkingGBank)
   -- Might be BOE but item is Bound
   if checkingGBank and IsItemLinkBound(itemLink) then itemLinkMoveRestricted = true end
 
+  -- Might be Unique and you can't store that in the Guild Bank
+  if checkingGBank and IsItemLinkUnique(itemLink) then itemLinkMoveRestricted = true end
+
   if itemLinkMoveRestricted then return end
 
   local itemMatch = false
@@ -521,13 +535,18 @@ local function prepareItem(bagId, slotId, checkingGBank)
   -- For each item in bag, look all rules
   for ruleName, ruleData in pairsByKeysAndPosition(dataSorted) do
 
-    local action = db.profiles[actualProfile].rules[ruleName].action
+    local action = db.profiles[actualProfile].rules[ruleName].action or ACTION_NOTSET
     local associatedGuild = db.profiles[actualProfile].rules[ruleName].associatedGuild
+    local actionAssigned = action ~= ACTION_NOTSET
+    local guildMatch = currentGBankName == associatedGuild
+    -- table.insert(BankManagerRevived.a_test, string.format(tostring(ruleName) .. ":" .. GetItemLinkName(itemLink) .. " : currentGBankName: %s : associatedGuild: %s", tostring(currentGBankName), tostring(associatedGuild)))
 
     local actionPullValid = action == ACTION_PULL and (bagId == BAG_BANK or bagId == BAG_SUBSCRIBER_BANK)
     local actionPushValid = action == ACTION_PUSH and bagId == BAG_BACKPACK
-    local actionPushGBankValid = currentGBankName == associatedGuild and action == ACTION_PUSH_GBANK and bagId == BAG_BACKPACK
-    local actionPushBothValid = action == ACTION_PUSH_BOTH and ((currentGBankName == associatedGuild and IsGuildBankOpen()) or IsBankOpen()) and bagId == BAG_BACKPACK
+    local actionPushGBankValid = guildMatch and action == ACTION_PUSH_GBANK and bagId == BAG_BACKPACK
+    local actionPushBothValid = action == ACTION_PUSH_BOTH and ((guildMatch and IsGuildBankOpen()) or IsBankOpen()) and bagId == BAG_BACKPACK
+    -- table.insert(BankManagerRevived.a_test, string.format(tostring(ruleName) .. ":" .. GetItemLinkName(itemLink) .. " : actionAssigned: %s : guildMatch: %s : actionPullValid: %s", tostring(actionAssigned), tostring(guildMatch), tostring(actionPullValid)))
+    -- table.insert(BankManagerRevived.a_test, string.format(tostring(ruleName) .. ":" .. GetItemLinkName(itemLink) .. " : actionPushValid: %s : actionPushGBankValid: %s : actionPushBothValid: %s", tostring(actionPushValid), tostring(actionPushGBankValid), tostring(actionPushBothValid)))
 
     -- Check first if item didn't matched a previous rule
     if not itemMatch then
@@ -540,8 +559,9 @@ local function prepareItem(bagId, slotId, checkingGBank)
           hasAnyPullToDo = true
         end
       end
-      if actionPullValid or actionPushValid or actionPushGBankValid or actionPushBothValid then shouldMove = true end
+      if actionAssigned and (actionPullValid or actionPushValid or actionPushGBankValid or actionPushBothValid) then shouldMove = true end
       -- If rule is well writen and set to do something
+      -- table.insert(BankManagerRevived.a_test, string.format(tostring(ruleName) .. ":" .. GetItemLinkName(itemLink) .. " : shouldMove: %s : action: %s", tostring(shouldMove), GetActionName(action)))
       if ruleData.params and shouldMove then
 
         for ruleParamIndex, ruleParamData in ipairs(ruleData.params) do
@@ -606,6 +626,7 @@ local function prepareItem(bagId, slotId, checkingGBank)
   end
 
   if itemMatch and ruleMatch ~= nil then
+    -- table.insert(BankManagerRevived.a_test, string.format(tostring(ruleMatch) .. ":" .. GetItemLinkName(itemLink) .. " itemMatch: %s", tostring(itemMatch)))
     queueAction(ruleMatch, bagId, slotId)
   end
 
@@ -1055,7 +1076,7 @@ local function moveItems(errorReasonAtGBank)
           PrintItemsNotMovedToBag(moveData.itemLink, moveData.itemIcon, BAG_GUILDBANK, qtyToMove, currentGBankName)
         end
 
-      -- TODO the next two conditions are the same, revise because the previous condition changed
+        --[[TODO the next two conditions are the same, revise because the previous condition changed]]--
       elseif onlyIfNotFullStack and stackSizeAndCountGreaterThanMaxStack then
         BankManagerRevived:dm("Debug", "onlyIfNotFullStack, stackSize and bank > maxStack")
 

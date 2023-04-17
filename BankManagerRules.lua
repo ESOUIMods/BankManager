@@ -1470,7 +1470,7 @@ function BankManagerRules.addFilters()
   BankManagerRules.data[ruleName] = {
     params = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_INGREDIENT } },
-      { func = GetItemLinkIngredientType, funcArgs = BMR_ITEMLINK, values = { 1 } },
+      { func = GetItemLinkItemType, funcArgs = BMR_ITEMTYPE_SPECIALIZED, values = { SPECIALIZED_ITEMTYPE_INGREDIENT_FOOD_ADDITIVE } },
     },
     name = zo_strformat("<<1>> - <<2>>", GetString("SI_ITEMTYPE", ITEMTYPE_INGREDIENT), GetString("SI_ITEMTYPE", ITEMTYPE_FOOD)),
     tooltip = zo_strformat("<<1>> - <<2>>", GetString("SI_ITEMTYPE", ITEMTYPE_INGREDIENT), GetString("SI_ITEMTYPE", ITEMTYPE_FOOD)),
@@ -1481,7 +1481,7 @@ function BankManagerRules.addFilters()
   BankManagerRules.data[ruleName] = {
     params = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_INGREDIENT } },
-      { func = GetItemLinkIngredientType, funcArgs = BMR_ITEMLINK, values = { 2 } },
+      { func = GetItemLinkItemType, funcArgs = BMR_ITEMTYPE_SPECIALIZED, values = { SPECIALIZED_ITEMTYPE_INGREDIENT_DRINK_ADDITIVE } },
     },
     name = zo_strformat("<<1>> - <<2>>", GetString("SI_ITEMTYPE", ITEMTYPE_INGREDIENT), GetString("SI_ITEMTYPE", ITEMTYPE_DRINK)),
     tooltip = zo_strformat("<<1>> - <<2>>", GetString("SI_ITEMTYPE", ITEMTYPE_INGREDIENT), GetString("SI_ITEMTYPE", ITEMTYPE_DRINK)),
@@ -1514,7 +1514,7 @@ function BankManagerRules.addFilters()
   BankManagerRules.data[ruleName] = {
     params = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_RECIPE } },
-      { func = GetItemLinkSpecializedItemType, funcArgs = BMR_ITEMLINK, values = { SPECIALIZED_ITEMTYPE_RECIPE_PROVISIONING_STANDARD_FOOD, SPECIALIZED_ITEMTYPE_RECIPE_PROVISIONING_STANDARD_DRINK } },
+      { func = GetItemLinkItemType, funcArgs = BMR_ITEMTYPE_SPECIALIZED, values = { SPECIALIZED_ITEMTYPE_RECIPE_PROVISIONING_STANDARD_FOOD, SPECIALIZED_ITEMTYPE_RECIPE_PROVISIONING_STANDARD_DRINK } },
       { func = IsItemLinkRecipeKnown, funcArgs = BMR_ITEMLINK, values = { true } },
     },
     name = GetString(SI_RECIPE_ALREADY_KNOWN),
@@ -1526,7 +1526,7 @@ function BankManagerRules.addFilters()
   BankManagerRules.data[ruleName] = {
     params = {
       { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_RECIPE } },
-      { func = GetItemLinkSpecializedItemType, funcArgs = BMR_ITEMLINK, values = { SPECIALIZED_ITEMTYPE_RECIPE_PROVISIONING_STANDARD_FOOD, SPECIALIZED_ITEMTYPE_RECIPE_PROVISIONING_STANDARD_DRINK } },
+      { func = GetItemLinkItemType, funcArgs = BMR_ITEMTYPE_SPECIALIZED, values = { SPECIALIZED_ITEMTYPE_RECIPE_PROVISIONING_STANDARD_FOOD, SPECIALIZED_ITEMTYPE_RECIPE_PROVISIONING_STANDARD_DRINK } },
       { func = IsItemLinkRecipeKnown, funcArgs = BMR_ITEMLINK, values = { false } },
     },
     name = GetString(SI_ITEM_FORMAT_STR_UNKNOWN_RECIPE),
