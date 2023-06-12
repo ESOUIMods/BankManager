@@ -30,7 +30,7 @@ local LAM2 = LibAddonMenu2
 local db = { }
 local ADDON_NAME = "BankManagerRevived"
 local displayName = "|c3366FFBank|r Manager |c990000Revived|r |cF4EE42(Jewelry Crafting fix)|r"
-local ADDON_AUTHOR = "Sharlikran, Lexynide, SnowmanDK, Ayantir, Eldrni, Todo"
+local ADDON_AUTHOR = "|cFF9B15Sharlikran|r, Lexynide, SnowmanDK, Ayantir, Eldrni, Todo"
 local ADDON_VERSION = "1.70"
 local ADDON_WEBSITE = "https://www.esoui.com/downloads/info2249-BankManagerRevivedJewelryCraftingfix.html"
 local activeBankBag = 0
@@ -1410,12 +1410,12 @@ local function nextRule(step)
 end
 
 -- onSingleSlotUpdate (only between onOpenBank and onOpenBank+2s)
-local function onSingleSlotUpdate(eventCode, bagId, slotId)
+local function onSingleSlotUpdate(eventCode, bagId, slotIndex, isNewItem, itemSoundCategory, inventoryUpdateReason, stackCountChange, triggeredByCharacterName, triggeredByDisplayName, isLastUpdateForMessage, bonusDropSource)
 
   -- if not, item has been moved elsewhere? We can't use SHARED_INVENTORY, it's still not updated.
-  if GetItemType(bagId, slotId) ~= ITEMTYPE_NONE then
+  if GetItemType(bagId, slotIndex) ~= ITEMTYPE_NONE then
     if not movedItems[bagId] then movedItems[bagId] = {} end -- Handle other moves. BAG_WORN per exemple
-    movedItems[bagId][slotId] = true
+    movedItems[bagId][slotIndex] = true
   end
 
 end
