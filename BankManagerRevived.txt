@@ -11,7 +11,7 @@
 ## Version: 1.70
 ## AddOnVersion: 170
 ## SavedVariables: BMVars
-## DependsOn: LibResearch>=042 LibAddonMenu-2.0>=33
+## DependsOn: LibResearch>=042 LibAddonMenu-2.0>=34
 ## OptionalDependsOn: LibDebugLogger>=196 DebugLogViewer
 
 languages\en.lua
