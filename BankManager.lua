@@ -455,7 +455,7 @@ local function IsItemProtected(bagId, slotId)
 
   --FCO ItemSaver support
   if FCOIS and FCOIS.IsLocked then
-    return FCOIS.IsLocked(bagid, slotindex)
+    return FCOIS.IsLocked(bagId, slotId)
   end
 
   --FilterIt support
@@ -2400,6 +2400,7 @@ local function LAMSubmenu(subMenu)
     table.insert(submenuControls, { type = "texture", image = "EsoUI/Art/Miscellaneous/horizontalDivider.dds", imageWidth = 510, imageHeight = 4 })
 
     table.insert(submenuControls, panelRule("MiscAvaRepair"))
+    table.insert(submenuControls, panelRule("MiscAvaSiege"))
     table.insert(submenuControls, panelRule("MiscContainer"))
     table.insert(submenuControls, panelRule("MiscDisguises"))
     table.insert(submenuControls, panelRule("MiscLockpick"))

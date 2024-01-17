@@ -235,8 +235,10 @@ BankManagerRules.static.rawIngredients = {
   ["26802"] = 3, --Frost Mirriam
   --rare drink additive
   ["27059"] = 3, --Bervez Juice
-  --Caviar
-  ["64222"] = 3, --Caviar
+  --Perfect Roe
+  ["64222"] = 3, --Perfect Roe
+  --Cyrodiil Citrus
+  ["171326"] = 3, --Cyrodiil Citrus
 
 }
 
@@ -1617,6 +1619,16 @@ function BankManagerRules.addFilters()
     },
     name = GetString("SI_ITEMTYPE", ITEMTYPE_AVA_REPAIR),
     tooltip = GetString("SI_ITEMTYPE", ITEMTYPE_AVA_REPAIR),
+  }
+
+  --AvA Siege
+  ruleName = "MiscAvaSiege"
+  BankManagerRules.data[ruleName] = {
+    params = {
+      { func = GetItemLinkItemType, funcArgs = BMR_ITEMLINK, values = { ITEMTYPE_SIEGE } },
+    },
+    name = GetString("SI_ITEMTYPE", ITEMTYPE_SIEGE),
+    tooltip = GetString("SI_ITEMTYPE", ITEMTYPE_SIEGE),
   }
 
   -- Disguises
