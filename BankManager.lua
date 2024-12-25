@@ -132,149 +132,37 @@ local movedItems = {
 
 -- Defaults structure for SV
 -- memory is a bit wasted here, still need to try to find how to dynamically build defaults after the SV pull from file
+local BMR_MAX_PROFILES = 9 -- Adjust as needed
+
 local defaults = {
   worldname = GetWorldName(),
-  actualProfile = 1,
+  actualProfile = {},
+  globalAddonProfile = 1,
   gui_x = -600,
   gui_y = -400,
-  profiles = {
-    [1] = {
-      name = "",
-      defined = true,
-      autoTransfert = true,
-      detailledDisplay = true,
-      summary = true,
-      protected = true,
-      moved = true,
-      detailledNotMoved = true,
-      initialWaitInSecs = 2,
-      overfill = 0,
-      pauseInMs = 0,
-      userRules = "",
-      userRulesAfter = false,
-    },
-    [2] = {
-      name = "",
-      defined = false,
-      autoTransfert = true,
-      detailledDisplay = true,
-      summary = true,
-      protected = true,
-      moved = true,
-      detailledNotMoved = true,
-      initialWaitInSecs = 2,
-      overfill = 0,
-      pauseInMs = 0,
-      userRules = "",
-      userRulesAfter = false,
-    },
-    [3] = {
-      name = "",
-      defined = false,
-      autoTransfert = true,
-      detailledDisplay = true,
-      summary = true,
-      protected = true,
-      moved = true,
-      detailledNotMoved = true,
-      initialWaitInSecs = 2,
-      overfill = 0,
-      pauseInMs = 0,
-      userRules = "",
-      userRulesAfter = false,
-    },
-    [4] = {
-      name = "",
-      defined = false,
-      autoTransfert = true,
-      detailledDisplay = true,
-      summary = true,
-      protected = true,
-      moved = true,
-      detailledNotMoved = true,
-      initialWaitInSecs = 2,
-      overfill = 0,
-      pauseInMs = 0,
-      userRules = "",
-      userRulesAfter = false,
-    },
-    [5] = {
-      name = "",
-      defined = false,
-      autoTransfert = true,
-      detailledDisplay = true,
-      summary = true,
-      protected = true,
-      moved = true,
-      detailledNotMoved = true,
-      initialWaitInSecs = 2,
-      overfill = 0,
-      pauseInMs = 0,
-      userRules = "",
-      userRulesAfter = false,
-    },
-    [6] = {
-      name = "",
-      defined = false,
-      autoTransfert = true,
-      detailledDisplay = true,
-      summary = true,
-      protected = true,
-      moved = true,
-      detailledNotMoved = true,
-      initialWaitInSecs = 2,
-      overfill = 0,
-      pauseInMs = 0,
-      userRules = "",
-      userRulesAfter = false,
-    },
-    [7] = {
-      name = "",
-      defined = false,
-      autoTransfert = true,
-      detailledDisplay = true,
-      summary = true,
-      protected = true,
-      moved = true,
-      detailledNotMoved = true,
-      initialWaitInSecs = 2,
-      overfill = 0,
-      pauseInMs = 0,
-      userRules = "",
-      userRulesAfter = false,
-    },
-    [8] = {
-      name = "",
-      defined = false,
-      autoTransfert = true,
-      detailledDisplay = true,
-      summary = true,
-      protected = true,
-      moved = true,
-      detailledNotMoved = true,
-      initialWaitInSecs = 2,
-      overfill = 0,
-      pauseInMs = 0,
-      userRules = "",
-      userRulesAfter = false,
-    },
-    [9] = {
-      name = "",
-      defined = false,
-      autoTransfert = true,
-      detailledDisplay = true,
-      summary = true,
-      protected = true,
-      moved = true,
-      detailledNotMoved = true,
-      initialWaitInSecs = 2,
-      overfill = 0,
-      pauseInMs = 0,
-      userRules = "",
-      userRulesAfter = false,
-    },
-  }
+  profiles = {} -- Start with an empty table
 }
+
+-- Populate the profiles table with default values using a loop
+do
+  for i = 1, BMR_MAX_PROFILES do
+    defaults.profiles[i] = {
+      name = "",
+      defined = (i == 1), -- First profile is defined, others are not
+      autoTransfert = true,
+      detailledDisplay = true,
+      summary = true,
+      protected = true,
+      moved = true,
+      detailledNotMoved = true,
+      initialWaitInSecs = 2,
+      overfill = 0,
+      pauseInMs = 0,
+      userRules = "",
+      userRulesAfter = false,
+    }
+  end
+end
 
 -------------------------------------------------
 ----- Logger Function                       -----
@@ -283,6 +171,7 @@ BankManagerRevived.show_log = false
 if LibDebugLogger then
   BankManagerRevived.logger = LibDebugLogger.Create(ADDON_NAME)
 end
+
 local logger
 local viewer
 if DebugLogViewer then viewer = true else viewer = false end
@@ -319,6 +208,16 @@ local function emit_table(log_type, t, indent, table_history)
   indent = indent or "."
   table_history = table_history or {}
 
+  if not t then
+    emit_message(log_type, indent .. "[Nil Table]")
+    return
+  end
+
+  if next(t) == nil then
+    emit_message(log_type, indent .. "[Empty Table]")
+    return
+  end
+
   for k, v in pairs(t) do
     local vType = type(v)
 
@@ -335,13 +234,70 @@ local function emit_table(log_type, t, indent, table_history)
   end
 end
 
+local function emit_userdata(log_type, udata)
+  local function_limit = 5  -- Limit the number of functions displayed
+  local total_limit = 10   -- Total number of entries to display (functions + non-functions)
+  local function_count = 0  -- Counter for functions
+  local entry_count = 0     -- Counter for total entries displayed
+
+  emit_message(log_type, "Userdata: " .. tostring(udata))
+
+  local meta = getmetatable(udata)
+  if meta and meta.__index then
+    for k, v in pairs(meta.__index) do
+      -- Show function name for functions
+      if type(v) == "function" then
+        if function_count < function_limit then
+          emit_message(log_type, "  Function: " .. tostring(k))  -- Function name
+          function_count = function_count + 1
+          entry_count = entry_count + 1
+        end
+      elseif type(v) ~= "function" then
+        -- For non-function entries (like tables or variables), show them
+        emit_message(log_type, "  " .. tostring(k) .. ": " .. tostring(v))
+        entry_count = entry_count + 1
+      end
+
+      -- Stop when we've reached the total limit
+      if entry_count >= total_limit then
+        emit_message(log_type, "  ... (output truncated due to limit)")
+        break
+      end
+    end
+  else
+    emit_message(log_type, "  (No detailed metadata available)")
+  end
+end
+
+local function contains_placeholders(str)
+  return type(str) == "string" and str:find("<<%d+>>")
+end
+
 function BankManagerRevived:dm(log_type, ...)
-  for i = 1, select("#", ...) do
-    local value = select(i, ...)
-    if (type(value) == "table") then
-      emit_table(log_type, value)
-    else
-      emit_message(log_type, tostring(value))
+  local num_args = select("#", ...)
+  local first_arg = select(1, ...)  -- The first argument is always the message string
+
+  -- Check if the first argument is a string with placeholders
+  if type(first_arg) == "string" and contains_placeholders(first_arg) then
+    -- Extract any remaining arguments for zo_strformat (after the message string)
+    local remaining_args = { select(2, ...) }
+
+    -- Format the string with the remaining arguments
+    local formatted_value = ZO_CachedStrFormat(first_arg, unpack(remaining_args))
+
+    -- Emit the formatted message
+    emit_message(log_type, formatted_value)
+  else
+    -- Process other argument types (userdata, tables, etc.)
+    for i = 1, num_args do
+      local value = select(i, ...)
+      if type(value) == "userdata" then
+        emit_userdata(log_type, value)
+      elseif type(value) == "table" then
+        emit_table(log_type, value)
+      else
+        emit_message(log_type, tostring(value))
+      end
     end
   end
 end
@@ -637,6 +593,7 @@ local function moveItems(errorReasonAtGBank)
   BankManagerRevived:dm("Debug", "moveItems")
   local atGuildBank = IsGuildBankOpen()
   local atBank = IsBankOpen()
+  local bagIdOpen = GetBankingBag()
 
   -- Our bagcache, because game don't have it in realtime
   local tinyBagCache = {
@@ -1382,7 +1339,7 @@ end
 local function nextRule(step)
 
   local changed
-  for i = actualProfile + step, 9, step do
+  for i = actualProfile + step, BMR_MAX_PROFILES, step do
     if db.profiles[i].defined then
       changed = true
       actualProfile = i
@@ -1422,6 +1379,7 @@ end
 
 -- onOpenBank
 local function onOpenBank(eventCode, bankBag)
+  BankManagerRevived:dm("Debug", "BankManagerRevived_executeRule")
   activeBankBag = bankBag or 0
   isBanking = true
 
@@ -1442,7 +1400,7 @@ local function onOpenBank(eventCode, bankBag)
 
       local multipleProfiles = false
 
-      for i = 2, 9 do
+      for i = 2, BMR_MAX_PROFILES do
         if db.profiles[i].defined == true then
           multipleProfiles = true
           break
@@ -1531,7 +1489,7 @@ local function interactWithGBank()
 
     local multipleProfiles = false
 
-    for i = 2, 9 do
+    for i = 2, BMR_MAX_PROFILES do
       if db.profiles[i].defined == true then
         multipleProfiles = true
         break
@@ -2527,7 +2485,7 @@ local function buildLAMPanel()
   end
 
   local listOfProfiles = {}
-  for i = 1, 9 do
+  for i = 1, BMR_MAX_PROFILES do
     listOfProfiles[i] = i
   end
 
@@ -2801,7 +2759,7 @@ local function onAddonLoaded(_, addon)
       BankManagerRules.defaults = BankManagerRules.addDefaultFilters(BankManagerRules.data, BankManagerRules.defaults)
 
       -- Load profiles defaults, Huge memory waste :'(
-      for i = 1, 9 do
+      for i = 1, BMR_MAX_PROFILES do
         defaults.profiles[i].rules = BankManagerRules.defaults
       end
 
@@ -2838,7 +2796,7 @@ end
 
 -- Called by UI
 function BankManagerRevived_executeRule()
-
+  BankManagerRevived:dm("Debug", "BankManagerRevived_executeRule")
   --startTimeInMs = GetGameTimeMilliseconds()
   if checkingGBank then
     doInteractionWithGBank()
@@ -2854,8 +2812,8 @@ function BankManagerRevived_saveGuiPosition()
   local _, _, rightScreen, bottomScreen = GuiRoot:GetScreenRect()
   local _, _, right, bottom = BankManager:GetScreenRect()
 
-  db.gui_x = math.floor(right - rightScreen)
-  db.gui_y = math.floor(bottom - bottomScreen)
+  db.gui_x = zo_floor(right - rightScreen)
+  db.gui_y = zo_floor(bottom - bottomScreen)
 
 end
 
@@ -2874,7 +2832,7 @@ function BankManagerRevived_runProfile(profile)
 
       local multipleProfiles = false
 
-      for i = 2, 9 do
+      for i = 2, BMR_MAX_PROFILES do
         if db.profiles[i].defined == true then
           multipleProfiles = true
           break

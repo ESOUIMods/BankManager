@@ -56,18 +56,18 @@ local lang = {
   BMR_PROFILE                           = "Profile <<1>>",
 
   -- Currencies qtyToPush
-  BMR_CURRENCY_PUSH                     = "Keep currency",
-  BMR_CURRENCY_PUSH_TOOLTIP             = "Keep this amount in your inventory\n\nIf you set the value for 'Fill-up to' this one will be used as minimum value for the option here",
+  BMR_CURRENCY_PUSH                     = "Keep No More Than", -- qtyToPush
+  BMR_CURRENCY_PUSH_TOOLTIP             = "Set the maximum amount to retain in your inventory. Any excess beyond this value will be transferred to the Bank. When 'Store in Bank' is enabled, this amount defines the maximum for the Bank instead.",
 
   -- Currencies qtyToPull
-  BMR_CURRENCY_PULL                     = "Fill-up to",
-  BMR_CURRENCY_PULL_TOOLTIP             = "Fill-up from the bank to your inventory with this value. Leave 0 to disable the option",
+  BMR_CURRENCY_PULL                     = "Keep At Least", -- qtyToPull
+  BMR_CURRENCY_PULL_TOOLTIP             = "Set the minimum amount to maintain in your inventory. If the amount falls below this value, it will be replenished from the Bank. Leave at 0 to disable replenishment.",
 
-  BMR_CURRENCY_NOTHING                  = "Don't keep any <<1>>",
-  BMR_CURRENCY_NOTHING_TOOLTIP          = "When \"Keep Currency\" is set to 0, you'll need to confirm by setting this value to push all your <<1>> in bank",
+  BMR_CURRENCY_NOTHING                  = "Excess <<1>> to Bank", -- keepNothing
+  BMR_CURRENCY_NOTHING_TOOLTIP          = "Move any amount exceeding the specified limits to the Bank. Ensures your inventory only holds the defined amount, with the rest transferred to storage.",
 
-  BMR_CURRENCY_KEEP_IN_BANK             = "Keep in Bank instead of Bag",
-  BMR_CURRENCY_KEEP_IN_BANK_TOOLTIP     = "Keep the desired amount in Bank instead of Bag and fill-up in bank if the Fill-Up option is defined",
+  BMR_CURRENCY_KEEP_IN_BANK             = "Store in Bank", -- keepInBank
+  BMR_CURRENCY_KEEP_IN_BANK_TOOLTIP     = "Prioritize keeping the specified amount in the Bank rather than your inventory. Transfers will ensure the Bank retains the target amount, with excess or shortages adjusted accordingly.",
 
   -- GetSkillLineInfo cannot be used. If you start game in FR Blacksmithing will be 5, even if you do a SetCVar, If you start game in EN, Blacksmithing will be 2. even if in the both languages they're at the 2nd position.
   BMR_TRADESKILL_ALCHEMY                = "Alchemy",
