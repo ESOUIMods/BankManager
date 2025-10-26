@@ -404,7 +404,7 @@ local function IsWritItem(itemLink)
   local itemName = " " .. zo_strformat(SI_TOOLTIP_ITEM_NAME, GetItemLinkName(itemLink))
 
   for _, data in ipairs(BankManagerRules.static.special.writsQuests) do
-    if string.find(data.text, Sanitize(itemName)) then
+    if zo_strfind(data.text, Sanitize(itemName)) then
       BankManagerRules.static.special.writsQuests[itemLink] = data.qtyToMove
       BankManagerRules.static.special.writsQuestsGlyphs[itemLink] = data.qtyToMove -- Bit dirty, see how to improve
       BankManagerRules.static.special.writsQuestsPots[itemLink] = data.qtyToMove

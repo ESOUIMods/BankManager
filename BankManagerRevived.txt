@@ -7,12 +7,12 @@
 ## Title: BankManagerRevived |cF4EE42(Jewelry Crafting fix)|r
 ## Author: Sharlikran, |c2DFFF7@Lexynide|r, |c990000Snowman|r|cFFFFFFDK|r, Ayantir, Eldrni, Todo
 ## Description: Manage your Banks with automated push/pull
-## APIVersion: 101043 101044
+## APIVersion: 101046 101047
 ## Version: 1.70
 ## AddOnVersion: 170
 ## SavedVariables: BMVars
-## DependsOn: LibResearch>=042 LibAddonMenu-2.0>=37
-## OptionalDependsOn: LibDebugLogger>=263 DebugLogViewer
+## DependsOn: LibResearch>=042 LibAddonMenu-2.0>=40 LibAsync>=30002
+## OptionalDependsOn: LibDebugLogger DebugLogViewer
 
 languages\en.lua
 languages\$(language).lua

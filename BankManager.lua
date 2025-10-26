@@ -26,6 +26,7 @@ http://creativecommons.org/licenses/by-nc-sa/4.0/legalcode
 
 -- Global Vars
 local LAM2 = LibAddonMenu2
+local task = LibAsync:Create("BMR_Debuging")
 
 local db = { }
 local ADDON_NAME = "BankManagerRevived"
@@ -67,6 +68,21 @@ local function GetActionName(action)
   return actionTable[action]
 end
 
+local BMR_ITEMLINK = 1
+local BMR_BAG_AND_SLOT = 2
+local BMR_ITEMTYPE = 3
+local BMR_ITEMTYPE_SPECIALIZED = 4
+
+local function GetFuncArgName(arg)
+  local actionTable = {
+    [BMR_ITEMLINK] = "BMR_ITEMLINK",
+    [BMR_BAG_AND_SLOT] = "BMR_BAG_AND_SLOT",
+    [BMR_ITEMTYPE] = "BMR_ITEMTYPE",
+    [BMR_ITEMTYPE_SPECIALIZED] = "BMR_ITEMTYPE_SPECIALIZED",
+  }
+  return actionTable[arg]
+end
+
 --[[TODO Optional Keyword, Returns true when keywordCondition.acceptedKeyword[arg1] is true ]]--
 local BMR_RULEWRITER_VALUE_OPTIONAL_KEYWORD = 1
 --[[TODO With Operator, Returns true when keywordCondition.acceptedKeyword[arg1] is true ]]--
@@ -77,10 +93,6 @@ local BMR_RULEWRITER_VALUE_WITHOUT_OPERATOR = 3
 --[[TODO Nothing, added because it wasn't defined. Requires 2 arguments and returns true if both false]]--
 local BMR_RULEWRITER_VALUE_NOTHING = 4
 
-local BMR_ITEMLINK = 1
-local BMR_BAG_AND_SLOT = 2
-local BMR_ITEMTYPE = 3
-local BMR_ITEMTYPE_SPECIALIZED = 4
 --local startTimeInMs			= 0
 
 --[[
@@ -143,12 +155,13 @@ local defaults = {
   profiles = {} -- Start with an empty table
 }
 
--- Populate the profiles table with default values using a loop
+--[[ Populate the profiles table with default values using a loop
+First profile will have a value of true, others false ]]--
 do
   for i = 1, BMR_MAX_PROFILES do
     defaults.profiles[i] = {
       name = "",
-      defined = (i == 1), -- First profile is defined, others are not
+      defined = (i == 1),
       autoTransfert = true,
       detailledDisplay = true,
       summary = true,
@@ -198,10 +211,13 @@ local function create_log(log_type, log_content)
 end
 
 local function emit_message(log_type, text)
-  if (text == "") then
+  if text == "" then
     text = "[Empty String]"
   end
-  create_log(log_type, text)
+
+  task:Call(function()
+    create_log(log_type, text)
+  end)
 end
 
 local function emit_table(log_type, t, indent, table_history)
@@ -346,7 +362,7 @@ local function BuildWritsItems()
         for numConditions = 1, GetJournalQuestNumConditions(journalQuestIndex, QUEST_MAIN_STEP_INDEX) do
           local conditionText, current, max, _, isComplete = GetJournalQuestConditionInfo(journalQuestIndex, QUEST_MAIN_STEP_INDEX, numConditions)
           if conditionText ~= "" and current < max then
-            conditionText = string.gsub(conditionText, " ", " ") -- First is a NO-BREAK SPACE, 2nd a SPACE, found somes.
+            conditionText = zo_strgsub(conditionText, " ", " ") -- First is a NO-BREAK SPACE, 2nd a SPACE, found somes.
             conditionText = Sanitize(conditionText)
             table.insert(BankManagerRules.static.special.writsQuests, { text = conditionText, qtyToMove = max })
             table.insert(BankManagerRules.static.special.writsQuestsGlyphs, { text = conditionText, qtyToMove = max })
@@ -384,12 +400,12 @@ local function queueAction(ruleName, bagId, slotId)
   local whichAction = db.profiles[actualProfile].rules[ruleName].action
   if (whichAction == ACTION_PUSH or whichAction == ACTION_PUSH_GBANK or whichAction == ACTION_PUSH_BOTH) and bagId == BAG_BACKPACK then
     -- Push item to bank
-    --BankManagerRevived:dm("Debug", string.format("BY ACTION: whichAction : %s ; ruleName: %s ; bagId: %s ; slotId: %s ; activeBankBag: %s", whichAction, ruleName, bagId, slotId, activeBankBag))
+    BankManagerRevived:dm("Debug", "[queueAction] - [Add to Push Queue] whichAction : <<1>> ; ruleName: <<2>> ; bagId: <<3>> ; slotId: <<4>> ; activeBankBag: <<5>>", GetActionName(whichAction), ruleName, bagId, slotId, activeBankBag)
     --d("ACTION " .. whichAction .. " " .. ruleName .. " " .. bagId .. " " .. slotId)
     table.insert(pushQueue, { ruleName = ruleName, bagId = bagId, slotId = slotId, itemLink = GetItemLink(bagId, slotId), itemIcon = GetItemLinkInfo(GetItemLink(bagId, slotId)) })
   elseif whichAction == ACTION_PULL and (bagId == BAG_BANK or bagId == BAG_SUBSCRIBER_BANK) then
     -- Pull item to bank
-    --BankManagerRevived:dm("Debug", string.format("ACTION_PULL: whichAction : %s ; ruleName: %s ; bagId: %s ; slotId: %s ; activeBankBag: %s", whichAction, ruleName, bagId, slotId, activeBankBag))
+    BankManagerRevived:dm("Debug", "[queueAction] - [Add to Pull Queue] whichAction : <<1>> ; ruleName: <<2>> ; bagId: <<3>> ; slotId: <<4>> ; activeBankBag: <<5>>", GetActionName(whichAction), ruleName, bagId, slotId, activeBankBag)
     --d("ACTION_PULL " .. ruleName .. " " .. bagId .. " " .. slotId)
     table.insert(pullQueue, { ruleName = ruleName, bagId = bagId, slotId = slotId, itemLink = GetItemLink(bagId, slotId), itemIcon = GetItemLinkInfo(GetItemLink(bagId, slotId)) })
   end
@@ -468,6 +484,8 @@ end
 local function prepareItem(bagId, slotId, checkingGBank)
   local itemLinkMoveRestricted = false
   local itemLink = GetItemLink(bagId, slotId)
+  local bagIdOpen = GetBankingBag()
+  BankManagerRevived:dm("Debug", "[prepareItem] bagId <<1>>, slotId <<2>>, bagIdOpen <<3>>, checkingGBank '<<4>>'", bagId, slotId, bagIdOpen, tostring(checkingGBank ~= nil and checkingGBank or false))
   -- Inits
   if IsItemStolen(bagId, slotId) then itemLinkMoveRestricted = true end
   if db.profiles[actualProfile].protected and IsItemProtected(bagId, slotId) then itemLinkMoveRestricted = true end
@@ -484,6 +502,8 @@ local function prepareItem(bagId, slotId, checkingGBank)
   -- Might be Unique and you can't store that in the Guild Bank
   if checkingGBank and IsItemLinkUnique(itemLink) then itemLinkMoveRestricted = true end
 
+  -- if bagIdOpen >= BAG_HOUSE_BANK_ONE and bagIdOpen <= BAG_HOUSE_BANK_TEN then itemLinkMoveRestricted = true end
+
   if itemLinkMoveRestricted then return end
 
   local itemMatch = false
@@ -495,14 +515,13 @@ local function prepareItem(bagId, slotId, checkingGBank)
     local associatedGuild = db.profiles[actualProfile].rules[ruleName].associatedGuild
     local actionAssigned = action ~= ACTION_NOTSET
     local guildMatch = currentGBankName == associatedGuild
-    -- table.insert(BankManagerRevived.a_test, string.format(tostring(ruleName) .. ":" .. GetItemLinkName(itemLink) .. " : currentGBankName: %s : associatedGuild: %s", tostring(currentGBankName), tostring(associatedGuild)))
 
     local actionPullValid = action == ACTION_PULL and (bagId == BAG_BANK or bagId == BAG_SUBSCRIBER_BANK)
     local actionPushValid = action == ACTION_PUSH and bagId == BAG_BACKPACK
     local actionPushGBankValid = guildMatch and action == ACTION_PUSH_GBANK and bagId == BAG_BACKPACK
     local actionPushBothValid = action == ACTION_PUSH_BOTH and ((guildMatch and IsGuildBankOpen()) or IsBankOpen()) and bagId == BAG_BACKPACK
-    -- table.insert(BankManagerRevived.a_test, string.format(tostring(ruleName) .. ":" .. GetItemLinkName(itemLink) .. " : actionAssigned: %s : guildMatch: %s : actionPullValid: %s", tostring(actionAssigned), tostring(guildMatch), tostring(actionPullValid)))
-    -- table.insert(BankManagerRevived.a_test, string.format(tostring(ruleName) .. ":" .. GetItemLinkName(itemLink) .. " : actionPushValid: %s : actionPushGBankValid: %s : actionPushBothValid: %s", tostring(actionPushValid), tostring(actionPushGBankValid), tostring(actionPushBothValid)))
+    -- too spammy
+    -- BankManagerRevived:dm("Debug", "[prepareItem] - actionPullValid: <<1>>, actionPushValid: <<2>>, actionPushGBankValid: <<3>>, actionPushBothValid: <<4>>", tostring(actionPullValid), tostring(actionPushValid), tostring(actionPushGBankValid), tostring(actionPushBothValid))
 
     -- Check first if item didn't matched a previous rule
     if not itemMatch then
@@ -514,11 +533,18 @@ local function prepareItem(bagId, slotId, checkingGBank)
         else
           hasAnyPullToDo = true
         end
+        BankManagerRevived:dm("Debug", "[prepareItem] ACTION_PULL - hasAnySpecialPullToDo: <<1>>, hasAnyPullToDo: <<2>>", tostring(hasAnySpecialPullToDo), tostring(hasAnyPullToDo))
       end
-      if actionAssigned and (actionPullValid or actionPushValid or actionPushGBankValid or actionPushBothValid) then shouldMove = true end
+
+      if actionAssigned and (actionPullValid or actionPushValid or actionPushGBankValid or actionPushBothValid) then
+        shouldMove = true
+      end
+
       -- If rule is well writen and set to do something
       -- table.insert(BankManagerRevived.a_test, string.format(tostring(ruleName) .. ":" .. GetItemLinkName(itemLink) .. " : shouldMove: %s : action: %s", tostring(shouldMove), GetActionName(action)))
       if ruleData.params and shouldMove then
+        --[[ TODO Not too spammy ]]--
+        -- BankManagerRevived:dm("Debug", "[prepareItem] - actionPullValid: <<1>>, actionPushValid: <<2>>, actionPushGBankValid: <<3>>, actionPushBothValid: <<4>>", tostring(actionPullValid), tostring(actionPushValid), tostring(actionPushGBankValid), tostring(actionPushBothValid))
 
         for ruleParamIndex, ruleParamData in ipairs(ruleData.params) do
 
@@ -526,7 +552,9 @@ local function prepareItem(bagId, slotId, checkingGBank)
           local itemMatchValue
 
           if funcToUse then
+
             if ruleParamData.funcArgs == BMR_ITEMLINK then
+
               -- Is item matching values ?
               for funcChoices, funcMatches in ipairs(ruleParamData.values) do
                 if funcToUse(itemLink) == funcMatches then
@@ -569,31 +597,37 @@ local function prepareItem(bagId, slotId, checkingGBank)
             -- The item match our filter .. for now
             itemMatch = true
             ruleMatch = ruleName
-            --BankManagerRevived:dm("Debug", string.format("ITEM MATCH VALUE: itemLink : %s ; ( bagId: %s ; slotId: %s ) ; ruleMatch: %s ; ruleName / #: (%s , %s) activeBankBag: %s", itemLink, bagId, slotId, ruleMatch, ruleName, ruleParamIndex, activeBankBag))
-            --d(itemLink .. " (" .. bagId .. " " .. slotId.. ") ruleMatch:" .. ruleName .. " #" .. ruleParamIndex)
+            if ruleParamData and ruleParamData.funcArgs and itemLink then
+              -- BankManagerRevived:dm("Debug", "[prepareItem] - [<<1>>], Matched Rule '<<2>>', funcArgs: <<3>>", itemLink, ruleMatch, GetFuncArgName(ruleParamData.funcArgs))
+            end
           end
-
         end -- end params loop
 
       end
     else
+      BankManagerRevived:dm("Debug", "[prepareItem] - [Break]")
       break
     end
+    -- too spammy
+    -- BankManagerRevived:dm("Debug", "[prepareItem] - [End of Loop over dataSorted] actionPullValid: <<1>>, actionPushValid: <<2>>, actionPushGBankValid: <<3>>, actionPushBothValid: <<4>>", tostring(actionPullValid), tostring(actionPushValid), tostring(actionPushGBankValid), tostring(actionPushBothValid))
   end
 
   if itemMatch and ruleMatch ~= nil then
     -- table.insert(BankManagerRevived.a_test, string.format(tostring(ruleMatch) .. ":" .. GetItemLinkName(itemLink) .. " itemMatch: %s", tostring(itemMatch)))
+    BankManagerRevived:dm("Debug", "[prepareItem] - Queue Action")
     queueAction(ruleMatch, bagId, slotId)
+  else
+    -- BankManagerRevived:dm("Debug", "[prepareItem] - Item was not a match")
   end
 
 end
 
 -- Move all items defined in push/pull arrays
 local function moveItems(errorReasonAtGBank)
-  BankManagerRevived:dm("Debug", "moveItems")
-  local atGuildBank = IsGuildBankOpen()
-  local atBank = IsBankOpen()
   local bagIdOpen = GetBankingBag()
+  local atGuildBank = IsGuildBankOpen()
+  local atBank = IsBankOpen() and bagIdOpen < BAG_HOUSE_BANK_ONE
+  BankManagerRevived:dm("Debug", "[moveItems] atGuildBank: <<1>>, atBank: <<2>>, bagIdOpen: <<3>>, activeBankBag: <<4>>", tostring(atGuildBank), tostring(atBank), bagIdOpen, activeBankBag)
 
   -- Our bagcache, because game don't have it in realtime
   local tinyBagCache = {
@@ -650,6 +684,11 @@ local function moveItems(errorReasonAtGBank)
     [BAG_HOUSE_BANK_NINE] = 0,
     [BAG_HOUSE_BANK_TEN] = 0,
   }
+  local function updateFreeSlots()
+    for bagId, _ in pairs(freeSlots) do
+      freeSlots[bagId] = GetNumBagFreeSlots(bagId)
+    end
+  end
 
   -- Items moved in psuh + pull actions
   local itemsMoved = 0
@@ -824,7 +863,7 @@ local function moveItems(errorReasonAtGBank)
 
       -- Should not exceed 100 in a move or game will kick you
       if db.profiles[actualProfile].pauseInMs >= 100 or (itemsMoved < 98 and db.profiles[actualProfile].pauseInMs < 100) then
-        --d(moveData.ruleName .. " will check qty and if, move " .. GetItemName(moveData.bagId, moveData.slotId))
+        BankManagerRevived:dm("Debug", "Rule Name [<<1>>] will check qty and if, move '<<2>>'", moveData.ruleName, GetItemName(moveData.bagId, moveData.slotId))
 
         -- Is slot at max size in bank ?
         local isFullStack, stackSize, maxStack, stackCountBackpack, stackCountBank = StackInfoInBag(bagIdTo, moveData.slotId, moveData.bagId, moveData.itemLink)
@@ -832,7 +871,7 @@ local function moveItems(errorReasonAtGBank)
         local qtyToMove, destSlot
 
         if BankManagerRules.data[moveData.ruleName].isSpecial then
-
+          BankManagerRevived:dm("Debug", "isSpecial")
           if bagIdTo == BAG_BACKPACK then
             qtyToMove = BankManagerRules.static.special[moveData.ruleName][moveData.itemLink]
             bagIdTo, destSlot = FindDestSlotInBag(stackCountBackpack, bagIdTo, moveData.bagId, moveData.slotId, maxStack)
@@ -840,31 +879,33 @@ local function moveItems(errorReasonAtGBank)
 
           --d("qtyToMove " .. qtyToMove .. " destSlot " .. tostring(destSlot))
           if destSlot then
-            --d(moveData.ruleName .. " is moving " .. GetItemName(moveData.bagId, moveData.slotId) .. " (not full stack)")
+            BankManagerRevived:dm("Debug", "[tryMoveSlots] <<1>> : is moving to bagId <<2>>, slotId <<3>>", GetItemName(moveData.bagId, moveData.slotId), bagIdTo, destSlot)
             itemMoved = moveItemInSlot(moveData.bagId, moveData.slotId, bagIdTo, destSlot, qtyToMove, moveData.itemLink)
           elseif db.profiles[actualProfile].detailledNotMoved then
             PrintItemsNotMovedToBag(moveData.itemLink, moveData.itemIcon, bagIdTo, qtyToMove)
           end
 
         elseif not isFullStack and db.profiles[actualProfile].rules[moveData.ruleName].onlyIfNotFullStack then
+          BankManagerRevived:dm("Debug", "isFullStack")
 
           if bagIdTo == BAG_BACKPACK then
-            qtyToMove = math.min(stackSize, (maxStack - stackCountBackpack))
+            qtyToMove = zo_min(stackSize, (maxStack - stackCountBackpack))
             bagIdTo, destSlot = FindDestSlotInBag(stackCountBackpack, bagIdTo, moveData.bagId, moveData.slotId, maxStack)
           elseif bagIdTo == BAG_BANK or bagIdTo == BAG_SUBSCRIBER_BANK then
-            qtyToMove = math.min(stackSize, (maxStack - stackCountBank))
+            qtyToMove = zo_min(stackSize, (maxStack - stackCountBank))
             bagIdTo, destSlot = FindDestSlotInBag(stackCountBank, bagIdTo, moveData.bagId, moveData.slotId, maxStack) -- bagIdTo can change because of BAG_SUBSCRIBER_BANK
           end
 
           --d("qtyToMove " .. tostring(qtyToMove) .. " destSlot " .. tostring(bagIdTo) .. "/" .. tostring(destSlot))
           if destSlot then
-            --d(moveData.ruleName .. " is moving " .. GetItemName(moveData.bagId, moveData.slotId) .. " (not full stack)")
+            BankManagerRevived:dm("Debug", "[tryMoveSlots] <<1>> : is moving to bagId <<2>>, slotId <<3>>", GetItemName(moveData.bagId, moveData.slotId), bagIdTo, destSlot)
             itemMoved = moveItemInSlot(moveData.bagId, moveData.slotId, bagIdTo, destSlot, qtyToMove, moveData.itemLink)
           elseif db.profiles[actualProfile].detailledNotMoved then
             PrintItemsNotMovedToBag(moveData.itemLink, moveData.itemIcon, bagIdTo, qtyToMove)
           end
 
         elseif not db.profiles[actualProfile].rules[moveData.ruleName].onlyIfNotFullStack then
+          BankManagerRevived:dm("Debug", "onlyIfNotFullStack")
 
           -- Still don't know why.
           if type(db.profiles[actualProfile].rules[moveData.ruleName].onlyStacks) == "boolean" then
@@ -880,18 +921,18 @@ local function moveItems(errorReasonAtGBank)
           end
 
           local maxQtyAuthorized = db.profiles[actualProfile].rules[moveData.ruleName].onlyStacks * maxStack
-          qtyToMove = math.min(stackSize, maxStack - (stackCountInBag % maxStack))
+          qtyToMove = zo_min(stackSize, maxStack - (stackCountInBag % maxStack))
 
           if qtyToMove + stackCountInBag <= maxQtyAuthorized then
+            BankManagerRevived:dm("Debug", "maxQtyAuthorized: " .. maxQtyAuthorized .. " stackCountInBag: " .. stackCountInBag)
             bagIdTo, destSlot = FindDestSlotInBag(stackCountInBag, bagIdTo, moveData.bagId, moveData.slotId, maxStack)
-            --d("maxQtyAuthorized: " .. maxQtyAuthorized .. " stackCountInBag: " .. stackCountInBag)
             if qtyToMove == stackSize or (qtyToMove < stackSize and qtyToMove + stackCountInBag == maxQtyAuthorized) then
 
               -- 1 push to do
-              --d("1 push to do")
-              --d("qtyToMove " .. qtyToMove .. " destSlot " .. tostring(destSlot))
+              BankManagerRevived:dm("Debug", "1 push to do qtyToMove " .. qtyToMove .. " destSlot " .. tostring(destSlot))
               if stackCountInBag + qtyToMove <= maxQtyAuthorized then
                 if destSlot then
+                  BankManagerRevived:dm("Debug", "[tryMoveSlots] <<1>> : is moving to bagId <<2>>, slotId <<3>>", GetItemName(moveData.bagId, moveData.slotId), bagIdTo, destSlot)
                   itemMoved = moveItemInSlot(moveData.bagId, moveData.slotId, bagIdTo, destSlot, qtyToMove, moveData.itemLink)
                 elseif db.profiles[actualProfile].detailledNotMoved then
                   PrintItemsNotMovedToBag(moveData.itemLink, moveData.itemIcon, bagIdTo, qtyToMove)
@@ -899,14 +940,12 @@ local function moveItems(errorReasonAtGBank)
               end
 
             else
-
-              --d("2 push to do?")
-              --d("qtyToMove " .. qtyToMove .. " destSlot " .. tostring(destSlot))
               -- 2 push to do, first will fulfil, 2nd will take the modulo
+              BankManagerRevived:dm("Debug", "2 push to do qtyToMove " .. qtyToMove .. " destSlot " .. tostring(destSlot))
               if stackCountInBag + qtyToMove <= maxQtyAuthorized then
                 --Already too late!
                 if destSlot then
-                  --d("2 push to do -> destSlot1:" .. destSlot)
+                  BankManagerRevived:dm("Debug", "[tryMoveSlots] <<1>> : is moving to bagId <<2>>, slotId <<3>>", GetItemName(moveData.bagId, moveData.slotId), bagIdTo, destSlot)
                   itemMoved = moveItemInSlot(moveData.bagId, moveData.slotId, bagIdTo, destSlot, qtyToMove, moveData.itemLink)
                 elseif db.profiles[actualProfile].detailledNotMoved then
                   PrintItemsNotMovedToBag(moveData.itemLink, moveData.itemIcon, bagIdTo, qtyToMove)
@@ -917,6 +956,7 @@ local function moveItems(errorReasonAtGBank)
                   destSlot = FindEmptySlotInBag(bagIdTo)
                   if destSlot then
                     --d("2 push to do -> destSlot2:" .. destSlot)
+                    BankManagerRevived:dm("Debug", "[tryMoveSlots] <<1>> : is moving to bagId <<2>>, slotId <<3>>", GetItemName(moveData.bagId, moveData.slotId), bagIdTo, destSlot)
                     itemMoved = moveItemInSlot(moveData.bagId, moveData.slotId, bagIdTo, destSlot, stackSize - qtyToMove, moveData.itemLink)
                     qtyToMove = stackSize -- to Display the correct value
                   elseif db.profiles[actualProfile].detailledNotMoved then
@@ -959,8 +999,8 @@ local function moveItems(errorReasonAtGBank)
 
       end
     elseif pushInProgress then
-
       -- End of push
+      BankManagerRevived:dm("Debug", "pushInProgress")
       pushInProgress = false
 
       if qtyMoved > 0 then
@@ -972,12 +1012,12 @@ local function moveItems(errorReasonAtGBank)
       qtyMoved = 0
       countMoved = 0
 
-      freeSlots[BAG_BACKPACK] = GetNumBagFreeSlots(BAG_BACKPACK)
+      updateFreeSlots()
       zo_callLater(function() tryMoveSlots(pullQueue, BAG_BACKPACK) end, db.profiles[actualProfile].pauseInMs)
 
     else
-
       -- End of pull
+      BankManagerRevived:dm("Debug", "End of pull")
       if qtyMoved > 0 then
         if db.profiles[actualProfile].summary then
           PrintSummaryToBag(bagIdTo, countMoved, qtyMoved)
@@ -1006,11 +1046,8 @@ local function moveItems(errorReasonAtGBank)
     local shouldPushGuildBank = onlyIfNotFullStack and (actionPushGBankValid or actionPushBothValid)
 
     if validGuild then
-      BankManagerRevived:dm("Debug", "validGuild")
-
-      --d(moveData.ruleName .. " will check qty and if, move " .. GetItemName(moveData.bagId, moveData.slotId))
-
       -- Is slot at max size in bank ?
+      BankManagerRevived:dm("Debug", "Valid Guild - Rule Name [<<1>>] will check qty and if, move '<<2>>'", moveData.ruleName, GetItemName(moveData.bagId, moveData.slotId))
       local isFullStack, stackSize, maxStack, stackCountBackpack, stackCountBank = StackInfoInBag(BAG_BANK, moveData.slotId, moveData.bagId, moveData.itemLink)
       local stackSizeAndStackCountBank = stackSize + stackCountBank
       local stackSizeAndCountGreaterThanMaxStack = stackSizeAndStackCountBank > maxStack
@@ -1037,7 +1074,7 @@ local function moveItems(errorReasonAtGBank)
       elseif onlyIfNotFullStack and stackSizeAndCountGreaterThanMaxStack then
         BankManagerRevived:dm("Debug", "onlyIfNotFullStack, stackSize and bank > maxStack")
 
-        qtyToMove = math.min(stackSize, stackCountBank + stackSize - maxStack)
+        qtyToMove = zo_min(stackSize, stackCountBank + stackSize - maxStack)
 
         --d("qtyToMove " .. qtyToMove)
         if GetNumBagFreeSlots(BAG_GUILDBANK) > 0 then
@@ -1054,7 +1091,7 @@ local function moveItems(errorReasonAtGBank)
       elseif not onlyIfNotFullStack and stackSizeAndCountGreaterThanOnlyStacksValueTimesMaxStack then
         BankManagerRevived:dm("Debug", "not onlyIfNotFullStack, onlyStacks * maxStack")
 
-        qtyToMove = math.min(stackSize, stackCountBank + stackSize - maxStack)
+        qtyToMove = zo_min(stackSize, stackCountBank + stackSize - maxStack)
 
         --d("qtyToMove " .. qtyToMove)
         if GetNumBagFreeSlots(BAG_GUILDBANK) > 0 then
@@ -1139,10 +1176,10 @@ local function moveItems(errorReasonAtGBank)
   end
 
   if atGuildBank then
+    BankManagerRevived:dm("Debug", "[moveItems] At GuildBank")
 
-    freeSlots[BAG_BACKPACK] = GetNumBagFreeSlots(BAG_BACKPACK)
-
-    BankManagerRevived:dm("Debug", string.format("errorReasonAtGBank: %s", tostring(errorReasonAtGBank)))
+    updateFreeSlots()
+    BankManagerRevived:dm("Debug", "errorReasonAtGBank: <<1>>", tostring(errorReasonAtGBank))
     if not errorReasonAtGBank then
       tryMoveSlotsToGBank(errorReasonAtGBank)
     elseif errorReasonAtGBank == GUILD_BANK_TRANSFER_PENDING then
@@ -1156,18 +1193,20 @@ local function moveItems(errorReasonAtGBank)
       tryMoveSlotsToGBank()
     end
 
-  else
-
-    freeSlots[BAG_BANK] = GetNumBagFreeSlots(BAG_BANK)
-    freeSlots[BAG_SUBSCRIBER_BANK] = GetNumBagFreeSlots(BAG_SUBSCRIBER_BANK)
+  elseif atBank then
+    BankManagerRevived:dm("Debug", "[moveItems] Not atGuildBank, preparing to push to bagId: <<1>>, activeBankBag: <<2>>", BAG_BANK, activeBankBag)
+    updateFreeSlots()
     tryMoveSlots(pushQueue, BAG_BANK)
-
+  else
+    --[[TODO Update this to include House Banks ]]--
+    BankManagerRevived:dm("Debug", "[moveItems] Destination Unknown bagIdOpen: <<1>>", bagIdOpen)
   end
 
 end
 
 -- Move a currency
 local function moveCurrency(ruleName, currencyType)
+  BankManagerRevived:dm("Debug", "moveCurrency")
 
   -- Our currencies
   local currentCurrencyInInventory = GetCarriedCurrencyAmount(currencyType)
@@ -1180,13 +1219,14 @@ local function moveCurrency(ruleName, currencyType)
 
   -- Keep In Bank set to ON
   if inverted then
+    BankManagerRevived:dm("Debug", "moveCurrency - inverted")
     -- Do I need to pull or push? If Inverted, addon push to inventory and pull from inventory
     local pushCurrency = currentCurrencyInBank > db.profiles[actualProfile].rules[ruleName].qtyToPush and (db.profiles[actualProfile].rules[ruleName].qtyToPush > 0 or (db.profiles[actualProfile].rules[ruleName].keepNothing and db.profiles[actualProfile].rules[ruleName].qtyToPush == 0))
     local pullCurrency = db.profiles[actualProfile].rules[ruleName].qtyToPull > 0 and currentCurrencyInBank < db.profiles[actualProfile].rules[ruleName].qtyToPull and currentCurrencyInInventory > 0
 
     if pullCurrency then
       currencyAmountMoved = db.profiles[actualProfile].rules[ruleName].qtyToPull - currentCurrencyInBank
-      currencyAmountMoved = math.min(currencyAmountMoved, currentCurrencyInInventory)
+      currencyAmountMoved = zo_min(currencyAmountMoved, currentCurrencyInInventory)
 
       if currencyAmountMoved > 0 then
         DepositCurrencyIntoBank(currencyType, currencyAmountMoved)
@@ -1207,13 +1247,14 @@ local function moveCurrency(ruleName, currencyType)
     end
     -- Keep In Bank set to OFF
   else
+    BankManagerRevived:dm("Debug", "moveCurrency - else, pull or push")
     -- Do I need to pull or push?
     local pushCurrency = currentCurrencyInInventory > db.profiles[actualProfile].rules[ruleName].qtyToPush and (db.profiles[actualProfile].rules[ruleName].qtyToPush > 0 or (db.profiles[actualProfile].rules[ruleName].keepNothing and db.profiles[actualProfile].rules[ruleName].qtyToPush == 0))
     local pullCurrency = db.profiles[actualProfile].rules[ruleName].qtyToPull > 0 and currentCurrencyInInventory < db.profiles[actualProfile].rules[ruleName].qtyToPull and currentCurrencyInBank > 0
 
     if pullCurrency then
       currencyAmountMoved = db.profiles[actualProfile].rules[ruleName].qtyToPull - currentCurrencyInInventory
-      currencyAmountMoved = math.min(currencyAmountMoved, currentCurrencyInBank)
+      currencyAmountMoved = zo_min(currencyAmountMoved, currentCurrencyInBank)
       if currencyAmountMoved > 0 then
         WithdrawCurrencyFromBank(currencyType, currencyAmountMoved)
         if db.profiles[actualProfile].detailledDisplay then
@@ -1267,6 +1308,7 @@ end
 
 -- move currencies, prepare items, build push/pull queue and move items
 local function interactWithBank()
+  BankManagerRevived:dm("Debug", "interactWithBank")
 
   if not inProgress then
     inProgress = true
@@ -1379,8 +1421,8 @@ end
 
 -- onOpenBank
 local function onOpenBank(eventCode, bankBag)
-  BankManagerRevived:dm("Debug", "BankManagerRevived_executeRule")
   activeBankBag = bankBag or 0
+  BankManagerRevived:dm("Debug", "onOpenBank: Set activeBankBag (<<1>>)", activeBankBag)
   isBanking = true
 
   -- Trace all items moved by another addon while BMR waits
@@ -1422,8 +1464,8 @@ local function onOpenBank(eventCode, bankBag)
 end
 
 -- onCloseBank, resets
-local function onCloseBank()
-
+local function onCloseBank(eventCode)
+  activeBankBag = 0
   isBanking = false
   hasAnyPullToDo = nil
   pushQueue = {}
@@ -1483,6 +1525,7 @@ end
 
 -- interactWithGBank
 local function interactWithGBank()
+  BankManagerRevived:dm("Debug", "interactWithGBank")
 
   -- The permission is maybe not allowed
   if DoesPlayerHaveGuildPermission(currentGBank, GUILD_PERMISSION_BANK_DEPOSIT) then
@@ -1678,7 +1721,7 @@ local function panelOnlyIfNotFullStack(ruleNamePatern, ruleNameToFollow)
     setFunc = function(value)
       for optionName, optionData in pairs(db.profiles[actualProfile].rules) do
         if type(optionData) == "table" then
-          if string.find(optionName, ruleNamePatern) then
+          if zo_strfind(optionName, ruleNamePatern) then
             optionData.onlyIfNotFullStack = value
           end
         end
@@ -1706,7 +1749,7 @@ local function panelMaxStacks(ruleNamePatern, onlyIfNotFullStackToFollow, ruleNa
     setFunc = function(value)
       for optionName, optionData in pairs(db.profiles[actualProfile].rules) do
         if type(optionData) == "table" then
-          if string.find(optionName, ruleNamePatern) then
+          if zo_strfind(optionName, ruleNamePatern) then
             --d("Changing " .. optionName)
             optionData.onlyStacks = value -- Don't know why sometimes this value is set to true and not value ?
           end
@@ -1757,7 +1800,7 @@ local function panelGuildBank(ruleNamePatern, ruleNameToFollow)
     setFunc = function(value)
       for optionName, optionData in pairs(db.profiles[actualProfile].rules) do
         if type(optionData) == "table" then
-          if string.find(optionName, ruleNamePatern) then
+          if zo_strfind(optionName, ruleNamePatern) then
             optionData.associatedGuild = value
           end
         end
@@ -1784,7 +1827,7 @@ local function panelGuildBankFull(ruleNamePatern, ruleNameToFollow)
     setFunc = function(value)
       for optionName, optionData in pairs(db.profiles[actualProfile].rules) do
         if type(optionData) == "table" then
-          if string.find(optionName, ruleNamePatern) then
+          if zo_strfind(optionName, ruleNamePatern) then
             optionData.associatedGuild = value
           end
         end
@@ -1836,11 +1879,11 @@ end
 local function Explode(div, str)
   if div == "" then return false end
   local pos, arr = 0, {}
-  for st, sp in function() return string.find(str, div, pos, true) end do
-    table.insert(arr, string.sub(str, pos, st - 1))
+  for st, sp in function() return zo_strfind(str, div, pos, true) end do
+    table.insert(arr, zo_strsub(str, pos, st - 1))
     pos = sp + 1
   end
-  table.insert(arr, string.sub(str, pos))
+  table.insert(arr, zo_strsub(str, pos))
   return arr
 end
 
@@ -1885,7 +1928,7 @@ end
 
 local function GetRuleWriterCondition(conditionTable)
 
-  local mainKeyword = string.lower(conditionTable[1])
+  local mainKeyword = zo_strlower(conditionTable[1])
   local keywordCondition = BankManagerRules.keywordConditionTable[mainKeyword]
 
   local conditionData
@@ -1920,7 +1963,7 @@ local function EvaluateRuleWriterParams(paramString)
     local validParams = {}
 
     for conditionIndex, conditionData in ipairs(conditions) do
-      local conditionText = string.gsub(conditionData, "^%s*(.-)%s*$", "%1")
+      local conditionText = zo_strgsub(conditionData, "^%s*(.-)%s*$", "%1")
       local conditionKeywords = Explode(" ", conditionText)
       local isValidCondition, params = GetRuleWriterCondition(conditionKeywords)
       if isValidCondition then
@@ -2402,11 +2445,11 @@ local function NamesToIDSavedVars()
 
   if not db.namesToIDSavedVars then
 
-    local displayName = GetDisplayName()
+    local accountName = GetDisplayName()
     local name = GetUnitName("player")
 
-    if BMVars.Default[displayName][name] then
-      db = BMVars.Default[displayName][name]
+    if BMVars.Default[accountName][name] then
+      db = BMVars.Default[accountName][name]
       db.namesToIDSavedVars = true -- should not be necessary because data don't exist anymore in BMVars.Default[displayName][name]
     end
 
