@@ -516,94 +516,68 @@ local function prepareItem(bagId, slotId, checkingGBank)
     local actionAssigned = action ~= ACTION_NOTSET
     local guildMatch = currentGBankName == associatedGuild
 
-    local actionPullValid = action == ACTION_PULL and (bagId == BAG_BANK or bagId == BAG_SUBSCRIBER_BANK)
+    local actionPullValid = action == ACTION_PULL and IsBankOpen() and (bagId == BAG_BANK or bagId == BAG_SUBSCRIBER_BANK)
     local actionPushValid = action == ACTION_PUSH and bagId == BAG_BACKPACK
-    local actionPushGBankValid = guildMatch and action == ACTION_PUSH_GBANK and bagId == BAG_BACKPACK
-    local actionPushBothValid = action == ACTION_PUSH_BOTH and ((guildMatch and IsGuildBankOpen()) or IsBankOpen()) and bagId == BAG_BACKPACK
+    local actionPushGBankValid = action == ACTION_PUSH_GBANK and bagId == BAG_BACKPACK and IsGuildBankOpen() and guildMatch
+    local actionPushBothValid = action == ACTION_PUSH_BOTH and bagId == BAG_BACKPACK and (IsBankOpen() or (IsGuildBankOpen() and guildMatch))
     -- too spammy
     -- BankManagerRevived:dm("Debug", "[prepareItem] - actionPullValid: <<1>>, actionPushValid: <<2>>, actionPushGBankValid: <<3>>, actionPushBothValid: <<4>>", tostring(actionPullValid), tostring(actionPushValid), tostring(actionPushGBankValid), tostring(actionPushBothValid))
 
     -- Check first if item didn't matched a previous rule
     if not itemMatch then
+      local shouldMove = actionAssigned and (actionPullValid or actionPushValid or actionPushGBankValid or actionPushBothValid)
 
-      local shouldMove = false
-      if action == ACTION_PULL then
-        if db.profiles[actualProfile].rules[ruleName].specialEnabled then
-          hasAnySpecialPullToDo = true
-        else
-          hasAnyPullToDo = true
-        end
-        BankManagerRevived:dm("Debug", "[prepareItem] ACTION_PULL - hasAnySpecialPullToDo: <<1>>, hasAnyPullToDo: <<2>>", tostring(hasAnySpecialPullToDo), tostring(hasAnyPullToDo))
-      end
-
-      if actionAssigned and (actionPullValid or actionPushValid or actionPushGBankValid or actionPushBothValid) then
-        shouldMove = true
-      end
-
-      -- If rule is well writen and set to do something
-      -- table.insert(BankManagerRevived.a_test, string.format(tostring(ruleName) .. ":" .. GetItemLinkName(itemLink) .. " : shouldMove: %s : action: %s", tostring(shouldMove), GetActionName(action)))
-      if ruleData.params and shouldMove then
-        --[[ TODO Not too spammy ]]--
-        -- BankManagerRevived:dm("Debug", "[prepareItem] - actionPullValid: <<1>>, actionPushValid: <<2>>, actionPushGBankValid: <<3>>, actionPushBothValid: <<4>>", tostring(actionPullValid), tostring(actionPushValid), tostring(actionPushGBankValid), tostring(actionPushBothValid))
-
-        for ruleParamIndex, ruleParamData in ipairs(ruleData.params) do
-
-          local funcToUse = ruleParamData.func -- Our fonction stored
-          local itemMatchValue
-
-          if funcToUse then
-
-            if ruleParamData.funcArgs == BMR_ITEMLINK then
-
-              -- Is item matching values ?
-              for funcChoices, funcMatches in ipairs(ruleParamData.values) do
-                if funcToUse(itemLink) == funcMatches then
-                  itemMatchValue = true
-                end
-              end
-
-            elseif ruleParamData.funcArgs == BMR_ITEMTYPE then
-              for funcChoices, funcMatches in ipairs(ruleParamData.values) do
-                local itemType = funcToUse(itemLink)
-                if itemType == funcMatches then
-                  itemMatchValue = true
-                end
-              end
-
-            elseif ruleParamData.funcArgs == BMR_ITEMTYPE_SPECIALIZED then
-              for funcChoices, funcMatches in ipairs(ruleParamData.values) do
-                local _, specializedItemType = funcToUse(itemLink)
-                if specializedItemType == funcMatches then
-                  itemMatchValue = true
-                end
-              end
-
-            elseif ruleParamData.funcArgs == BMR_BAG_AND_SLOT then
-              for funcChoices, funcMatches in ipairs(ruleParamData.values) do
-                if funcToUse(bagId, slotId) == funcMatches then
-                  itemMatchValue = true
-                end
-              end
-            end
-
-          end
-
-          -- The item didn't match our filter, don't try other params, go to next rule
-          if not itemMatchValue then
-            itemMatch = false
-            ruleMatch = nil
-            break
+      if shouldMove then
+        if action == ACTION_PULL then
+          if db.profiles[actualProfile].rules[ruleName].specialEnabled then
+            hasAnySpecialPullToDo = true
           else
-            -- The item match our filter .. for now
-            itemMatch = true
-            ruleMatch = ruleName
-            if ruleParamData and ruleParamData.funcArgs and itemLink then
-              -- BankManagerRevived:dm("Debug", "[prepareItem] - [<<1>>], Matched Rule '<<2>>', funcArgs: <<3>>", itemLink, ruleMatch, GetFuncArgName(ruleParamData.funcArgs))
+            hasAnyPullToDo = true
+          end
+          BankManagerRevived:dm("Debug",
+            "[prepareItem] ACTION_PULL - hasAnySpecialPullToDo: <<1>>, hasAnyPullToDo: <<2>>",
+            tostring(hasAnySpecialPullToDo), tostring(hasAnyPullToDo))
+        end
+
+        if ruleData.params then
+          for ruleParamIndex, ruleParamData in ipairs(ruleData.params) do
+            local funcToUse = ruleParamData.func
+            local itemMatchValue
+
+            if funcToUse then
+              if ruleParamData.funcArgs == BMR_ITEMLINK then
+                for _, funcMatches in ipairs(ruleParamData.values) do
+                  if funcToUse(itemLink) == funcMatches then itemMatchValue = true end
+                end
+              elseif ruleParamData.funcArgs == BMR_ITEMTYPE then
+                for _, funcMatches in ipairs(ruleParamData.values) do
+                  local itemType = funcToUse(itemLink)
+                  if itemType == funcMatches then itemMatchValue = true end
+                end
+              elseif ruleParamData.funcArgs == BMR_ITEMTYPE_SPECIALIZED then
+                for _, funcMatches in ipairs(ruleParamData.values) do
+                  local _, specializedItemType = funcToUse(itemLink)
+                  if specializedItemType == funcMatches then itemMatchValue = true end
+                end
+              elseif ruleParamData.funcArgs == BMR_BAG_AND_SLOT then
+                for _, funcMatches in ipairs(ruleParamData.values) do
+                  if funcToUse(bagId, slotId) == funcMatches then itemMatchValue = true end
+                end
+              end
+            end
+
+            if not itemMatchValue then
+              itemMatch = false
+              ruleMatch = nil
+              break
+            else
+              itemMatch = true
+              ruleMatch = ruleName
             end
           end
-        end -- end params loop
-
+        end
       end
+
     else
       BankManagerRevived:dm("Debug", "[prepareItem] - [Break]")
       break
